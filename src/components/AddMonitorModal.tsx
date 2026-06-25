@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { api, type CreateMonitorPayload } from '@/lib/api';
+import { motion, AnimatePresence } from 'framer-motion';
+import { GlowingButton } from '@/components/ui/GlowingButton';
 
 interface Props {
   token: string;
@@ -40,129 +42,139 @@ export function AddMonitorModal({ token, onClose, onCreated }: Props) {
   }
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(6,10,18,0.85)',
-        backdropFilter: 'blur(6px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 100,
-        padding: 24,
-      }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div
-        className="fade-up"
-        style={{
-          background: 'var(--surface)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: 12,
-          padding: '28px 28px',
-          width: '100%',
-          maxWidth: 480,
-          boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700 }}>
-            New Monitor
-          </h2>
-          <button onClick={onClose} className="btn-ghost" style={{ padding: '6px 10px' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
+    <AnimatePresence>
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+        {/* Backdrop */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="absolute inset-0 bg-black/60 backdrop-blur-md"
+          onClick={onClose}
+        />
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <Field label="Name">
-            <input
-              className="input-field"
-              placeholder="My API"
-              value={form.name}
-              onChange={(e) => update('name', e.target.value)}
-              required
-            />
-          </Field>
+        {/* Modal */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="relative w-full max-w-[480px] glass-panel p-8"
+        >
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="font-display font-bold text-2xl text-white">
+              New Monitor
+            </h2>
+            <button 
+              onClick={onClose} 
+              className="text-[var(--text-muted)] hover:text-white transition-colors p-2 bg-white/5 hover:bg-white/10 rounded-full"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
 
-          <Field label="URL">
-            <input
-              className="input-field"
-              placeholder="https://api.example.com/health"
-              value={form.url}
-              onChange={(e) => update('url', e.target.value)}
-              required
-              type="url"
-            />
-          </Field>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Field label="Expected Status">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            <Field label="Name">
               <input
-                className="input-field"
-                type="number"
-                min={100}
-                max={599}
-                value={form.expectedStatus}
-                onChange={(e) => update('expectedStatus', parseInt(e.target.value))}
+                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-[15px] text-white placeholder-white/20 focus:outline-none focus:border-white/30 focus:bg-black/60 transition-all"
+                placeholder="My API"
+                value={form.name}
+                onChange={(e) => update('name', e.target.value)}
+                required
               />
             </Field>
-            <Field label="Interval (min)">
-              <select
-                className="input-field"
-                value={form.intervalMinutes}
-                onChange={(e) => update('intervalMinutes', parseInt(e.target.value))}
-                style={{ cursor: 'pointer' }}
-              >
-                <option value={1}>1 min</option>
-                <option value={5}>5 min</option>
-                <option value={10}>10 min</option>
-                <option value={15}>15 min</option>
-                <option value={30}>30 min</option>
-                <option value={60}>60 min</option>
-              </select>
+
+            <Field label="URL">
+              <input
+                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-[15px] text-white placeholder-white/20 focus:outline-none focus:border-white/30 focus:bg-black/60 transition-all"
+                placeholder="https://api.example.com/health"
+                value={form.url}
+                onChange={(e) => update('url', e.target.value)}
+                required
+                type="url"
+              />
             </Field>
-          </div>
 
-          <Field label="Expected text (optional)" hint="Check if response body contains this string">
-            <input
-              className="input-field"
-              placeholder="ok"
-              value={form.expectedText}
-              onChange={(e) => update('expectedText', e.target.value)}
-            />
-          </Field>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Expected Status">
+                <input
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-[15px] text-white placeholder-white/20 focus:outline-none focus:border-white/30 focus:bg-black/60 transition-all"
+                  type="number"
+                  min={100}
+                  max={599}
+                  value={form.expectedStatus}
+                  onChange={(e) => update('expectedStatus', parseInt(e.target.value))}
+                />
+              </Field>
+              <Field label="Interval (min)">
+                <select
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-[15px] text-white placeholder-white/20 focus:outline-none focus:border-white/30 focus:bg-black/60 transition-all cursor-pointer appearance-none"
+                  value={form.intervalMinutes}
+                  onChange={(e) => update('intervalMinutes', parseInt(e.target.value))}
+                >
+                  <option value={1} className="bg-[#0A0D14] text-white">1 min</option>
+                  <option value={5} className="bg-[#0A0D14] text-white">5 min</option>
+                  <option value={10} className="bg-[#0A0D14] text-white">10 min</option>
+                  <option value={15} className="bg-[#0A0D14] text-white">15 min</option>
+                  <option value={30} className="bg-[#0A0D14] text-white">30 min</option>
+                  <option value={60} className="bg-[#0A0D14] text-white">60 min</option>
+                </select>
+              </Field>
+            </div>
 
-          {error && (
-            <p style={{ fontSize: 12, color: 'var(--red)', background: 'rgba(255,59,107,0.08)', border: '1px solid rgba(255,59,107,0.15)', borderRadius: 6, padding: '8px 12px' }}>
-              {error}
-            </p>
-          )}
+            <Field label="Expected text (optional)" hint="Check if response body contains this string">
+              <input
+                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-[15px] text-white placeholder-white/20 focus:outline-none focus:border-white/30 focus:bg-black/60 transition-all"
+                placeholder="ok"
+                value={form.expectedText}
+                onChange={(e) => update('expectedText', e.target.value)}
+              />
+            </Field>
 
-          <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
-            <button type="button" onClick={onClose} className="btn-ghost" style={{ flex: 1, justifyContent: 'center' }}>
-              Cancel
-            </button>
-            <button type="submit" className="btn-primary" disabled={loading} style={{ flex: 2, justifyContent: 'center' }}>
-              {loading ? 'Creating…' : 'Create Monitor'}
-            </button>
-          </div>
-        </form>
+            {error && (
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
+                <p className="text-[13px] text-[#FF5A79] bg-[#FF5A79]/10 border border-[#FF5A79]/20 rounded-lg p-3 mt-1">
+                  {error}
+                </p>
+              </motion.div>
+            )}
+
+            <div className="flex gap-3 mt-4">
+              <button 
+                type="button" 
+                onClick={onClose} 
+                className="flex-1 py-3.5 px-4 bg-white/[0.03] border border-white/10 rounded-xl text-white text-[15px] font-medium transition-all hover:bg-white/[0.08] hover:border-white/20"
+              >
+                Cancel
+              </button>
+              <GlowingButton 
+                type="submit" 
+                variant="primary" 
+                disabled={loading} 
+                className="flex-[2] py-3.5 px-4 justify-center"
+              >
+                {loading ? 'Creating...' : 'Create Monitor'}
+              </GlowingButton>
+            </div>
+          </form>
+        </motion.div>
       </div>
-    </div>
+    </AnimatePresence>
   );
 }
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
-    <div>
-      <label style={{ display: 'block', fontSize: 11, fontFamily: 'var(--font-mono)', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 7 }}>
+    <div className="flex flex-col gap-2">
+      <label className="text-[12px] font-medium text-[var(--text-muted)] ml-1 uppercase tracking-widest font-mono">
         {label}
-        {hint && <span style={{ marginLeft: 6, textTransform: 'none', letterSpacing: 0, fontFamily: 'var(--font-body)', color: 'var(--subtle)' }}>— {hint}</span>}
+        {hint && <span className="ml-2 normal-case tracking-normal font-sans text-white/30">— {hint}</span>}
       </label>
       {children}
     </div>
