@@ -30,7 +30,7 @@ export default function LoginPage() {
       provider,
       options: { 
         redirectTo: `${window.location.origin}/auth/callback`,
-        scopes: provider === 'github' ? 'public_repo write:repo_hook read:user' : undefined
+        scopes: provider === 'github' ? 'repo write:repo_hook read:user' : undefined
       },
     });
   }
