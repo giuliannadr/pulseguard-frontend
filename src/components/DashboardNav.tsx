@@ -16,71 +16,204 @@ export default function DashboardNav({ userEmail }: { userEmail: string | null }
   }
 
   const links = [
-    { href: '/dashboard', label: 'Monitors', icon: <MonitorIcon /> },
-    { href: '/status', label: 'Status Page', icon: <StatusIcon /> },
+    {
+      href: '/dashboard',
+      label: 'Monitors',
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="1"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+      ),
+    },
+    {
+      href: '/status',
+      label: 'Status',
+      icon: (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+        </svg>
+      ),
+    },
   ];
 
+  const initial = userEmail ? userEmail[0].toUpperCase() : '?';
+
   return (
-    <nav className="w-64 h-full border-r border-[var(--color-border-subtle)] bg-[var(--color-surface)]/50 backdrop-blur-3xl flex flex-col relative z-20">
-      <div className="p-6">
-        <Link href="/dashboard" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-violet-primary)] to-[var(--color-pink-primary)] flex items-center justify-center shadow-[0_0_12px_rgba(255,20,147,0.3)]">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+    <nav
+      style={{
+        width: 220,
+        height: '100%',
+        borderRight: '1px solid rgba(255,255,255,0.06)',
+        background: '#050505',
+        display: 'flex',
+        flexDirection: 'column',
+        flexShrink: 0,
+        position: 'relative',
+        zIndex: 20,
+      }}
+    >
+      {/* Logo */}
+      <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+          <div
+            style={{
+              width: 28,
+              height: 28,
+              background: '#CAFF00',
+              borderRadius: 3,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span className="font-display font-bold text-lg text-white">Ethereal</span>
+          <span
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 800,
+              fontSize: 15,
+              color: '#F0F0F0',
+              letterSpacing: '-0.01em',
+            }}
+          >
+            Ethereal
+          </span>
         </Link>
       </div>
 
-      <div className="flex-1 px-4 py-2 flex flex-col gap-2">
+      {/* Nav links */}
+      <div style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <p
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 9,
+            color: 'rgba(255,255,255,0.2)',
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            margin: '0 8px 10px',
+          }}
+        >
+          Navigation
+        </p>
         {links.map((link) => {
-          const active = pathname === link.href || pathname.startsWith(link.href + '/');
+          const active = pathname === link.href || (link.href !== '/dashboard' && pathname.startsWith(link.href));
           return (
             <Link
               key={link.href}
               href={link.href}
-              className={`flex items-center gap-3 px-4 h-12 rounded-lg font-medium text-sm transition-all duration-200 ${
-                active
-                  ? 'bg-[var(--color-border-subtle)] text-white shadow-[inset_2px_0_0_var(--color-pink-primary)]'
-                  : 'text-[var(--color-text-muted)] hover:bg-white/5 hover:text-white'
-              }`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '9px 12px',
+                borderRadius: 3,
+                fontSize: 13,
+                fontWeight: active ? 600 : 400,
+                color: active ? '#F0F0F0' : '#4A4A4A',
+                background: active ? 'rgba(255,255,255,0.05)' : 'transparent',
+                borderLeft: active ? '2px solid #CAFF00' : '2px solid transparent',
+                textDecoration: 'none',
+                transition: 'color 0.15s, background 0.15s',
+              }}
             >
-              <div className={active ? 'text-[var(--color-pink-primary)]' : 'opacity-70'}>{link.icon}</div>
+              <span style={{ color: active ? '#CAFF00' : 'currentColor', flexShrink: 0 }}>{link.icon}</span>
               {link.label}
             </Link>
           );
         })}
       </div>
 
-      <div className="p-4 border-t border-[var(--color-border-subtle)]">
-        <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/5 mb-2">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-gray-800 to-gray-700 border border-white/10 flex items-center justify-center text-xs font-bold text-white">
-            {userEmail ? userEmail[0].toUpperCase() : 'U'}
+      {/* User + signout */}
+      <div style={{ padding: '16px 12px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '10px 12px',
+            borderRadius: 3,
+            background: 'rgba(255,255,255,0.03)',
+            marginBottom: 8,
+          }}
+        >
+          <div
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: 3,
+              background: '#CAFF00',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontFamily: 'var(--font-mono)',
+              fontSize: 11,
+              fontWeight: 700,
+              color: '#000',
+              flexShrink: 0,
+            }}
+          >
+            {initial}
           </div>
-          <div className="flex flex-col flex-1 min-w-0">
-            <span className="text-xs text-[var(--color-text-muted)] font-mono uppercase tracking-widest">Signed in</span>
-            <span className="text-sm text-white font-medium truncate">{userEmail ?? 'Loading...'}</span>
+          <div style={{ minWidth: 0 }}>
+            <div
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 9,
+                color: 'rgba(255,255,255,0.2)',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                marginBottom: 2,
+              }}
+            >
+              Signed in
+            </div>
+            <div
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 11,
+                color: '#F0F0F0',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {userEmail ?? '—'}
+            </div>
           </div>
         </div>
+
         <button
           onClick={handleSignout}
-          className="w-full flex items-center gap-3 px-4 h-10 rounded-lg text-sm text-[var(--color-text-muted)] hover:text-white hover:bg-white/5 transition-colors"
+          style={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '8px 12px',
+            borderRadius: 3,
+            background: 'transparent',
+            border: 'none',
+            color: '#4A4A4A',
+            fontSize: 12,
+            fontFamily: 'var(--font-body)',
+            cursor: 'pointer',
+            transition: 'color 0.15s',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = '#F0F0F0')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = '#4A4A4A')}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
           </svg>
           Sign out
         </button>
       </div>
     </nav>
   );
-}
-
-function MonitorIcon() {
-  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>;
-}
-
-function StatusIcon() {
-  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>;
 }

@@ -2,25 +2,11 @@
 
 import type { MonitorStatus } from '@/lib/api';
 
-const labels: Record<MonitorStatus, string> = {
-  up: 'UP',
-  down: 'DOWN',
-  degraded: 'DEGRADED',
-  unknown: 'UNKNOWN',
-};
-
-const styles: Record<MonitorStatus, string> = {
-  up: 'bg-[var(--color-violet-primary)]/10 text-[var(--color-violet-primary)] border-[var(--color-violet-primary)]/30',
-  down: 'bg-[var(--color-pink-primary)]/10 text-[var(--color-pink-primary)] border-[var(--color-pink-primary)]/30',
-  degraded: 'bg-[#FFDF00]/10 text-[#FFDF00] border-[#FFDF00]/30',
-  unknown: 'bg-white/5 text-[var(--color-text-muted)] border-[var(--color-border-subtle)]',
-};
-
-const pulseColors: Record<MonitorStatus, string> = {
-  up: 'bg-[var(--color-violet-primary)] shadow-[0_0_8px_var(--color-violet-primary)]',
-  down: 'bg-[var(--color-pink-primary)] shadow-[0_0_8px_var(--color-pink-primary)]',
-  degraded: 'bg-[#FFDF00] shadow-[0_0_8px_#FFDF00]',
-  unknown: 'bg-white/30',
+const cfg: Record<MonitorStatus, { label: string; dot: string; text: string; bg: string; border: string }> = {
+  up:       { label: 'UP',       dot: '#00E676', text: '#00E676', bg: 'rgba(0,230,118,0.08)',  border: 'rgba(0,230,118,0.2)' },
+  down:     { label: 'DOWN',     dot: '#FF1744', text: '#FF1744', bg: 'rgba(255,23,68,0.08)',   border: 'rgba(255,23,68,0.2)' },
+  degraded: { label: 'DEGRADED', dot: '#FFB300', text: '#FFB300', bg: 'rgba(255,179,0,0.08)',   border: 'rgba(255,179,0,0.2)' },
+  unknown:  { label: 'UNKNOWN',  dot: '#4A4A4A', text: '#4A4A4A', bg: 'rgba(255,255,255,0.03)', border: 'rgba(255,255,255,0.07)' },
 };
 
 interface Props {
@@ -29,15 +15,44 @@ interface Props {
 }
 
 export function StatusBadge({ status, showPulse = true }: Props) {
+  const c = cfg[status];
   return (
-    <span className={`inline-flex items-center gap-2 px-2 py-0.5 rounded border text-[10px] font-mono tracking-widest uppercase font-bold ${styles[status]}`}>
-      {showPulse && status !== 'unknown' && (
-        <span className="relative flex h-2 w-2">
-          <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${pulseColors[status]}`}></span>
-          <span className={`relative inline-flex rounded-full h-2 w-2 ${pulseColors[status]}`}></span>
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        padding: '2px 8px',
+        background: c.bg,
+        border: `1px solid ${c.border}`,
+        borderRadius: 2,
+        fontFamily: 'var(--font-mono)',
+        fontSize: 10,
+        fontWeight: 600,
+        letterSpacing: '0.1em',
+        color: c.text,
+        lineHeight: 1.8,
+      }}
+    >
+      {showPulse && (
+        <span style={{ position: 'relative', display: 'inline-flex', width: 6, height: 6, flexShrink: 0 }}>
+          {status !== 'unknown' && (
+            <span
+              style={{
+                position: 'absolute',
+                inset: 0,
+                borderRadius: '50%',
+                background: c.dot,
+                animation: 'ping 1.5s cubic-bezier(0,0,0.2,1) infinite',
+                opacity: 0.5,
+              }}
+            />
+          )}
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: c.dot, flexShrink: 0 }} />
         </span>
       )}
-      {labels[status]}
+      {c.label}
+      <style>{`@keyframes ping { 75%,100% { transform: scale(2.2); opacity: 0; } }`}</style>
     </span>
   );
 }

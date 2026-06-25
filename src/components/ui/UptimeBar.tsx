@@ -7,11 +7,11 @@ interface Props {
   segments?: number;
 }
 
-const segStyles: Record<string, string> = {
-  up: 'bg-[var(--color-violet-primary)] hover:shadow-[0_0_12px_var(--color-violet-primary)] opacity-80 hover:opacity-100',
-  down: 'bg-[var(--color-pink-primary)] hover:shadow-[0_0_12px_var(--color-pink-primary)] opacity-100',
-  degraded: 'bg-[#FFDF00] hover:shadow-[0_0_12px_#FFDF00] opacity-100',
-  empty: 'bg-white/5',
+const colors: Record<string, string> = {
+  up:       '#00E676',
+  down:     '#FF1744',
+  degraded: '#FFB300',
+  empty:    'rgba(255,255,255,0.05)',
 };
 
 export function UptimeBar({ checks, segments = 60 }: Props) {
@@ -21,16 +21,25 @@ export function UptimeBar({ checks, segments = 60 }: Props) {
 
   const bars = Array.from({ length: segments }, (_, i) => {
     const check = sorted[sorted.length - segments + i];
-    if (!check) return 'empty';
-    return check.status;
+    return check ? check.status : 'empty';
   });
 
   return (
-    <div className="flex items-center gap-[2px] h-8 w-full">
+    <div style={{ display: 'flex', alignItems: 'stretch', gap: 2, height: 24, width: '100%' }}>
       {bars.map((s, i) => (
-        <div 
-          key={i} 
-          className={`flex-1 h-full rounded-[1px] transition-all duration-200 hover:scale-y-125 cursor-pointer ${segStyles[s]}`} 
+        <div
+          key={i}
+          title={s}
+          style={{
+            flex: 1,
+            background: colors[s] ?? colors.empty,
+            borderRadius: 1,
+            opacity: s === 'empty' ? 1 : 0.85,
+            transition: 'opacity 0.15s, transform 0.15s',
+            cursor: 'default',
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.opacity = '1'; (e.currentTarget as HTMLDivElement).style.transform = 'scaleY(1.2)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.opacity = s === 'empty' ? '1' : '0.85'; (e.currentTarget as HTMLDivElement).style.transform = 'scaleY(1)'; }}
         />
       ))}
     </div>

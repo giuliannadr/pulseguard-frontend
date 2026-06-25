@@ -11,29 +11,34 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  ReferenceLine,
 } from 'recharts';
 import { createClient } from '@/lib/supabase/client';
 import { api, type Monitor, type Check, type Metrics } from '@/lib/api';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { UptimeBar } from '@/components/ui/UptimeBar';
 
-function fmtDate(date: string) {
-  return new Date(date).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+function fmtDate(d: string) {
+  return new Date(d).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
-function fmtTime(date: string) {
-  return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+function fmtTime(d: string) {
+  return new Date(d).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="panel-base p-4 shadow-xl">
-      <p className="text-[var(--color-text-muted)] text-xs font-mono mb-3">{label}</p>
+    <div
+      style={{
+        background: '#0F0F0F',
+        border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: 3,
+        padding: '10px 14px',
+      }}
+    >
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A', marginBottom: 6 }}>{label}</p>
       {payload.map((p: any) => (
-        <p key={p.name} className="text-sm font-bold flex items-center gap-2" style={{ color: p.color }}>
-          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
-          {p.name}: {p.value}{p.name === 'Response (ms)' ? 'ms' : ''}
+        <p key={p.name} style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 600, color: '#CAFF00', margin: 0 }}>
+          {p.value}ms
         </p>
       ))}
     </div>
@@ -42,13 +47,13 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export default function MonitorDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const router = useRouter();
+  const router  = useRouter();
 
-  const [monitor, setMonitor] = useState<Monitor | null>(null);
-  const [checks, setChecks] = useState<Check[]>([]);
-  const [metrics, setMetrics] = useState<Metrics | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [monitor,  setMonitor]  = useState<Monitor | null>(null);
+  const [checks,   setChecks]   = useState<Check[]>([]);
+  const [metrics,  setMetrics]  = useState<Metrics | null>(null);
+  const [token,    setToken]    = useState<string | null>(null);
+  const [loading,  setLoading]  = useState(true);
   const [checking, setChecking] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -76,24 +81,18 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
 
   useEffect(() => {
     if (!token) return;
-    const channel = supabase
+    const ch = supabase
       .channel(`checks-${id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'checks', filter: `monitor_id=eq.${id}` }, () => {
-        load(token);
-      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'checks', filter: `monitor_id=eq.${id}` }, () => load(token))
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => { supabase.removeChannel(ch); };
   }, [token, id, load]);
 
   async function handleCheckNow() {
     if (!token) return;
     setChecking(true);
-    try {
-      await api.monitors.checkNow(id, token);
-      await load(token);
-    } finally {
-      setChecking(false);
-    }
+    try { await api.monitors.checkNow(id, token); await load(token); }
+    finally { setChecking(false); }
   }
 
   async function handleDelete() {
@@ -111,67 +110,76 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
 
   if (loading) {
     return (
-      <div className="w-full flex flex-col gap-6 animate-fade-in">
-        <div className="h-24 panel-base animate-pulse" />
-        <div className="grid grid-cols-4 gap-4">
-          <div className="h-32 panel-base animate-pulse" />
-          <div className="h-32 panel-base animate-pulse" />
-          <div className="h-32 panel-base animate-pulse" />
-          <div className="h-32 panel-base animate-pulse" />
-        </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {[80, 120, 280].map((h) => (
+          <div key={h} style={{ height: h, background: '#080808', borderRadius: 3, opacity: 0.5 }} />
+        ))}
       </div>
     );
   }
 
   if (!monitor) return null;
 
-  const status = (checks[0]?.status ?? 'unknown') as any;
+  const status    = (checks[0]?.status ?? 'unknown') as any;
   const chartData = [...checks]
     .sort((a, b) => new Date(a.checkedAt).getTime() - new Date(b.checkedAt).getTime())
     .slice(-60)
-    .map((c) => ({
-      time: fmtTime(c.checkedAt),
-      'Response (ms)': c.responseTimeMs ?? 0,
-    }));
+    .map((c) => ({ time: fmtTime(c.checkedAt), ms: c.responseTimeMs ?? 0 }));
+
+  const uptimePct = metrics?.uptime;
+  const uptimeColor = uptimePct == null ? '#4A4A4A' : uptimePct >= 99 ? '#00E676' : uptimePct >= 95 ? '#FFB300' : '#FF1744';
 
   return (
-    <div className="w-full">
+    <div style={{ width: '100%', animation: 'pg-fade-in 0.35s ease-out both' }}>
+
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 mb-8 font-mono text-xs uppercase tracking-widest animate-fade-in">
-        <Link href="/dashboard" className="text-[var(--color-text-muted)] hover:text-white transition-colors">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 32, fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>
+        <Link href="/dashboard" style={{ color: '#4A4A4A', textDecoration: 'none', transition: 'color 0.15s' }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = '#F0F0F0')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = '#4A4A4A')}
+        >
           Monitors
         </Link>
-        <span className="text-white/20">/</span>
-        <span className="text-[var(--color-violet-primary)]">{monitor.name}</span>
+        <span>/</span>
+        <span style={{ color: '#CAFF00' }}>{monitor.name}</span>
       </div>
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8 animate-fade-in">
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 24, marginBottom: 32, flexWrap: 'wrap' }}>
         <div>
-          <div className="flex items-center gap-4 mb-2">
-            <h1 className="font-display text-4xl font-bold tracking-tight text-white">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 8, flexWrap: 'wrap' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 800, color: '#F0F0F0', margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
               {monitor.name}
             </h1>
             <StatusBadge status={status} />
             {!monitor.isActive && (
-              <span className="px-2 py-0.5 rounded border border-[var(--color-border-subtle)] text-[var(--color-text-muted)] text-[10px] font-mono tracking-widest uppercase">Paused</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 2, padding: '2px 8px', letterSpacing: '0.1em' }}>
+                PAUSED
+              </span>
             )}
           </div>
-          <a href={monitor.url} target="_blank" rel="noopener noreferrer" className="font-mono text-sm text-[var(--color-pink-primary)] hover:underline flex items-center gap-2">
-            {monitor.url} 
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          <a
+            href={monitor.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#CAFF00', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6, opacity: 0.8 }}
+          >
+            {monitor.url}
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+              <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
           </a>
         </div>
-        <div className="flex gap-4">
-          <button onClick={handleCheckNow} disabled={checking} className="btn-strict-secondary">
-            {checking ? (
-              <span style={{ width: 14, height: 14, border: '2px solid var(--color-border-subtle)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-            ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
-            )}
-            Check now
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <button onClick={handleCheckNow} disabled={checking} className="btn-strict-secondary" style={{ height: 38, fontSize: 12 }}>
+            {checking
+              ? <span style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.15)', borderTopColor: '#CAFF00', borderRadius: '50%', animation: 'pg-spin 0.7s linear infinite', display: 'inline-block' }} />
+              : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+            }
+            Check Now
           </button>
-          <button onClick={handleToggle} className="btn-strict-secondary">
+          <button onClick={handleToggle} className="btn-strict-secondary" style={{ height: 38, fontSize: 12 }}>
             {monitor.isActive ? 'Pause' : 'Resume'}
           </button>
           <button onClick={handleDelete} disabled={deleting} className="btn-strict-danger">
@@ -181,22 +189,33 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
       </div>
 
       {/* Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-        <StatCard label="Uptime" value={metrics?.uptime != null ? `${metrics.uptime}%` : '—'} color={metrics?.uptime && metrics.uptime >= 99 ? 'var(--color-violet-primary)' : metrics?.uptime && metrics.uptime >= 95 ? '#FFDF00' : 'var(--color-pink-primary)'} />
-        <StatCard label="Avg Response" value={metrics?.avgResponseMs != null ? `${metrics.avgResponseMs}ms` : '—'} color="white" />
-        <StatCard label="SSL Expires" value={checks[0]?.sslDaysLeft != null ? `${checks[0].sslDaysLeft}d` : '—'} color={checks[0]?.sslDaysLeft != null && checks[0].sslDaysLeft < 14 ? 'var(--color-pink-primary)' : 'white'} />
-        <StatCard label="Total Checks" value={metrics?.totalChecks ?? 0} color="var(--color-text-muted)" />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, marginBottom: 24, border: '1px solid rgba(255,255,255,0.07)', borderRadius: 3, overflow: 'hidden' }}>
+        {[
+          { label: 'Uptime',        value: uptimePct != null ? `${uptimePct}%` : '—',                                      color: uptimeColor },
+          { label: 'Avg Response',  value: metrics?.avgResponseMs != null ? `${metrics.avgResponseMs}ms` : '—',             color: '#F0F0F0' },
+          { label: 'SSL Expires',   value: checks[0]?.sslDaysLeft != null ? `${checks[0].sslDaysLeft}d` : '—',             color: checks[0]?.sslDaysLeft != null && checks[0].sslDaysLeft < 14 ? '#FF1744' : '#F0F0F0' },
+          { label: 'Total Checks',  value: metrics?.totalChecks ?? '—',                                                      color: '#4A4A4A' },
+        ].map((m, i) => (
+          <div key={m.label} style={{ padding: '20px 24px', background: '#080808', borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.07)' : 'none' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 28, fontWeight: 600, color: m.color, lineHeight: 1, marginBottom: 6 }}>
+              {m.value}
+            </div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              {m.label}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Uptime bar */}
-      <div className="panel-base p-6 md:p-8 mb-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-        <div className="flex justify-between items-center mb-6">
-          <span className="font-mono text-xs uppercase tracking-widest text-[var(--color-text-muted)]">
-            Last 90 checks
+      <div style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 3, padding: '20px 24px', marginBottom: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            Last {Math.min(checks.length, 90)} checks
           </span>
-          {metrics?.uptime != null && (
-            <span className="font-mono text-sm text-[var(--color-violet-primary)] font-bold">
-              {metrics.uptime}% uptime
+          {uptimePct != null && (
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600, color: uptimeColor }}>
+              {uptimePct}% uptime
             </span>
           )}
         </div>
@@ -205,32 +224,43 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
 
       {/* Chart */}
       {chartData.length > 1 && (
-        <div className="panel-base p-6 md:p-8 mb-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-          <p className="font-mono text-xs uppercase tracking-widest text-[var(--color-text-muted)] mb-6">
+        <div style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 3, padding: '20px 24px', marginBottom: 16 }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 20px' }}>
             Response time (ms)
           </p>
-          <div className="h-[240px] w-full">
+          <div style={{ height: 200, width: '100%' }}>
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+              <AreaChart data={chartData} margin={{ top: 4, right: 0, left: -24, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="respGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="var(--color-pink-primary)" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="var(--color-pink-primary)" stopOpacity={0} />
+                  <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%"  stopColor="#CAFF00" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#CAFF00" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="var(--color-border-subtle)" vertical={false} strokeDasharray="4 4" />
-                <XAxis dataKey="time" tick={{ fontSize: 11, fill: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }} tickLine={false} axisLine={false} interval="preserveStartEnd" dy={10} />
-                <YAxis tick={{ fontSize: 11, fill: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }} tickLine={false} axisLine={false} dx={-10} />
-                <ReferenceLine y={2000} stroke="rgba(255,223,0,0.3)" strokeDasharray="4 4" />
-                <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.1)' }} />
+                <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} strokeDasharray="4 4" />
+                <XAxis
+                  dataKey="time"
+                  tick={{ fontSize: 10, fill: '#4A4A4A', fontFamily: 'var(--font-mono)' }}
+                  tickLine={false}
+                  axisLine={false}
+                  interval="preserveStartEnd"
+                  dy={8}
+                />
+                <YAxis
+                  tick={{ fontSize: 10, fill: '#4A4A4A', fontFamily: 'var(--font-mono)' }}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.06)' }} />
                 <Area
                   type="monotone"
-                  dataKey="Response (ms)"
-                  stroke="var(--color-pink-primary)"
-                  strokeWidth={2}
-                  fill="url(#respGrad)"
+                  dataKey="ms"
+                  name="Response"
+                  stroke="#CAFF00"
+                  strokeWidth={1.5}
+                  fill="url(#grad)"
                   dot={false}
-                  activeDot={{ r: 5, fill: 'var(--color-pink-primary)', stroke: '#000', strokeWidth: 2 }}
+                  activeDot={{ r: 4, fill: '#CAFF00', stroke: '#000', strokeWidth: 2 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -238,51 +268,48 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
         </div>
       )}
 
-      {/* Table */}
-      <div className="panel-base overflow-hidden animate-fade-in" style={{ animationDelay: '0.4s' }}>
-        <div className="p-6 border-b border-[var(--color-border-subtle)]">
-          <span className="font-mono text-xs uppercase tracking-widest text-[var(--color-text-muted)]">
-            Recent checks
+      {/* Check log */}
+      <div style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 3, overflow: 'hidden' }}>
+        <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            Check Log
           </span>
         </div>
-        <div className="flex flex-col">
-          {checks.slice(0, 20).map((check) => (
-            <div
-              key={check.id}
-              className="grid grid-cols-2 sm:grid-cols-5 gap-6 items-center p-4 sm:px-6 border-b border-[var(--color-border-subtle)] last:border-0 text-sm font-mono hover:bg-white/[0.02] transition-colors"
-            >
-              <div className="flex items-center">
-                <StatusBadge status={check.status as any} showPulse={false} />
-              </div>
-              <span className="text-[var(--color-text-muted)]">{check.statusCode ?? '—'}</span>
-              <span className={check.responseTimeMs && check.responseTimeMs > 2000 ? 'text-[#FFDF00]' : 'text-white'}>
-                {check.responseTimeMs != null ? `${check.responseTimeMs}ms` : '—'}
-              </span>
-              <span className="text-[var(--color-text-muted)] hidden sm:block">
-                {check.sslDaysLeft != null ? `SSL ${check.sslDaysLeft}d` : '—'}
-              </span>
-              <span className="text-[var(--color-text-muted)] text-right text-xs">
-                {fmtDate(check.checkedAt)}
-              </span>
-            </div>
+        {/* Table head */}
+        <div style={{ display: 'grid', gridTemplateColumns: '100px 70px 90px 80px 1fr', padding: '10px 24px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+          {['Status', 'Code', 'Response', 'SSL', 'Time'].map((h) => (
+            <span key={h} style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#2A2A2A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              {h}
+            </span>
           ))}
         </div>
+        {checks.slice(0, 25).map((check, i) => (
+          <div
+            key={check.id}
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '100px 70px 90px 80px 1fr',
+              alignItems: 'center',
+              padding: '11px 24px',
+              borderBottom: i < Math.min(checks.length, 25) - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+            }}
+          >
+            <div><StatusBadge status={check.status as any} showPulse={false} /></div>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#4A4A4A' }}>{check.statusCode ?? '—'}</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: check.responseTimeMs && check.responseTimeMs > 2000 ? '#FFB300' : '#F0F0F0' }}>
+              {check.responseTimeMs != null ? `${check.responseTimeMs}ms` : '—'}
+            </span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#4A4A4A' }}>
+              {check.sslDaysLeft != null ? `${check.sslDaysLeft}d` : '—'}
+            </span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#2A2A2A', textAlign: 'right' }}>
+              {fmtDate(check.checkedAt)}
+            </span>
+          </div>
+        ))}
       </div>
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-    </div>
-  );
-}
-
-function StatCard({ label, value, color }: { label: string; value: string | number; color: string }) {
-  return (
-    <div className="panel-base p-6 flex flex-col justify-center">
-      <div className="font-mono text-3xl font-bold mb-2" style={{ color }}>
-        {value}
-      </div>
-      <div className="font-display text-[10px] tracking-widest uppercase text-[var(--color-text-muted)]">
-        {label}
-      </div>
+      <style>{`@keyframes pg-spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

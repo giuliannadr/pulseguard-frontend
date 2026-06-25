@@ -15,17 +15,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, []);
 
   return (
-    <div className="flex h-screen bg-[#000000] overflow-hidden relative text-white font-body">
-      {/* Strict Orbs */}
-      <div className="bg-orb-violet top-[-20%] left-[-10%]" />
-      <div className="bg-orb-pink bottom-[-20%] right-[-10%]" />
-
-      {/* Sidebar */}
+    <div
+      style={{
+        display: 'flex',
+        height: '100dvh',
+        background: '#000',
+        overflow: 'hidden',
+        color: '#F0F0F0',
+        fontFamily: 'var(--font-body)',
+      }}
+    >
       <DashboardNav userEmail={email} />
-
-      {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto relative z-10 animate-fade-in flex flex-col">
-        <div className="container-strict py-12 flex-1">
+      <main style={{ flex: 1, overflowY: 'auto' }}>
+        <div style={{ maxWidth: 1120, margin: '0 auto', padding: '48px 40px' }}>
           {children}
         </div>
       </main>

@@ -2,63 +2,330 @@
 
 import Link from 'next/link';
 
+const TICKER_ITEMS = [
+  { name: 'api.stripe.com',    status: 'up',   ms: 42  },
+  { name: 'api.github.com',    status: 'up',   ms: 88  },
+  { name: 'api.openai.com',    status: 'up',   ms: 124 },
+  { name: 'payments.corp.io',  status: 'down', ms: null },
+  { name: 'cdn.assets.dev',    status: 'up',   ms: 19  },
+  { name: 'auth.service.io',   status: 'up',   ms: 67  },
+  { name: 'webhook.relay.net', status: 'up',   ms: 203 },
+];
+
+const STATUS_COLORS: Record<string, string> = {
+  up:   '#00E676',
+  down: '#FF1744',
+};
+
 export default function LandingPage() {
   return (
-    <div className="min-h-dvh flex flex-col relative overflow-hidden bg-[#000000] text-white font-body">
-      {/* Background orbs */}
-      <div className="bg-orb-violet top-[-10%] left-[-10%]" />
-      <div className="bg-orb-pink top-[30%] right-[-10%]" />
-
-      {/* Strict Nav */}
-      <nav className="container-strict h-20 flex items-center justify-between relative z-10 border-b border-[var(--color-border-subtle)]">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-[var(--color-violet-primary)] to-[var(--color-pink-primary)] rounded flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+    <div
+      style={{
+        minHeight: '100dvh',
+        display: 'flex',
+        flexDirection: 'column',
+        background: '#000',
+        color: '#F0F0F0',
+        fontFamily: 'var(--font-body)',
+        overflowX: 'hidden',
+      }}
+    >
+      {/* ── Nav ── */}
+      <nav
+        style={{
+          borderBottom: '1px solid rgba(255,255,255,0.07)',
+          padding: '0 40px',
+          height: 64,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          position: 'sticky',
+          top: 0,
+          zIndex: 50,
+          background: 'rgba(0,0,0,0.9)',
+          backdropFilter: 'blur(12px)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 26, height: 26, background: '#CAFF00', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span className="font-display font-bold text-xl tracking-tight text-white">Ethereal</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 15, color: '#F0F0F0', letterSpacing: '-0.01em' }}>
+            Ethereal
+          </span>
         </div>
-        <div className="flex items-center gap-8">
-          <Link href="/status" className="text-sm font-medium text-[var(--color-text-muted)] hover:text-white transition-colors">
-            System Status
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Link href="/status" style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A', textDecoration: 'none', padding: '6px 14px', letterSpacing: '0.06em', transition: 'color 0.15s' }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#F0F0F0')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#4A4A4A')}
+          >
+            Status
           </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/login" className="btn-strict-secondary h-10 px-4">
-              Sign In
-            </Link>
-            <Link href="/signup" className="btn-strict-primary h-10 px-4">
-              Get Started
-            </Link>
-          </div>
+          <Link href="/login" className="btn-strict-secondary" style={{ height: 34, fontSize: 12, padding: '0 16px' }}>
+            Sign in
+          </Link>
+          <Link href="/signup" className="btn-strict-primary" style={{ height: 34, fontSize: 12, padding: '0 16px' }}>
+            Get started
+          </Link>
         </div>
       </nav>
 
-      {/* Hero */}
-      <main className="flex-1 flex flex-col items-center justify-center relative z-10 px-6 py-32 text-center animate-fade-in">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[var(--color-border-subtle)] bg-[var(--color-surface)] mb-8">
-          <span className="w-2 h-2 rounded-full bg-[var(--color-pink-primary)] animate-pulse" />
-          <span className="text-xs font-mono tracking-widest uppercase text-[var(--color-text-muted)]">Absolute Precision</span>
-        </div>
+      {/* ── Hero ── */}
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
 
-        <h1 className="font-display text-6xl md:text-8xl font-extrabold tracking-tighter text-white mb-8 max-w-4xl leading-tight">
-          Monitoring, <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-violet-primary)] to-[var(--color-pink-primary)]">Redefined.</span>
-        </h1>
+        {/* Big headline section */}
+        <section
+          style={{
+            padding: '100px 40px 80px',
+            maxWidth: 1120,
+            margin: '0 auto',
+            width: '100%',
+            display: 'grid',
+            gridTemplateColumns: '1fr 400px',
+            gap: 80,
+            alignItems: 'center',
+          }}
+          className="hero-grid"
+        >
+          {/* Left */}
+          <div>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                border: '1px solid rgba(202,255,0,0.25)',
+                borderRadius: 2,
+                padding: '5px 12px',
+                marginBottom: 32,
+                background: 'rgba(202,255,0,0.05)',
+              }}
+            >
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#CAFF00', display: 'inline-block' }} />
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#CAFF00', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                Real-time monitoring
+              </span>
+            </div>
 
-        <p className="text-lg text-[var(--color-text-muted)] max-w-2xl mb-12 leading-relaxed">
-          Experience the ultimate infrastructure monitoring platform. Built with strict design principles, real-time alerts, and unparalleled elegance.
-        </p>
+            <h1
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 'clamp(52px, 6vw, 80px)',
+                fontWeight: 800,
+                color: '#F0F0F0',
+                margin: '0 0 24px',
+                lineHeight: 1.0,
+                letterSpacing: '-0.035em',
+              }}
+            >
+              Know before<br />
+              your users do.
+            </h1>
 
-        <div className="flex items-center gap-4">
-          <Link href="/signup" className="btn-strict-primary h-14 px-8 text-base">
-            Start Monitoring Free
+            <p
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: 16,
+                color: '#4A4A4A',
+                lineHeight: 1.65,
+                margin: '0 0 40px',
+                maxWidth: 440,
+              }}
+            >
+              Ethereal watches your APIs and websites 24/7. Get instant alerts on downtime,
+              degraded performance, and expiring SSL certificates.
+            </p>
+
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <Link href="/signup" className="btn-strict-primary" style={{ height: 48, fontSize: 13, padding: '0 28px' }}>
+                Start monitoring free
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                </svg>
+              </Link>
+              <Link href="/status" className="btn-strict-secondary" style={{ height: 48, fontSize: 13, padding: '0 28px' }}>
+                View live status
+              </Link>
+            </div>
+
+            {/* Quick stats */}
+            <div style={{ display: 'flex', gap: 36, marginTop: 52, paddingTop: 36, borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+              {[['1min', 'Check interval'], ['SSL', 'Expiry tracking'], ['∞', 'Check history']].map(([v, l]) => (
+                <div key={l}>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 20, fontWeight: 600, color: '#CAFF00', marginBottom: 4 }}>{v}</div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{l}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right — mock monitor card */}
+          <div
+            className="hero-card"
+            style={{
+              background: '#080808',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 3,
+              overflow: 'hidden',
+              fontFamily: 'var(--font-mono)',
+            }}
+          >
+            {/* Card header */}
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: 10, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>// Live monitors</span>
+              <span style={{ fontSize: 10, color: '#CAFF00', letterSpacing: '0.05em' }}>● LIVE</span>
+            </div>
+
+            {/* Monitor rows */}
+            {TICKER_ITEMS.map((item) => (
+              <div
+                key={item.name}
+                style={{
+                  padding: '12px 20px',
+                  borderBottom: '1px solid rgba(255,255,255,0.04)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: '50%',
+                      background: STATUS_COLORS[item.status],
+                      flexShrink: 0,
+                    }}
+                  />
+                  <span style={{ fontSize: 12, color: '#F0F0F0' }}>{item.name}</span>
+                </div>
+                <span style={{ fontSize: 11, color: item.ms ? '#4A4A4A' : '#FF1744' }}>
+                  {item.ms ? `${item.ms}ms` : 'DOWN'}
+                </span>
+              </div>
+            ))}
+
+            {/* Mini uptime bars */}
+            <div style={{ padding: '16px 20px' }}>
+              <div style={{ display: 'flex', gap: 2, height: 16 }}>
+                {[...Array(40)].map((_, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      flex: 1,
+                      background: i === 14 || i === 15 ? '#FF1744' : '#00E676',
+                      borderRadius: 1,
+                      opacity: 0.7,
+                    }}
+                  />
+                ))}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
+                <span style={{ fontSize: 9, color: '#2A2A2A', letterSpacing: '0.08em' }}>40 checks ago</span>
+                <span style={{ fontSize: 9, color: '#CAFF00', letterSpacing: '0.08em' }}>99.7% uptime</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Feature strip ── */}
+        <section
+          style={{
+            borderTop: '1px solid rgba(255,255,255,0.07)',
+            borderBottom: '1px solid rgba(255,255,255,0.07)',
+            background: '#050505',
+          }}
+        >
+          <div
+            style={{
+              maxWidth: 1120,
+              margin: '0 auto',
+              padding: '0 40px',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+            }}
+            className="features-grid"
+          >
+            {[
+              { icon: '⟳', title: 'Every Minute', desc: 'Checks run as often as every 60 seconds, catching downtime fast.' },
+              { icon: '⬡', title: 'SSL Monitoring', desc: 'Track certificate expiry days before they cause issues.' },
+              { icon: '⤿', title: 'Response Time', desc: 'Full history charts for every endpoint you monitor.' },
+              { icon: '⊡', title: 'Real-time', desc: 'Supabase Realtime pushes updates to your dashboard instantly.' },
+            ].map((f, i) => (
+              <div
+                key={f.title}
+                style={{
+                  padding: '40px 32px',
+                  borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+                }}
+              >
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 22, color: '#CAFF00', marginBottom: 16 }}>{f.icon}</div>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: '#F0F0F0', margin: '0 0 8px', letterSpacing: '-0.01em' }}>
+                  {f.title}
+                </h3>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#4A4A4A', margin: 0, lineHeight: 1.6 }}>
+                  {f.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── CTA ── */}
+        <section style={{ padding: '100px 40px', textAlign: 'center', maxWidth: 640, margin: '0 auto', width: '100%' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#CAFF00', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 16 }}>
+            // Free to start
+          </p>
+          <h2
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(36px, 4vw, 52px)',
+              fontWeight: 800,
+              color: '#F0F0F0',
+              margin: '0 0 20px',
+              letterSpacing: '-0.03em',
+              lineHeight: 1.1,
+            }}
+          >
+            Your infrastructure,<br />always visible.
+          </h2>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: 15, color: '#4A4A4A', margin: '0 0 36px', lineHeight: 1.65 }}>
+            Add monitors in 30 seconds. No credit card required.
+          </p>
+          <Link href="/signup" className="btn-strict-primary" style={{ height: 52, fontSize: 14, padding: '0 36px' }}>
+            Start monitoring — it's free
           </Link>
-          <Link href="/status" className="btn-strict-secondary h-14 px-8 text-base">
-            View Live Status
-          </Link>
-        </div>
+        </section>
       </main>
+
+      {/* ── Footer ── */}
+      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.07)', padding: '24px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ width: 18, height: 18, background: '#CAFF00', borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#2A2A2A', letterSpacing: '0.06em' }}>Ethereal</span>
+        </div>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#2A2A2A', letterSpacing: '0.06em' }}>
+          Built for AranguriApps Challenge · 2026
+        </span>
+      </footer>
+
+      <style>{`
+        @media (max-width: 900px) {
+          .hero-grid { grid-template-columns: 1fr !important; gap: 48px !important; }
+          .hero-card { display: none !important; }
+          .features-grid { grid-template-columns: 1fr 1fr !important; }
+        }
+        @media (max-width: 600px) {
+          .features-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </div>
   );
 }
