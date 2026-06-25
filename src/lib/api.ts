@@ -1,5 +1,6 @@
 // Include /api in the env var: e.g. http://localhost:3001/api or https://xxx.railway.app/api
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
+const FETCH_TIMEOUT_MS = 15_000;
 
 export type MonitorStatus = 'up' | 'down' | 'degraded' | 'unknown';
 
@@ -7,7 +8,7 @@ export interface Monitor {
   id: string;
   userId: string;
   name: string;
-  url: string;
+  url: string | null;
   expectedStatus: number;
   expectedText?: string | null;
   intervalMinutes: number;
@@ -58,22 +59,59 @@ export interface CreateMonitorPayload {
 }
 
 async function apiFetch<T>(path: string, token: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      ...options?.headers,
-    },
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.message ?? `HTTP ${res.status}`);
+  try {
+    const res = await fetch(`${API_URL}${path}`, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        ...options?.headers,
+      },
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.message ?? `HTTP ${res.status}`);
+    }
+
+    return res.json() as Promise<T>;
+  } catch (err: any) {
+    if (err.name === 'AbortError') throw new Error('Request timed out. Check your connection.');
+    throw err;
+  } finally {
+    clearTimeout(timer);
   }
-
-  return res.json() as Promise<T>;
 }
+
+// GitHub token helpers — stored with a 7-day TTL so stale tokens are auto-cleared
+const GH_TOKEN_KEY = 'gh_provider_token';
+const GH_TOKEN_TS_KEY = 'gh_provider_token_ts';
+const GH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+export const githubToken = {
+  get(): string | null {
+    if (typeof window === 'undefined') return null;
+    const ts = Number(localStorage.getItem(GH_TOKEN_TS_KEY) ?? 0);
+    if (Date.now() - ts > GH_TOKEN_TTL_MS) {
+      localStorage.removeItem(GH_TOKEN_KEY);
+      localStorage.removeItem(GH_TOKEN_TS_KEY);
+      return null;
+    }
+    return localStorage.getItem(GH_TOKEN_KEY);
+  },
+  set(token: string) {
+    localStorage.setItem(GH_TOKEN_KEY, token);
+    localStorage.setItem(GH_TOKEN_TS_KEY, String(Date.now()));
+  },
+  clear() {
+    localStorage.removeItem(GH_TOKEN_KEY);
+    localStorage.removeItem(GH_TOKEN_TS_KEY);
+  },
+};
 
 export const api = {
   monitors: {
@@ -90,17 +128,17 @@ export const api = {
     securityIncidents: (id: string, token: string) => apiFetch<SecurityIncident[]>(`/monitors/${id}/security-incidents`, token),
     checkNow:(id: string, token: string) =>
                apiFetch<Check>(`/monitors/${id}/check-now`, token, { method: 'POST' }),
-    scanRepo: (id: string, token: string, githubToken: string) =>
-               apiFetch<any>(`/monitors/${id}/scan-repo`, token, { method: 'POST', headers: { 'x-github-token': githubToken } }),
+    scanRepo: (id: string, token: string, ghToken: string) =>
+               apiFetch<any>(`/monitors/${id}/scan-repo`, token, { method: 'POST', headers: { 'x-github-token': ghToken } }),
   },
   github: {
-    repos: (token: string, githubToken: string) => 
-      apiFetch<any[]>('/github/repos', token, { headers: { 'x-github-token': githubToken } }),
-    connect: (monitorId: string, owner: string, repo: string, token: string, githubToken: string) =>
-      apiFetch<any>(`/github/connect/${monitorId}`, token, { 
-        method: 'POST', 
+    repos: (token: string, ghToken: string) =>
+      apiFetch<any[]>('/github/repos', token, { headers: { 'x-github-token': ghToken } }),
+    connect: (monitorId: string, owner: string, repo: string, token: string, ghToken: string) =>
+      apiFetch<any>(`/github/connect/${monitorId}`, token, {
+        method: 'POST',
         body: JSON.stringify({ owner, repo }),
-        headers: { 'x-github-token': githubToken } 
+        headers: { 'x-github-token': ghToken },
       }),
   },
   securityIncidents: {
@@ -116,5 +154,5 @@ export const api = {
       apiFetch<any>('/playground/inspect-domain', token, { method: 'POST', body: JSON.stringify(payload) }),
     simulateAttack: (payload: { url: string; attackType: string }, token: string) =>
       apiFetch<any>('/playground/simulate-attack', token, { method: 'POST', body: JSON.stringify(payload) }),
-  }
+  },
 };

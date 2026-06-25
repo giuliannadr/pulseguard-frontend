@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { api } from '@/lib/api';
+import { api, githubToken as ghTokenHelper } from '@/lib/api';
 import Link from 'next/link';
 
 type MonitorMode = 'full' | 'url-only' | 'repo-only';
@@ -66,8 +66,8 @@ export default function ImportPage() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       const tok = session?.access_token ?? null;
       const freshGToken = session?.provider_token ?? null;
-      if (freshGToken) localStorage.setItem('gh_provider_token', freshGToken);
-      const gToken = freshGToken ?? localStorage.getItem('gh_provider_token');
+      if (freshGToken) ghTokenHelper.set(freshGToken);
+      const gToken = freshGToken ?? ghTokenHelper.get();
       setToken(tok);
       setGithubToken(gToken);
     });
@@ -80,7 +80,7 @@ export default function ImportPage() {
       .then(data => { setRepos(data); setReposLoaded(true); setLoadingRepos(false); })
       .catch(e => {
         if (e.message?.includes('401') || e.message?.includes('403')) {
-          localStorage.removeItem('gh_provider_token');
+          ghTokenHelper.clear();
           setGithubToken(null);
         }
         setError(e.message || 'Failed to load repositories');

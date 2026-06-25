@@ -76,7 +76,7 @@ export default function StatusPage() {
                   <div className="flex justify-between items-center mb-6">
                     <div className="flex items-center gap-4">
                       <span className="font-display font-bold text-lg">{monitor.name}</span>
-                      <span className="text-[12px] text-[var(--text-muted)] font-mono">{monitor.url}</span>
+                      {monitor.url && <span className="text-[12px] text-[var(--text-muted)] font-mono">{monitor.url}</span>}
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={`status-indicator ${status}`} />
