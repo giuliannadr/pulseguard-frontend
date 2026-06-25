@@ -1,3 +1,4 @@
+// Include /api in the env var: e.g. http://localhost:3001/api or https://xxx.railway.app/api
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
 
 export type MonitorStatus = 'up' | 'down' | 'degraded' | 'unknown';
@@ -55,7 +56,7 @@ export interface CreateMonitorPayload {
 }
 
 async function apiFetch<T>(path: string, token: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_URL}/api${path}`, {
+  const res = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
