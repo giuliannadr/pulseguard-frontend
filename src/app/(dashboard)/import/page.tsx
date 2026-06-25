@@ -23,7 +23,13 @@ export default function ImportPage() {
     const supabase = createClient();
     supabase.auth.getSession().then(({ data: { session } }) => {
       const tok = session?.access_token ?? null;
-      const gToken = session?.provider_token ?? null;
+      // provider_token is only available right after OAuth — persist it so it survives page refresh
+      const freshGToken = session?.provider_token ?? null;
+      if (freshGToken) {
+        localStorage.setItem('gh_provider_token', freshGToken);
+      }
+      const gToken = freshGToken ?? localStorage.getItem('gh_provider_token');
+
       setToken(tok);
       setGithubToken(gToken);
 
@@ -35,6 +41,10 @@ export default function ImportPage() {
           })
           .catch(e => {
             console.error(e);
+            // Token might be stale — clear it so user can reconnect
+            if (e.message?.includes('401') || e.message?.includes('403')) {
+              localStorage.removeItem('gh_provider_token');
+            }
             setError(e.message || 'Failed to load repositories');
             setLoadingRepos(false);
           });
