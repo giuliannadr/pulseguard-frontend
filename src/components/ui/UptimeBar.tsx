@@ -8,10 +8,10 @@ interface Props {
 }
 
 const segStyles: Record<string, string> = {
-  up: 'bg-[var(--green-start)] hover:shadow-[0_0_12px_var(--green-start)] opacity-90',
-  down: 'bg-[#FF5A79] hover:shadow-[0_0_12px_#FF5A79] opacity-100',
+  up: 'bg-[var(--color-violet-primary)] hover:shadow-[0_0_12px_var(--color-violet-primary)] opacity-80 hover:opacity-100',
+  down: 'bg-[var(--color-pink-primary)] hover:shadow-[0_0_12px_var(--color-pink-primary)] opacity-100',
   degraded: 'bg-[#FFDF00] hover:shadow-[0_0_12px_#FFDF00] opacity-100',
-  empty: 'bg-white/10',
+  empty: 'bg-white/5',
 };
 
 export function UptimeBar({ checks, segments = 60 }: Props) {
@@ -30,7 +30,7 @@ export function UptimeBar({ checks, segments = 60 }: Props) {
       {bars.map((s, i) => (
         <div 
           key={i} 
-          className={`flex-1 h-full rounded-sm transition-all duration-300 hover:scale-y-110 cursor-pointer ${segStyles[s]}`} 
+          className={`flex-1 h-full rounded-[1px] transition-all duration-200 hover:scale-y-125 cursor-pointer ${segStyles[s]}`} 
         />
       ))}
     </div>
