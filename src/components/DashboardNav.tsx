@@ -2,10 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-
-interface Props {
-  userEmail: string;
-}
+import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
 
 const navItems = [
   {
@@ -21,63 +19,29 @@ const navItems = [
   },
 ];
 
-export function DashboardNav({ userEmail }: Props) {
+export function DashboardNav() {
   const pathname = usePathname();
+  const [email, setEmail] = useState('');
 
-  const initials = userEmail.charAt(0).toUpperCase();
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setEmail(data.user?.email ?? '');
+    });
+  }, []);
+
+  const initials = email.charAt(0).toUpperCase();
 
   return (
-    <aside
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        bottom: 0,
-        width: 220,
-        background: 'var(--surface)',
-        borderRight: '1px solid var(--border)',
-        display: 'flex',
-        flexDirection: 'column',
-        zIndex: 50,
-        padding: '0',
-      }}
-    >
+    <aside style={{ position: 'fixed', top: 0, left: 0, bottom: 0, width: 220, background: 'var(--surface)', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', zIndex: 50 }}>
       {/* Logo */}
-      <div
-        style={{
-          padding: '24px 20px 20px',
-          borderBottom: '1px solid var(--border)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-        }}
-      >
-        <div
-          style={{
-            width: 30,
-            height: 30,
-            background: 'var(--cyan)',
-            borderRadius: 7,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}
-        >
+      <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ width: 30, height: 30, background: 'var(--cyan)', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
             <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
-        <span
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontWeight: 800,
-            fontSize: 17,
-            letterSpacing: '-0.02em',
-          }}
-        >
-          PulseGuard
-        </span>
+        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 17, letterSpacing: '-0.02em' }}>PulseGuard</span>
       </div>
 
       {/* Nav */}
@@ -85,24 +49,7 @@ export function DashboardNav({ userEmail }: Props) {
         {navItems.map((item) => {
           const active = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '9px 12px',
-                borderRadius: 6,
-                textDecoration: 'none',
-                fontSize: 13,
-                fontWeight: 500,
-                transition: 'background 0.15s, color 0.15s',
-                color: active ? 'var(--cyan)' : 'var(--muted)',
-                background: active ? 'rgba(0,229,255,0.08)' : 'transparent',
-                border: active ? '1px solid rgba(0,229,255,0.1)' : '1px solid transparent',
-              }}
-            >
+            <Link key={item.href} href={item.href} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 6, textDecoration: 'none', fontSize: 13, fontWeight: 500, transition: 'background 0.15s, color 0.15s', color: active ? 'var(--cyan)' : 'var(--muted)', background: active ? 'rgba(0,229,255,0.08)' : 'transparent', border: active ? '1px solid rgba(0,229,255,0.1)' : '1px solid transparent' }}>
               {item.icon}
               {item.label}
             </Link>
@@ -111,60 +58,24 @@ export function DashboardNav({ userEmail }: Props) {
       </nav>
 
       {/* User */}
-      <div
-        style={{
-          padding: '16px 16px 20px',
-          borderTop: '1px solid var(--border)',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            marginBottom: 12,
-          }}
-        >
-          <div
-            style={{
-              width: 30,
-              height: 30,
-              borderRadius: '50%',
-              background: 'rgba(0,229,255,0.15)',
-              border: '1px solid rgba(0,229,255,0.2)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 12,
-              fontWeight: 600,
-              color: 'var(--cyan)',
-              fontFamily: 'var(--font-display)',
-              flexShrink: 0,
-            }}
-          >
+      <div style={{ padding: '16px 16px 20px', borderTop: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+          <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(0,229,255,0.15)', border: '1px solid rgba(0,229,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600, color: 'var(--cyan)', fontFamily: 'var(--font-display)', flexShrink: 0 }}>
             {initials}
           </div>
-          <span
-            style={{
-              fontSize: 12,
-              color: 'var(--muted)',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {userEmail}
+          <span style={{ fontSize: 12, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {email}
           </span>
         </div>
         <form action="/auth/signout" method="POST" style={{ width: '100%' }}>
-        <button type="submit" className="btn-ghost" style={{ width: '100%', justifyContent: 'center', fontSize: 12 }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
-          </svg>
-          Sign out
-        </button>
+          <button type="submit" className="btn-ghost" style={{ width: '100%', justifyContent: 'center', fontSize: 12 }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Sign out
+          </button>
         </form>
       </div>
     </aside>
