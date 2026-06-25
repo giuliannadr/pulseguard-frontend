@@ -1,8 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+import { usePathname } from 'next/navigation';
 
 interface Props {
   userEmail: string;
@@ -24,14 +23,6 @@ const navItems = [
 
 export function DashboardNav({ userEmail }: Props) {
   const pathname = usePathname();
-  const router = useRouter();
-
-  async function handleSignOut() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push('/login');
-    router.refresh();
-  }
 
   const initials = userEmail.charAt(0).toUpperCase();
 
@@ -165,7 +156,8 @@ export function DashboardNav({ userEmail }: Props) {
             {userEmail}
           </span>
         </div>
-        <button onClick={handleSignOut} className="btn-ghost" style={{ width: '100%', justifyContent: 'center', fontSize: 12 }}>
+        <form action="/auth/signout" method="POST" style={{ width: '100%' }}>
+        <button type="submit" className="btn-ghost" style={{ width: '100%', justifyContent: 'center', fontSize: 12 }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
             <polyline points="16 17 21 12 16 7"/>
@@ -173,6 +165,7 @@ export function DashboardNav({ userEmail }: Props) {
           </svg>
           Sign out
         </button>
+        </form>
       </div>
     </aside>
   );
