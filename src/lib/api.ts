@@ -51,7 +51,7 @@ export interface Metrics {
 
 export interface CreateMonitorPayload {
   name: string;
-  url: string;
+  url?: string;
   expectedStatus?: number;
   expectedText?: string;
   intervalMinutes?: number;
