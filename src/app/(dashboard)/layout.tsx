@@ -10,7 +10,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div style={{ display: 'flex', minHeight: '100dvh' }}>
-      <DashboardNav />
+      <DashboardNav userEmail={user.email ?? ''} />
       <main style={{ flex: 1, marginLeft: 220, minHeight: '100dvh', background: 'var(--bg)' }} className="grid-bg">
         {children}
       </main>

@@ -2,8 +2,6 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
 
 const navItems = [
   {
@@ -19,16 +17,9 @@ const navItems = [
   },
 ];
 
-export function DashboardNav() {
+export function DashboardNav({ userEmail }: { userEmail: string }) {
   const pathname = usePathname();
-  const [email, setEmail] = useState('');
-
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      setEmail(data.user?.email ?? '');
-    });
-  }, []);
+  const email = userEmail || '';
 
   const initials = email.charAt(0).toUpperCase();
 
