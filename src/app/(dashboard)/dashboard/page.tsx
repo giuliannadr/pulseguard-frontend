@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { api, type Monitor, type MonitorStatus } from '@/lib/api';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { UptimeBar } from '@/components/ui/UptimeBar';
-import { AddMonitorModal } from '@/components/AddMonitorModal';
+
 
 function getLastStatus(monitor: Monitor): MonitorStatus {
   return (monitor.checks?.[0]?.status as MonitorStatus) ?? 'unknown';
@@ -20,7 +20,7 @@ function ms(val: number | null | undefined) {
 export default function DashboardPage() {
   const [monitors, setMonitors] = useState<Monitor[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showAdd, setShowAdd] = useState(false);
+
   const [token, setToken] = useState<string | null>(null);
 
   const supabase = createClient();
@@ -70,15 +70,17 @@ export default function DashboardPage() {
             // System
           </p>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: '#F0F0F0', margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
-            Monitors
+            Projects
           </h1>
         </div>
-        <button onClick={() => setShowAdd(true)} className="btn-strict-primary" style={{ height: 38, fontSize: 12 }}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          Add Monitor
-        </button>
+        <Link href="/import" style={{ textDecoration: 'none' }}>
+          <button className="btn-strict-primary" style={{ height: 38, fontSize: 12 }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Import Repository
+          </button>
+        </Link>
       </div>
 
       {/* ── Stat row ── */}
@@ -115,7 +117,7 @@ export default function DashboardPage() {
           ))}
         </div>
       ) : monitors.length === 0 ? (
-        <EmptyState onAdd={() => setShowAdd(true)} />
+        <EmptyState />
       ) : (
         <div style={{ border: '1px solid rgba(255,255,255,0.07)', borderRadius: 3, overflow: 'hidden' }}>
           {/* Table head */}
@@ -129,7 +131,7 @@ export default function DashboardPage() {
               borderBottom: '1px solid rgba(255,255,255,0.07)',
             }}
           >
-            {['Monitor', 'Response', 'SSL', 'Int.', ''].map((h) => (
+            {['Project', 'Response', 'SSL', 'Int.', ''].map((h) => (
               <span
                 key={h}
                 style={{
@@ -226,22 +228,11 @@ export default function DashboardPage() {
           })}
         </div>
       )}
-
-      {showAdd && token && (
-        <AddMonitorModal
-          token={token}
-          onClose={() => setShowAdd(false)}
-          onCreated={() => {
-            setShowAdd(false);
-            if (token) loadMonitors(token);
-          }}
-        />
-      )}
     </div>
   );
 }
 
-function EmptyState({ onAdd }: { onAdd: () => void }) {
+function EmptyState() {
   return (
     <div
       style={{
@@ -271,17 +262,19 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
         </svg>
       </div>
       <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 800, color: '#F0F0F0', margin: '0 0 8px' }}>
-        No monitors yet
+        No projects yet
       </h3>
       <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#4A4A4A', margin: '0 0 28px', maxWidth: 320 }}>
-        Add your first URL to start tracking uptime, SSL expiry, and response times.
+        Import your first GitHub repository to start protecting your code and tracking uptime.
       </p>
-      <button onClick={onAdd} className="btn-strict-primary">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        Add Monitor
-      </button>
+      <Link href="/import" style={{ textDecoration: 'none' }}>
+        <button className="btn-strict-primary">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Import Repository
+        </button>
+      </Link>
     </div>
   );
 }

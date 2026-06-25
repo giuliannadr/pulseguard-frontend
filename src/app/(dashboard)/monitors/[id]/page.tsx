@@ -292,16 +292,38 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
             </span>
           </div>
           {incidents.map((inc, i) => (
-            <div key={inc.id} style={{ padding: '16px 24px', borderBottom: i < incidents.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+            <div key={inc.id} style={{ padding: '16px 24px', borderBottom: i < incidents.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', opacity: inc.resolved ? 0.5 : 1 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-pink-primary)', fontWeight: 'bold' }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: inc.resolved ? '#888' : 'var(--color-pink-primary)', fontWeight: 'bold' }}>
                   [{inc.severity.toUpperCase()}] {inc.riskType}
                 </span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>
-                  {fmtDate(inc.createdAt)}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>
+                    {fmtDate(inc.createdAt)}
+                  </span>
+                  {!inc.resolved && (
+                    <button 
+                      onClick={async () => {
+                        if (!token) return;
+                        setIncidents(prev => prev.map(item => item.id === inc.id ? { ...item, resolved: true } : item));
+                        try {
+                          await api.securityIncidents.resolve(inc.id, token);
+                        } catch (e) {
+                          console.error(e);
+                          if (token) load(token); // revert
+                        }
+                      }}
+                      style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#F0F0F0', padding: '4px 8px', borderRadius: 3, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}
+                    >
+                      Resolve
+                    </button>
+                  )}
+                  {inc.resolved && (
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#00E676' }}>✓ RESOLVED</span>
+                  )}
+                </div>
               </div>
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#F0F0F0', margin: '0 0 12px 0', lineHeight: 1.5 }}>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: inc.resolved ? '#888' : '#F0F0F0', margin: '0 0 12px 0', lineHeight: 1.5 }}>
                 {inc.description}
               </p>
               <div style={{ background: 'rgba(255,20,147,0.05)', padding: 12, borderRadius: 3, border: '1px solid rgba(255,20,147,0.1)', marginBottom: 12 }}>

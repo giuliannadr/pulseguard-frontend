@@ -97,5 +97,9 @@ export const api = {
         body: JSON.stringify({ owner, repo }),
         headers: { 'x-github-token': githubToken } 
       }),
+  },
+  securityIncidents: {
+    listAll: (token: string) => apiFetch<SecurityIncident[]>('/security-incidents', token),
+    resolve: (id: string, token: string) => apiFetch<void>(`/security-incidents/${id}/resolve`, token, { method: 'PATCH' }),
   }
 };
