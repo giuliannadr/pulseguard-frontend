@@ -7,6 +7,9 @@ import { api, type Monitor, type MonitorStatus } from '@/lib/api';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { UptimeBar } from '@/components/ui/UptimeBar';
 import { AddMonitorModal } from '@/components/AddMonitorModal';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { GlowingButton } from '@/components/ui/GlowingButton';
+import { LineChart, Line, ResponsiveContainer, YAxis } from 'recharts';
 
 function getLastStatus(monitor: Monitor): MonitorStatus {
   const last = monitor.checks?.[0];
@@ -16,6 +19,32 @@ function getLastStatus(monitor: Monitor): MonitorStatus {
 function formatResponseTime(ms: number | null | undefined) {
   if (!ms) return '—';
   return `${ms}ms`;
+}
+
+function Sparkline({ checks }: { checks: any[] }) {
+  if (!checks || checks.length === 0) return null;
+  const data = [...checks].reverse().map((c) => ({
+    time: c.createdAt,
+    ms: c.responseTimeMs || 0
+  }));
+
+  return (
+    <div className="h-10 w-24">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={data}>
+          <YAxis domain={['auto', 'auto']} hide />
+          <Line 
+            type="monotone" 
+            dataKey="ms" 
+            stroke="var(--green-start)" 
+            strokeWidth={2} 
+            dot={false}
+            isAnimationActive={false}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
 }
 
 export default function DashboardPage() {
@@ -46,7 +75,6 @@ export default function DashboardPage() {
     });
   }, []);
 
-  // Supabase Realtime — listen to new checks
   useEffect(() => {
     if (!token) return;
     const channel = supabase
@@ -63,201 +91,113 @@ export default function DashboardPage() {
   const degradedCount = monitors.filter((m) => getLastStatus(m) === 'degraded').length;
 
   return (
-    <div style={{ padding: '36px 40px', maxWidth: 1100 }}>
+    <div className="w-full max-w-6xl mx-auto">
       {/* Header */}
-      <div
-        className="fade-up"
-        style={{
-          display: 'flex',
-          alignItems: 'flex-end',
-          justifyContent: 'space-between',
-          marginBottom: 36,
-        }}
-      >
+      <div className="flex items-end justify-between mb-10 fade-up">
         <div>
-          <p
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 11,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              color: 'var(--cyan)',
-              marginBottom: 6,
-            }}
-          >
+          <p className="font-mono text-[11px] tracking-widest uppercase text-[var(--green-start)] mb-2">
             // Monitors
           </p>
-          <h1
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 30,
-              fontWeight: 800,
-              letterSpacing: '-0.02em',
-              lineHeight: 1,
-            }}
-          >
+          <h1 className="font-display text-4xl font-bold tracking-tight">
             Infrastructure Overview
           </h1>
         </div>
-        <button onClick={() => setShowAdd(true)} className="btn-primary">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+        <GlowingButton onClick={() => setShowAdd(true)} variant="primary">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <line x1="12" y1="5" x2="12" y2="19"/>
             <line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
           Add Monitor
-        </button>
+        </GlowingButton>
       </div>
 
       {/* Stats */}
-      <div
-        className="fade-up fade-up-1"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: 12,
-          marginBottom: 32,
-        }}
-      >
-        <StatCard label="Total" value={monitors.length} color="var(--text)" />
-        <StatCard label="Operational" value={upCount} color="var(--green)" />
-        <StatCard label="Down" value={downCount} color="var(--red)" />
-        <StatCard label="Degraded" value={degradedCount} color="var(--amber)" />
+      <div className="grid grid-cols-4 gap-4 mb-8 fade-up delay-100">
+        <StatCard label="Total" value={monitors.length} color="var(--text-main)" />
+        <StatCard label="Operational" value={upCount} color="var(--green-start)" />
+        <StatCard label="Down" value={downCount} color="#FF5A79" />
+        <StatCard label="Degraded" value={degradedCount} color="#FFDF00" />
       </div>
 
       {/* Monitors grid */}
       {loading ? (
-        <div className="fade-up" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="flex flex-col gap-3 fade-up delay-200">
           {[...Array(3)].map((_, i) => (
-            <div
-              key={i}
-              style={{
-                height: 110,
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: 8,
-                animation: 'pulse-dot 1.5s ease-in-out infinite',
-              }}
-            />
+            <div key={i} className="h-28 glass-card animate-pulse" />
           ))}
         </div>
       ) : monitors.length === 0 ? (
         <EmptyState onAdd={() => setShowAdd(true)} />
       ) : (
-        <div
-          style={{ display: 'flex', flexDirection: 'column', gap: 10 }}
-        >
+        <div className="flex flex-col gap-4 fade-up delay-200">
           {monitors.map((monitor, i) => {
             const status = getLastStatus(monitor);
             const lastCheck = monitor.checks?.[0];
             return (
-              <Link
-                key={monitor.id}
-                href={`/monitors/${monitor.id}`}
-                className={`monitor-card fade-up fade-up-${Math.min(i + 2, 6)} ${status === 'down' ? 'card-down' : ''}`}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                  {/* Status dot */}
-                  <div
-                    className={`pulse-indicator ${status === 'up' ? 'pulse-up' : status === 'down' ? 'pulse-down' : status === 'degraded' ? 'pulse-deg' : ''}`}
-                    style={{ flexShrink: 0 }}
-                  >
-                    <span className="dot" />
-                  </div>
+              <Link key={monitor.id} href={`/monitors/${monitor.id}`} className="block">
+                <GlassCard hoverEffect className={`p-6 ${status === 'down' ? 'border-[#FF5A79]/30 bg-[#FF5A79]/5' : ''}`}>
+                  <div className="flex items-center gap-6">
+                    {/* Status dot */}
+                    <div className="shrink-0">
+                      <span className={`status-indicator ${status}`} />
+                    </div>
 
-                  {/* Name + URL */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 3 }}>
-                      <span
-                        style={{
-                          fontFamily: 'var(--font-display)',
-                          fontWeight: 700,
-                          fontSize: 15,
-                        }}
-                      >
-                        {monitor.name}
+                    {/* Name + URL */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className="font-display font-bold text-[16px] text-white">
+                          {monitor.name}
+                        </span>
+                        <StatusBadge status={status} showPulse={false} />
+                        {!monitor.isActive && (
+                          <span className="px-2 py-0.5 rounded-full bg-white/10 text-[var(--text-muted)] text-[10px] font-mono tracking-wider uppercase border border-white/10">Paused</span>
+                        )}
+                      </div>
+                      <span className="font-mono text-xs text-[var(--text-muted)] block truncate">
+                        {monitor.url}
                       </span>
-                      <StatusBadge status={status} showPulse={false} />
-                      {!monitor.isActive && (
-                        <span className="badge badge-unknown">Paused</span>
-                      )}
                     </div>
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 12,
-                        color: 'var(--muted)',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        display: 'block',
-                      }}
-                    >
-                      {monitor.url}
-                    </span>
+
+                    {/* Chart */}
+                    <div className="shrink-0 hidden md:block opacity-70">
+                       <Sparkline checks={monitor.checks || []} />
+                    </div>
+
+                    {/* Response time */}
+                    <div className="text-right shrink-0 min-w-[80px]">
+                      <div className={`font-mono text-2xl font-bold leading-none ${lastCheck?.responseTimeMs && lastCheck.responseTimeMs > 2000 ? 'text-[#FFDF00]' : 'text-white'}`}>
+                        {formatResponseTime(lastCheck?.responseTimeMs)}
+                      </div>
+                      <div className="text-[10px] text-[var(--text-muted)] mt-1.5 font-mono tracking-widest uppercase">
+                        Response
+                      </div>
+                    </div>
+
+                    {/* SSL */}
+                    {lastCheck?.sslDaysLeft !== null && lastCheck?.sslDaysLeft !== undefined && (
+                      <div className="text-right shrink-0 min-w-[60px]">
+                        <div className={`font-mono text-2xl font-bold leading-none ${lastCheck.sslDaysLeft < 14 ? 'text-[#FF5A79]' : lastCheck.sslDaysLeft < 30 ? 'text-[#FFDF00]' : 'text-white'}`}>
+                          {lastCheck.sslDaysLeft}d
+                        </div>
+                        <div className="text-[10px] text-[var(--text-muted)] mt-1.5 font-mono tracking-widest uppercase">
+                          SSL
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Arrow */}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 ml-2">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
                   </div>
 
-                  {/* Response time */}
-                  <div style={{ textAlign: 'right', flexShrink: 0, minWidth: 80 }}>
-                    <div
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 20,
-                        fontWeight: 600,
-                        color: lastCheck?.responseTimeMs && lastCheck.responseTimeMs > 2000
-                          ? 'var(--amber)'
-                          : 'var(--text)',
-                        lineHeight: 1,
-                      }}
-                    >
-                      {formatResponseTime(lastCheck?.responseTimeMs)}
-                    </div>
-                    <div style={{ fontSize: 10, color: 'var(--muted)', marginTop: 3, fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>
-                      RESPONSE
-                    </div>
-                  </div>
-
-                  {/* SSL */}
-                  {lastCheck?.sslDaysLeft !== null && lastCheck?.sslDaysLeft !== undefined && (
-                    <div style={{ textAlign: 'right', flexShrink: 0, minWidth: 60 }}>
-                      <div
-                        style={{
-                          fontFamily: 'var(--font-mono)',
-                          fontSize: 20,
-                          fontWeight: 600,
-                          color: lastCheck.sslDaysLeft < 14 ? 'var(--red)' : lastCheck.sslDaysLeft < 30 ? 'var(--amber)' : 'var(--text)',
-                          lineHeight: 1,
-                        }}
-                      >
-                        {lastCheck.sslDaysLeft}d
-                      </div>
-                      <div style={{ fontSize: 10, color: 'var(--muted)', marginTop: 3, fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>
-                        SSL
-                      </div>
+                  {/* Uptime bar */}
+                  {monitor.checks && monitor.checks.length > 0 && (
+                    <div className="mt-5 pt-5 border-t border-[var(--border)]">
+                      <UptimeBar checks={monitor.checks} segments={60} />
                     </div>
                   )}
-
-                  {/* Interval */}
-                  <div style={{ flexShrink: 0, textAlign: 'right', minWidth: 60 }}>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 20, fontWeight: 600, lineHeight: 1, color: 'var(--muted)' }}>
-                      {monitor.intervalMinutes}m
-                    </div>
-                    <div style={{ fontSize: 10, color: 'var(--muted)', marginTop: 3, fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>
-                      INTERVAL
-                    </div>
-                  </div>
-
-                  {/* Arrow */}
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                    <polyline points="9 18 15 12 9 6"/>
-                  </svg>
-                </div>
-
-                {/* Uptime bar */}
-                {monitor.checks && monitor.checks.length > 0 && (
-                  <div style={{ marginTop: 14 }}>
-                    <UptimeBar checks={monitor.checks} segments={60} />
-                  </div>
-                )}
+                </GlassCard>
               </Link>
             );
           })}
@@ -278,58 +218,40 @@ export default function DashboardPage() {
   );
 }
 
-function StatCard({ label, value, color }: { label: string; value: number; color: string }) {
+function StatCard({ label, value, color }: { label: string; value: number | string; color: string }) {
   return (
-    <div className="stat-card">
-      <div className="stat-value" style={{ color }}>
+    <GlassCard className="p-6">
+      <div className="font-mono text-4xl font-bold mb-2" style={{ color }}>
         {value}
       </div>
-      <div className="stat-label">{label}</div>
-    </div>
+      <div className="font-display text-xs tracking-widest uppercase text-[var(--text-muted)]">
+        {label}
+      </div>
+    </GlassCard>
   );
 }
 
 function EmptyState({ onAdd }: { onAdd: () => void }) {
   return (
-    <div
-      className="fade-up"
-      style={{
-        textAlign: 'center',
-        padding: '80px 40px',
-        border: '1px dashed rgba(255,255,255,0.08)',
-        borderRadius: 10,
-      }}
-    >
-      <div
-        style={{
-          width: 52,
-          height: 52,
-          background: 'rgba(0,229,255,0.08)',
-          border: '1px solid rgba(0,229,255,0.12)',
-          borderRadius: 12,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          margin: '0 auto 20px',
-        }}
-      >
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <GlassCard className="p-16 text-center border-dashed border-2 border-white/10">
+      <div className="w-16 h-16 bg-gradient-purple rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(199,121,208,0.4)]">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
         </svg>
       </div>
-      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 18, marginBottom: 8 }}>
+      <h3 className="font-display text-xl font-bold mb-2 text-white">
         No monitors yet
       </h3>
-      <p style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 24 }}>
+      <p className="text-sm text-[var(--text-muted)] mb-8">
         Add your first URL to start tracking uptime and response times.
       </p>
-      <button onClick={onAdd} className="btn-primary">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <GlowingButton onClick={onAdd} variant="primary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
           <line x1="12" y1="5" x2="12" y2="19"/>
           <line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
         Add your first monitor
-      </button>
-    </div>
+      </GlowingButton>
+    </GlassCard>
   );
 }

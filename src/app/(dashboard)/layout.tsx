@@ -9,10 +9,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!user) redirect('/login');
 
   return (
-    <div style={{ display: 'flex', minHeight: '100dvh' }}>
+    <div className="flex min-h-dvh relative">
+      <div className="noise-overlay" />
       <DashboardNav userEmail={user.email ?? ''} />
-      <main style={{ flex: 1, marginLeft: 220, minHeight: '100dvh', background: 'var(--bg)' }} className="grid-bg">
-        {children}
+      <main className="flex-1 ml-[260px] min-h-dvh relative z-10 p-8">
+        <div className="max-w-7xl mx-auto fade-up">
+          {children}
+        </div>
       </main>
     </div>
   );
