@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { api, type CreateMonitorPayload } from '@/lib/api';
+import { createClient } from '@/lib/supabase/client';
 
 interface Props {
   token: string;
@@ -19,6 +20,22 @@ export function AddMonitorModal({ token, onClose, onCreated }: Props) {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [repos, setRepos] = useState<any[]>([]);
+  const [selectedRepo, setSelectedRepo] = useState<any | null>(null);
+  const [githubToken, setGithubToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const gToken = session?.provider_token;
+      if (gToken) {
+        setGithubToken(gToken);
+        api.github.repos(token, gToken)
+          .then(setRepos)
+          .catch(e => console.error('Failed to fetch repos', e));
+      }
+    });
+  }, [token]);
 
   function update(field: keyof CreateMonitorPayload, value: string | number) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -31,7 +48,13 @@ export function AddMonitorModal({ token, onClose, onCreated }: Props) {
     try {
       const payload = { ...form };
       if (!payload.expectedText) delete payload.expectedText;
-      await api.monitors.create(payload, token);
+      const monitor = await api.monitors.create(payload, token);
+      
+      if (selectedRepo && githubToken) {
+        const [owner, repoName] = selectedRepo.full_name.split('/');
+        await api.github.connect(monitor.id, owner, repoName, token, githubToken);
+      }
+      
       onCreated();
     } catch (err: any) {
       setError(err.message);
@@ -174,6 +197,33 @@ export function AddMonitorModal({ token, onClose, onCreated }: Props) {
               onChange={(e) => update('expectedText', e.target.value)}
             />
           </Field>
+
+          {repos.length > 0 && (
+            <Field label="DevSecOps AI" hint="1-Click GitHub Integration">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <select
+                  className="input-strict"
+                  style={{ cursor: 'pointer', border: selectedRepo ? '1px solid var(--color-violet-primary)' : undefined }}
+                  value={selectedRepo?.full_name || ''}
+                  onChange={(e) => {
+                    const repo = repos.find(r => r.full_name === e.target.value);
+                    setSelectedRepo(repo || null);
+                    if (repo && form.name === '') update('name', repo.name);
+                  }}
+                >
+                  <option value="">Do not connect (Monitor Only)</option>
+                  {repos.map(r => (
+                    <option key={r.id} value={r.full_name}>Protect {r.full_name}</option>
+                  ))}
+                </select>
+                {selectedRepo && (
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-violet-primary)', background: 'var(--color-violet-primary)10', padding: '8px 12px', borderRadius: 3, border: '1px solid var(--color-violet-primary)30' }}>
+                    <span style={{ fontWeight: 'bold' }}>✓ Webhook will be auto-configured.</span> The AI will scan every push for security vulnerabilities.
+                  </div>
+                )}
+              </div>
+            </Field>
+          )}
 
           {error && (
             <div

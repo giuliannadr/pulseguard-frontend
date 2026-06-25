@@ -27,6 +27,19 @@ export interface Check {
   checkedAt: string;
 }
 
+export interface SecurityIncident {
+  id: string;
+  monitorId: string;
+  commitHash: string;
+  commitAuthor: string | null;
+  riskType: string;
+  severity: 'Critical' | 'High' | 'Medium' | 'Low' | 'None';
+  description: string;
+  recommendation: string;
+  resolved: boolean;
+  createdAt: string;
+}
+
 export interface Metrics {
   uptime: number | null;
   avgResponseMs: number | null;
@@ -71,7 +84,18 @@ export const api = {
     checks:  (id: string, token: string, limit = 100) =>
                apiFetch<Check[]>(`/monitors/${id}/checks?limit=${limit}`, token),
     metrics: (id: string, token: string) => apiFetch<Metrics>(`/monitors/${id}/metrics`, token),
+    securityIncidents: (id: string, token: string) => apiFetch<SecurityIncident[]>(`/monitors/${id}/security-incidents`, token),
     checkNow:(id: string, token: string) =>
                apiFetch<Check>(`/monitors/${id}/check-now`, token, { method: 'POST' }),
   },
+  github: {
+    repos: (token: string, githubToken: string) => 
+      apiFetch<any[]>('/github/repos', token, { headers: { 'x-github-token': githubToken } }),
+    connect: (monitorId: string, owner: string, repo: string, token: string, githubToken: string) =>
+      apiFetch<any>(`/github/connect/${monitorId}`, token, { 
+        method: 'POST', 
+        body: JSON.stringify({ owner, repo }),
+        headers: { 'x-github-token': githubToken } 
+      }),
+  }
 };

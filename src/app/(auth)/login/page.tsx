@@ -28,7 +28,10 @@ export default function LoginPage() {
     setOauthLoading(provider);
     await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { 
+        redirectTo: `${window.location.origin}/auth/callback`,
+        scopes: provider === 'github' ? 'public_repo write:repo_hook read:user' : undefined
+      },
     });
   }
 

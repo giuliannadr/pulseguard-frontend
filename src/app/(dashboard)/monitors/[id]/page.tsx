@@ -13,7 +13,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 import { createClient } from '@/lib/supabase/client';
-import { api, type Monitor, type Check, type Metrics } from '@/lib/api';
+import { api, type Monitor, type Check, type Metrics, type SecurityIncident } from '@/lib/api';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { UptimeBar } from '@/components/ui/UptimeBar';
 
@@ -52,6 +52,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
   const [monitor,  setMonitor]  = useState<Monitor | null>(null);
   const [checks,   setChecks]   = useState<Check[]>([]);
   const [metrics,  setMetrics]  = useState<Metrics | null>(null);
+  const [incidents, setIncidents] = useState<SecurityIncident[]>([]);
   const [token,    setToken]    = useState<string | null>(null);
   const [loading,  setLoading]  = useState(true);
   const [checking, setChecking] = useState(false);
@@ -60,14 +61,16 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
   const supabase = createClient();
 
   const load = useCallback(async (tok: string) => {
-    const [mon, chks, mets] = await Promise.all([
+    const [mon, chks, mets, incs] = await Promise.all([
       api.monitors.get(id, tok),
       api.monitors.checks(id, tok, 200),
       api.monitors.metrics(id, tok),
+      api.monitors.securityIncidents(id, tok).catch(() => []), // fallback in case endpoint not ready
     ]);
     setMonitor(mon);
     setChecks(chks);
     setMetrics(mets);
+    setIncidents(incs);
     setLoading(false);
   }, [id]);
 
@@ -81,12 +84,21 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
 
   useEffect(() => {
     if (!token) return;
-    const ch = supabase
+    const chChecks = supabase
       .channel(`checks-${id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'checks', filter: `monitor_id=eq.${id}` }, () => load(token))
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
-  }, [token, id, load]);
+      
+    const chIncidents = supabase
+      .channel(`incidents-${id}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'security_incidents', filter: `monitor_id=eq.${id}` }, () => load(token))
+      .subscribe();
+      
+    return () => { 
+      supabase.removeChannel(chChecks); 
+      supabase.removeChannel(chIncidents); 
+    };
+  }, [token, id, load, supabase]);
 
   async function handleCheckNow() {
     if (!token) return;
@@ -127,7 +139,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
     .map((c) => ({ time: fmtTime(c.checkedAt), ms: c.responseTimeMs ?? 0 }));
 
   const uptimePct = metrics?.uptime;
-  const uptimeColor = uptimePct == null ? '#4A4A4A' : uptimePct >= 99 ? '#00E676' : uptimePct >= 95 ? '#FFB300' : '#FF1744';
+  const uptimeColor = uptimePct == null ? '#4A4A4A' : uptimePct >= 99 ? 'var(--color-violet-primary)' : uptimePct >= 95 ? '#FFDF00' : 'var(--color-pink-primary)';
 
   return (
     <div style={{ width: '100%', animation: 'pg-fade-in 0.35s ease-out both' }}>
@@ -141,7 +153,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
           Monitors
         </Link>
         <span>/</span>
-        <span style={{ color: '#CAFF00' }}>{monitor.name}</span>
+        <span style={{ color: 'var(--color-violet-primary)' }}>{monitor.name}</span>
       </div>
 
       {/* Header */}
@@ -162,7 +174,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
             href={monitor.url}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#CAFF00', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6, opacity: 0.8 }}
+            style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-violet-primary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6, opacity: 0.8 }}
           >
             {monitor.url}
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -174,7 +186,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <button onClick={handleCheckNow} disabled={checking} className="btn-strict-secondary" style={{ height: 38, fontSize: 12 }}>
             {checking
-              ? <span style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.15)', borderTopColor: '#CAFF00', borderRadius: '50%', animation: 'pg-spin 0.7s linear infinite', display: 'inline-block' }} />
+              ? <span style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.15)', borderTopColor: 'var(--color-violet-primary)', borderRadius: '50%', animation: 'pg-spin 0.7s linear infinite', display: 'inline-block' }} />
               : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
             }
             Check Now
@@ -233,8 +245,8 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
               <AreaChart data={chartData} margin={{ top: 4, right: 0, left: -24, bottom: 0 }}>
                 <defs>
                   <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="#CAFF00" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#CAFF00" stopOpacity={0} />
+                    <stop offset="5%"  stopColor="var(--color-violet-primary)" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="var(--color-violet-primary)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} strokeDasharray="4 4" />
@@ -256,15 +268,60 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                   type="monotone"
                   dataKey="ms"
                   name="Response"
-                  stroke="#CAFF00"
+                  stroke="var(--color-violet-primary)"
                   strokeWidth={1.5}
                   fill="url(#grad)"
                   dot={false}
-                  activeDot={{ r: 4, fill: '#CAFF00', stroke: '#000', strokeWidth: 2 }}
+                  activeDot={{ r: 4, fill: 'var(--color-violet-primary)', stroke: '#000', strokeWidth: 2 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
+        </div>
+      )}
+
+      {/* Security Incidents */}
+      {incidents.length > 0 && (
+        <div style={{ background: '#080808', border: '1px solid var(--color-pink-primary)', borderRadius: 3, overflow: 'hidden', marginBottom: 16 }}>
+          <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-pink-primary)', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 'bold' }}>
+              ⚠️ AI Security Incidents Detected
+            </span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-pink-primary)' }}>
+              {incidents.filter(i => !i.resolved).length} Unresolved
+            </span>
+          </div>
+          {incidents.map((inc, i) => (
+            <div key={inc.id} style={{ padding: '16px 24px', borderBottom: i < incidents.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-pink-primary)', fontWeight: 'bold' }}>
+                  [{inc.severity.toUpperCase()}] {inc.riskType}
+                </span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>
+                  {fmtDate(inc.createdAt)}
+                </span>
+              </div>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#F0F0F0', margin: '0 0 12px 0', lineHeight: 1.5 }}>
+                {inc.description}
+              </p>
+              <div style={{ background: 'rgba(255,20,147,0.05)', padding: 12, borderRadius: 3, border: '1px solid rgba(255,20,147,0.1)', marginBottom: 12 }}>
+                <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-pink-primary)', marginBottom: 4, textTransform: 'uppercase' }}>
+                  Recommendation
+                </span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#D0D0D0' }}>
+                  {inc.recommendation}
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#8A2BE2' }}>
+                  👤 Responsible: {inc.commitAuthor || 'Unknown'}
+                </span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>
+                  Commit: {inc.commitHash.substring(0, 7)}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -296,7 +353,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
           >
             <div><StatusBadge status={check.status as any} showPulse={false} /></div>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#4A4A4A' }}>{check.statusCode ?? '—'}</span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: check.responseTimeMs && check.responseTimeMs > 2000 ? '#FFB300' : '#F0F0F0' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: check.responseTimeMs && check.responseTimeMs > 2000 ? '#FFDF00' : '#F0F0F0' }}>
               {check.responseTimeMs != null ? `${check.responseTimeMs}ms` : '—'}
             </span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#4A4A4A' }}>
