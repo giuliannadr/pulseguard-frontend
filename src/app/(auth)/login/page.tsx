@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email,        setEmail]        = useState('');
   const [password,     setPassword]     = useState('');
   const [error,        setError]        = useState('');
@@ -15,22 +16,32 @@ export default function LoginPage() {
 
   const supabase = createClient();
 
+  useEffect(() => {
+    const err = searchParams.get('error');
+    if (err === 'auth_failed') setError('Authentication failed. Please try again.');
+    if (err === 'missing_code') setError('Invalid login link. Please try again.');
+  }, [searchParams]);
+
+  const redirectTo = searchParams.get('redirectTo') ?? '/dashboard';
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) { setError(error.message); setLoading(false); }
-    else { router.push('/dashboard'); router.refresh(); }
+    else { router.push(redirectTo); router.refresh(); }
   }
 
   async function handleOAuth(provider: 'google' | 'github') {
     setOauthLoading(provider);
+    const callbackUrl = new URL(`${window.location.origin}/auth/callback`);
+    callbackUrl.searchParams.set('redirectTo', redirectTo);
     await supabase.auth.signInWithOAuth({
       provider,
-      options: { 
-        redirectTo: `${window.location.origin}/auth/callback`,
-        scopes: provider === 'github' ? 'repo write:repo_hook read:user' : undefined
+      options: {
+        redirectTo: callbackUrl.toString(),
+        scopes: provider === 'github' ? 'repo write:repo_hook read:user' : undefined,
       },
     });
   }
