@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Bricolage_Grotesque, JetBrains_Mono, DM_Sans } from 'next/font/google';
 import './globals.css';
+import { TranslationProvider } from '@/lib/i18n';
 
 const bricolage = Bricolage_Grotesque({
   subsets: ['latin'],
@@ -31,7 +32,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`h-full ${bricolage.variable} ${jetbrains.variable} ${dmSans.variable}`}>
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        <TranslationProvider>
+          {children}
+        </TranslationProvider>
+      </body>
     </html>
   );
 }

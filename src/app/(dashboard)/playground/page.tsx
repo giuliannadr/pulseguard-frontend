@@ -3,21 +3,30 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { api, type Monitor } from '@/lib/api';
+import { useTranslation } from '@/lib/i18n';
 
 type Tab = 'api' | 'code' | 'dns' | 'hacking';
 
 export default function PlaygroundPage() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<Tab>('api');
   const [token, setToken] = useState<string | null>(null);
+  const [githubToken, setGithubToken] = useState<string | null>(null);
   const [monitors, setMonitors] = useState<Monitor[]>([]);
   const [loadingMonitors, setLoadingMonitors] = useState(true);
 
   // Supabase Auth
   useEffect(() => {
+    setGithubToken(localStorage.getItem('gh_provider_token'));
     const supabase = createClient();
     supabase.auth.getSession().then(({ data: { session } }) => {
       const tok = session?.access_token ?? null;
       setToken(tok);
+      const freshGToken = session?.provider_token ?? null;
+      if (freshGToken) {
+        localStorage.setItem('gh_provider_token', freshGToken);
+        setGithubToken(freshGToken);
+      }
       if (tok) {
         api.monitors.list(tok).then(data => {
           setMonitors(data);
@@ -49,6 +58,100 @@ export default function PlaygroundPage() {
   const [codeResult, setCodeResult] = useState<any | null>(null);
   const [codeRunning, setCodeRunning] = useState(false);
   const [codeError, setCodeError] = useState('');
+
+  // Code Auditor repository selection states
+  const [codeSourceMode, setCodeSourceMode] = useState<'paste' | 'repo'>('paste');
+  const [selectedRepoId, setSelectedRepoId] = useState('');
+  const [commitsList, setCommitsList] = useState<any[]>([]);
+  const [loadingCommits, setLoadingCommits] = useState(false);
+  const [selectedCommitSha, setSelectedCommitSha] = useState('');
+  const [fetchingDiff, setFetchingDiff] = useState(false);
+
+  // Load commits when repository changes
+  useEffect(() => {
+    if (codeSourceMode !== 'repo' || !selectedRepoId || !githubToken) return;
+
+    const mon = monitors.find(m => m.id === selectedRepoId);
+    if (!mon || !mon.githubRepoUrl) return;
+
+    const cleanUrl = mon.githubRepoUrl.replace('.git', '');
+    const parts = cleanUrl.split('/');
+    const repo = parts.pop();
+    const owner = parts.pop();
+
+    if (!owner || !repo) return;
+
+    setLoadingCommits(true);
+    setCommitsList([]);
+    setSelectedCommitSha('');
+
+    fetch(`https://api.github.com/repos/${owner}/${repo}/commits?per_page=5`, {
+      headers: {
+        Authorization: `Bearer ${githubToken}`,
+        Accept: 'application/vnd.github.v3+json',
+      }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        const formatted = data.map((c: any) => ({
+          sha: c.sha,
+          message: c.commit.message.split('\n')[0],
+          author: c.commit.author.name
+        }));
+        setCommitsList(formatted);
+        setLoadingCommits(false);
+        if (formatted.length > 0) {
+          setSelectedCommitSha(formatted[0].sha);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        setLoadingCommits(false);
+        setCodeError('Failed to load commits for this repository. Make sure you connected your GitHub account.');
+      });
+  }, [selectedRepoId, codeSourceMode, githubToken, monitors]);
+
+  // Load commit diff when selected commit changes
+  useEffect(() => {
+    if (codeSourceMode !== 'repo' || !selectedRepoId || !selectedCommitSha || !githubToken) return;
+
+    const mon = monitors.find(m => m.id === selectedRepoId);
+    if (!mon || !mon.githubRepoUrl) return;
+
+    const cleanUrl = mon.githubRepoUrl.replace('.git', '');
+    const parts = cleanUrl.split('/');
+    const repo = parts.pop();
+    const owner = parts.pop();
+
+    if (!owner || !repo) return;
+
+    setFetchingDiff(true);
+    setCodeError('');
+
+    fetch(`https://api.github.com/repos/${owner}/${repo}/commits/${selectedCommitSha}`, {
+      headers: {
+        Authorization: `Bearer ${githubToken}`,
+        Accept: 'application/vnd.github.v3.diff',
+      }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`Failed to fetch diff: HTTP ${res.status}`);
+        return res.text();
+      })
+      .then(diffText => {
+        setCodeSnippet(diffText);
+        setCodeLanguage('javascript'); // Set type to code/diff context
+        setFetchingDiff(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setFetchingDiff(false);
+        setCodeError('Failed to fetch commit diff.');
+      });
+  }, [selectedCommitSha, selectedRepoId, codeSourceMode, githubToken, monitors]);
 
   // ── Tab 3: SSL & DNS Inspector States ──
   const [domainInput, setDomainInput] = useState('github.com');
@@ -242,23 +345,23 @@ export default function PlaygroundPage() {
       {/* ── Title Header ── */}
       <div style={{ marginBottom: 32 }}>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#CAFF00', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
-          // SecOps Laboratory
+          // {t('play_sub')}
         </p>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: '#F0F0F0', margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
-          Developer Playground
+          {t('play_title')}
         </h1>
         <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#666', marginTop: 8 }}>
-          Test API endpoints, scan code snippets, check network configurations, and run safe attack simulations in real-time.
+          {t('play_desc')}
         </p>
       </div>
 
       {/* ── Tabs Selector ── */}
       <div style={{ display: 'flex', gap: 8, borderBottom: '1px solid rgba(255,255,255,0.07)', paddingBottom: 16, marginBottom: 32 }}>
         {[
-          { id: 'api', name: 'API Auditor' },
-          { id: 'code', name: 'Code Auditor' },
-          { id: 'dns', name: 'SSL & DNS Inspector' },
-          { id: 'hacking', name: 'Hacking Simulator' },
+          { id: 'api', name: t('play_tab_api') },
+          { id: 'code', name: t('play_tab_code') },
+          { id: 'dns', name: t('play_tab_dns') },
+          { id: 'hacking', name: t('play_tab_hack') },
         ].map(t => (
           <button
             key={t.id}
@@ -562,51 +665,169 @@ export default function PlaygroundPage() {
 
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A', textTransform: 'uppercase', marginBottom: 8 }}>
-                  Snippet Context / Type
+                  Code Input Mode
                 </label>
-                <select
-                  value={codeLanguage}
-                  onChange={(e) => setCodeLanguage(e.target.value)}
-                  style={{
-                    width: '100%',
-                    background: '#000',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    color: '#F0F0F0',
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 12,
-                    padding: '0 12px',
-                    borderRadius: 3,
-                    height: 40
-                  }}
-                >
-                  <option value="javascript">JavaScript / TypeScript</option>
-                  <option value="dockerfile">Dockerfile</option>
-                  <option value="dependencies">Dependency File (package.json, requirements.txt, go.mod)</option>
-                  <option value="yaml">Config Files (Kubernetes YAML, docker-compose.yml)</option>
-                  <option value="shell">Shell script (.sh)</option>
-                </select>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    onClick={() => setCodeSourceMode('paste')}
+                    style={{
+                      flex: 1,
+                      height: 34,
+                      background: codeSourceMode === 'paste' ? 'rgba(255,255,255,0.06)' : 'transparent',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      color: codeSourceMode === 'paste' ? '#F0F0F0' : '#4A4A4A',
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 11,
+                      borderRadius: 3,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Paste Custom Code
+                  </button>
+                  <button
+                    onClick={() => {
+                      setCodeSourceMode('repo');
+                      if (monitors.length > 0 && !selectedRepoId) {
+                        const firstWithRepo = monitors.find(m => m.githubRepoUrl);
+                        if (firstWithRepo) setSelectedRepoId(firstWithRepo.id);
+                      }
+                    }}
+                    style={{
+                      flex: 1,
+                      height: 34,
+                      background: codeSourceMode === 'repo' ? 'rgba(255,255,255,0.06)' : 'transparent',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      color: codeSourceMode === 'repo' ? '#F0F0F0' : '#4A4A4A',
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 11,
+                      borderRadius: 3,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Select Monitored Repos
+                  </button>
+                </div>
               </div>
+
+              {codeSourceMode === 'repo' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
+                  <div>
+                    <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A', textTransform: 'uppercase', marginBottom: 8 }}>
+                      Select Project Repository
+                    </label>
+                    <select
+                      value={selectedRepoId}
+                      onChange={(e) => setSelectedRepoId(e.target.value)}
+                      style={{
+                        width: '100%',
+                        background: '#000',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        color: '#F0F0F0',
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: 12,
+                        padding: '0 12px',
+                        borderRadius: 3,
+                        height: 40
+                      }}
+                    >
+                      {monitors.filter(m => m.githubRepoUrl).length === 0 ? (
+                        <option>No connected repos</option>
+                      ) : (
+                        monitors.filter(m => m.githubRepoUrl).map(m => (
+                          <option key={m.id} value={m.id}>{m.name} ({m.githubRepoUrl?.replace('https://github.com/', '')})</option>
+                        ))
+                      )}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A', textTransform: 'uppercase', marginBottom: 8 }}>
+                      Select Recent Commit
+                    </label>
+                    <select
+                      value={selectedCommitSha}
+                      onChange={(e) => setSelectedCommitSha(e.target.value)}
+                      disabled={loadingCommits || commitsList.length === 0}
+                      style={{
+                        width: '100%',
+                        background: '#000',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        color: '#F0F0F0',
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: 12,
+                        padding: '0 12px',
+                        borderRadius: 3,
+                        height: 40
+                      }}
+                    >
+                      {loadingCommits ? (
+                        <option>Loading commits...</option>
+                      ) : commitsList.length === 0 ? (
+                        <option>No commits found</option>
+                      ) : (
+                        commitsList.map(c => (
+                          <option key={c.sha} value={c.sha}>{c.sha.substring(0, 7)} - {c.message}</option>
+                        ))
+                      )}
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {codeSourceMode === 'paste' && (
+                <div style={{ marginBottom: 20 }}>
+                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A', textTransform: 'uppercase', marginBottom: 8 }}>
+                    Snippet Context / Type
+                  </label>
+                  <select
+                    value={codeLanguage}
+                    onChange={(e) => setCodeLanguage(e.target.value)}
+                    style={{
+                      width: '100%',
+                      background: '#000',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      color: '#F0F0F0',
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 12,
+                      padding: '0 12px',
+                      borderRadius: 3,
+                      height: 40
+                    }}
+                  >
+                    <option value="javascript">JavaScript / TypeScript</option>
+                    <option value="dockerfile">Dockerfile</option>
+                    <option value="dependencies">Dependency File (package.json, requirements.txt, go.mod)</option>
+                    <option value="yaml">Config Files (Kubernetes YAML, docker-compose.yml)</option>
+                    <option value="shell">Shell script (.sh)</option>
+                  </select>
+                </div>
+              )}
 
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A', textTransform: 'uppercase', marginBottom: 8 }}>
-                  Paste Code
+                  {codeSourceMode === 'repo' ? 'Commit Diff (Loaded automatically)' : 'Paste Code'}
                 </label>
-                <textarea
-                  value={codeSnippet}
-                  onChange={(e) => setCodeSnippet(e.target.value)}
-                  rows={10}
-                  style={{
-                    width: '100%',
-                    background: '#000',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    color: '#F0F0F0',
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 12,
-                    padding: 12,
-                    borderRadius: 3,
-                    resize: 'vertical'
-                  }}
-                />
+                {fetchingDiff ? (
+                  <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 3, color: '#4A4A4A', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+                    Fetching commit diff from GitHub...
+                  </div>
+                ) : (
+                  <textarea
+                    value={codeSnippet}
+                    onChange={(e) => setCodeSnippet(e.target.value)}
+                    rows={10}
+                    style={{
+                      width: '100%',
+                      background: '#000',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      color: '#F0F0F0',
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 12,
+                      padding: 12,
+                      borderRadius: 3,
+                      resize: 'vertical'
+                    }}
+                  />
+                )}
               </div>
 
               {codeError && (

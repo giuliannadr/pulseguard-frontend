@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { api, type SecurityIncident } from '@/lib/api';
 import Link from 'next/link';
+import { useTranslation } from '@/lib/i18n';
 
 // Use same fmtDate function
 function fmtDate(d: string) {
@@ -11,6 +12,7 @@ function fmtDate(d: string) {
 }
 
 export default function SecurityPage() {
+  const { t } = useTranslation();
   const [incidents, setIncidents] = useState<(SecurityIncident & { monitor: { name: string, url: string } })[]>([]);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
@@ -74,10 +76,10 @@ export default function SecurityPage() {
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 40 }}>
         <div>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-pink-primary)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
-            // Global
+            // {t('sec_global')}
           </p>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: '#F0F0F0', margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
-            Security Operations
+            {t('sec_title')}
           </h1>
         </div>
       </div>
@@ -85,10 +87,10 @@ export default function SecurityPage() {
       {/* ── Stat row ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, marginBottom: 32, border: '1px solid rgba(255,255,255,0.07)', borderRadius: 3, overflow: 'hidden' }}>
         {[
-          { label: 'Critical Risks', value: critical, color: critical > 0 ? '#FF1744' : '#F0F0F0' },
-          { label: 'High Risks',     value: high,     color: high > 0 ? '#FFB300' : '#F0F0F0' },
-          { label: 'Medium Risks',   value: medium,   color: medium > 0 ? '#F0F0F0' : '#4A4A4A' },
-          { label: 'Resolved',       value: resolved, color: '#00E676' },
+          { label: t('sec_critical'), value: critical, color: critical > 0 ? '#FF1744' : '#F0F0F0' },
+          { label: t('sec_high'),     value: high,     color: high > 0 ? '#FFB300' : '#F0F0F0' },
+          { label: t('sec_medium'),   value: medium,   color: medium > 0 ? '#F0F0F0' : '#4A4A4A' },
+          { label: t('sec_resolved'), value: resolved, color: '#00E676' },
         ].map((s, i) => (
           <div
             key={s.label}
@@ -116,8 +118,8 @@ export default function SecurityPage() {
         </div>
       ) : incidents.length === 0 ? (
         <div style={{ border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 3, padding: '80px 40px', textAlign: 'center' }}>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: '#00E676', margin: '0 0 8px' }}>All Clear!</h3>
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#4A4A4A', margin: 0 }}>No security incidents have been detected across your projects.</p>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: '#00E676', margin: '0 0 8px' }}>{t('sec_all_clear')}</h3>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#4A4A4A', margin: 0 }}>{t('sec_no_incidents')}</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -152,7 +154,7 @@ export default function SecurityPage() {
                     </span>
                   </div>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span>Project:</span>
+                    <span>{t('dash_project')}:</span>
                     <Link href={`/monitors/${inc.monitorId}`} style={{ color: 'var(--color-violet-primary)', textDecoration: 'none' }}>
                       {inc.monitor?.name}
                     </Link>
@@ -177,12 +179,12 @@ export default function SecurityPage() {
                     onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
                     onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                   >
-                    ✔ Mark as Resolved
+                    ✔ {t('btn_resolve')}
                   </button>
                 )}
                 {inc.resolved && (
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#00E676' }}>
-                    ✓ RESOLVED
+                    ✓ {t('sec_resolved_badge')}
                   </span>
                 )}
               </div>
@@ -193,7 +195,7 @@ export default function SecurityPage() {
               
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: 12, borderRadius: 3, border: '1px solid rgba(255,255,255,0.05)' }}>
                 <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: '#888', marginBottom: 4, textTransform: 'uppercase' }}>
-                  Recommendation
+                  {t('sec_recommendation')}
                 </span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: inc.resolved ? '#666' : '#A0A0A0' }}>
                   {inc.recommendation}
@@ -202,7 +204,7 @@ export default function SecurityPage() {
               
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 12 }}>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: inc.resolved ? '#4A4A4A' : '#8A2BE2' }}>
-                  👤 Author: {inc.commitAuthor || 'Unknown'}
+                  👤 {t('sec_author')}: {inc.commitAuthor || 'Unknown'}
                 </span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>
                   Commit: {inc.commitHash.substring(0, 7)}

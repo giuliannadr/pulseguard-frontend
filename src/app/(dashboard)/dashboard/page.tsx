@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { api, type Monitor, type MonitorStatus } from '@/lib/api';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { UptimeBar } from '@/components/ui/UptimeBar';
+import { useTranslation } from '@/lib/i18n';
 
 
 function getLastStatus(monitor: Monitor): MonitorStatus {
@@ -18,6 +19,7 @@ function ms(val: number | null | undefined) {
 }
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   const [monitors, setMonitors] = useState<Monitor[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -67,10 +69,10 @@ export default function DashboardPage() {
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 40 }}>
         <div>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#CAFF00', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
-            // System
+            // {t('dash_system')}
           </p>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: '#F0F0F0', margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
-            Projects
+            {t('nav_projects')}
           </h1>
         </div>
         <Link href="/import" style={{ textDecoration: 'none' }}>
@@ -78,7 +80,7 @@ export default function DashboardPage() {
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
-            Import Repository
+            {t('btn_import')}
           </button>
         </Link>
       </div>
@@ -86,10 +88,10 @@ export default function DashboardPage() {
       {/* ── Stat row ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, marginBottom: 32, border: '1px solid rgba(255,255,255,0.07)', borderRadius: 3, overflow: 'hidden' }}>
         {[
-          { label: 'Total',       value: monitors.length,  color: '#F0F0F0' },
-          { label: 'Operational', value: upCount,           color: '#00E676' },
-          { label: 'Down',        value: downCount,         color: '#FF1744' },
-          { label: 'Degraded',    value: degradedCount,     color: '#FFB300' },
+          { label: t('dash_total'),       value: monitors.length,  color: '#F0F0F0' },
+          { label: t('dash_operational'), value: upCount,           color: '#00E676' },
+          { label: t('dash_down'),        value: downCount,         color: '#FF1744' },
+          { label: t('dash_degraded'),    value: degradedCount,     color: '#FFB300' },
         ].map((s, i) => (
           <div
             key={s.label}
@@ -131,7 +133,7 @@ export default function DashboardPage() {
               borderBottom: '1px solid rgba(255,255,255,0.07)',
             }}
           >
-            {['Project', 'Response', 'SSL', 'Int.', ''].map((h) => (
+            {[t('dash_project'), t('dash_response'), t('dash_ssl'), t('dash_interval'), ''].map((h) => (
               <span
                 key={h}
                 style={{
@@ -233,6 +235,7 @@ export default function DashboardPage() {
 }
 
 function EmptyState() {
+  const { t } = useTranslation();
   return (
     <div
       style={{
@@ -262,17 +265,17 @@ function EmptyState() {
         </svg>
       </div>
       <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 800, color: '#F0F0F0', margin: '0 0 8px' }}>
-        No projects yet
+        {t('dash_empty_title')}
       </h3>
       <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#4A4A4A', margin: '0 0 28px', maxWidth: 320 }}>
-        Import your first GitHub repository to start protecting your code and tracking uptime.
+        {t('dash_empty_desc')}
       </p>
       <Link href="/import" style={{ textDecoration: 'none' }}>
         <button className="btn-strict-primary">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
-          Import Repository
+          {t('btn_import')}
         </button>
       </Link>
     </div>
