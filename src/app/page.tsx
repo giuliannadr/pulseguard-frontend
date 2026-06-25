@@ -53,7 +53,7 @@ export default function LandingPage() {
             </svg>
           </div>
           <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 15, color: '#F0F0F0', letterSpacing: '-0.01em' }}>
-            Ethereal
+            PulseGuard
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -134,7 +134,7 @@ export default function LandingPage() {
                 maxWidth: 440,
               }}
             >
-              Ethereal watches your APIs and websites 24/7. Get instant alerts on downtime,
+              PulseGuard watches your APIs and websites 24/7. Get instant alerts on downtime,
               degraded performance, and expiring SSL certificates.
             </p>
 
@@ -309,7 +309,7 @@ export default function LandingPage() {
               <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#2A2A2A', letterSpacing: '0.06em' }}>Ethereal</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#2A2A2A', letterSpacing: '0.06em' }}>PulseGuard</span>
         </div>
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#2A2A2A', letterSpacing: '0.06em' }}>
           Built for AranguriApps Challenge · 2026

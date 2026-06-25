@@ -56,6 +56,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
   const [token,    setToken]    = useState<string | null>(null);
   const [loading,  setLoading]  = useState(true);
   const [checking, setChecking] = useState(false);
+  const [scanning, setScanning] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const supabase = createClient();
@@ -105,6 +106,22 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
     setChecking(true);
     try { await api.monitors.checkNow(id, token); await load(token); }
     finally { setChecking(false); }
+  }
+
+  async function handleScanRepo() {
+    if (!token || !monitor?.githubRepoUrl) return;
+    setScanning(true);
+    try {
+      const gToken = localStorage.getItem('gh_provider_token') || '';
+      await api.monitors.scanRepo(id, token, gToken);
+      await load(token);
+      alert('GitHub repository scan completed successfully!');
+    } catch (e: any) {
+      console.error(e);
+      alert(e.message || 'Failed to scan repository. Make sure you connected your GitHub account.');
+    } finally {
+      setScanning(false);
+    }
   }
 
   async function handleDelete() {
@@ -184,6 +201,15 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
           </a>
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          {monitor.githubRepoUrl && (
+            <button onClick={handleScanRepo} disabled={scanning} className="btn-strict-secondary" style={{ height: 38, fontSize: 12, border: '1px solid rgba(202,255,0,0.3)', color: '#CAFF00', background: 'rgba(202,255,0,0.03)' }}>
+              {scanning
+                ? <span style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.15)', borderTopColor: '#CAFF00', borderRadius: '50%', animation: 'pg-spin 0.7s linear infinite', display: 'inline-block', marginRight: 6 }} />
+                : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }}><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
+              }
+              Scan Commits
+            </button>
+          )}
           <button onClick={handleCheckNow} disabled={checking} className="btn-strict-secondary" style={{ height: 38, fontSize: 12 }}>
             {checking
               ? <span style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.15)', borderTopColor: 'var(--color-violet-primary)', borderRadius: '50%', animation: 'pg-spin 0.7s linear infinite', display: 'inline-block' }} />
@@ -281,69 +307,97 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
       )}
 
       {/* Security Incidents */}
-      {incidents.length > 0 && (
-        <div style={{ background: '#080808', border: '1px solid var(--color-pink-primary)', borderRadius: 3, overflow: 'hidden', marginBottom: 16 }}>
+      {monitor.githubRepoUrl && (
+        <div style={{ background: '#080808', border: incidents.length > 0 ? '1px solid var(--color-pink-primary)' : '1px solid rgba(255,255,255,0.07)', borderRadius: 3, overflow: 'hidden', marginBottom: 16 }}>
           <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-pink-primary)', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 'bold' }}>
-              ⚠️ AI Security Incidents Detected
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: incidents.length > 0 ? 'var(--color-pink-primary)' : '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 'bold' }}>
+              🛡️ AI Security Incidents Scan
             </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-pink-primary)' }}>
-              {incidents.filter(i => !i.resolved).length} Unresolved
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A' }}>
+              {incidents.length > 0 ? `${incidents.filter(i => !i.resolved).length} Unresolved` : '0 Alerts'}
             </span>
           </div>
-          {incidents.map((inc, i) => (
-            <div key={inc.id} style={{ padding: '16px 24px', borderBottom: i < incidents.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', opacity: inc.resolved ? 0.5 : 1 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: inc.resolved ? '#888' : 'var(--color-pink-primary)', fontWeight: 'bold' }}>
-                  [{inc.severity.toUpperCase()}] {inc.riskType}
-                </span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>
-                    {fmtDate(inc.createdAt)}
+
+          {incidents.length === 0 ? (
+            <div style={{ padding: '32px 24px', textAlign: 'center', color: '#4A4A4A' }}>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, margin: '0 0 16px 0', color: '#888' }}>
+                No security alerts have been generated for this repository yet.
+              </p>
+              <button 
+                onClick={handleScanRepo}
+                disabled={scanning}
+                style={{ 
+                  background: 'rgba(202,255,0,0.03)', 
+                  border: '1px solid rgba(202,255,0,0.2)', 
+                  color: '#CAFF00', 
+                  padding: '8px 20px', 
+                  borderRadius: 3, 
+                  fontSize: 11, 
+                  fontFamily: 'var(--font-mono)', 
+                  cursor: 'pointer',
+                  transition: 'background 0.15s'
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(202,255,0,0.07)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(202,255,0,0.03)'; }}
+              >
+                {scanning ? 'Auditing Commits...' : '🔍 Scan Recent Commits Now'}
+              </button>
+            </div>
+          ) : (
+            incidents.map((inc, i) => (
+              <div key={inc.id} style={{ padding: '16px 24px', borderBottom: i < incidents.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', opacity: inc.resolved ? 0.5 : 1 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: inc.resolved ? '#888' : 'var(--color-pink-primary)', fontWeight: 'bold' }}>
+                    [{inc.severity.toUpperCase()}] {inc.riskType}
                   </span>
-                  {!inc.resolved && (
-                    <button 
-                      onClick={async () => {
-                        if (!token) return;
-                        setIncidents(prev => prev.map(item => item.id === inc.id ? { ...item, resolved: true } : item));
-                        try {
-                          await api.securityIncidents.resolve(inc.id, token);
-                        } catch (e) {
-                          console.error(e);
-                          if (token) load(token); // revert
-                        }
-                      }}
-                      style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#F0F0F0', padding: '4px 8px', borderRadius: 3, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}
-                    >
-                      Resolve
-                    </button>
-                  )}
-                  {inc.resolved && (
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#00E676' }}>✓ RESOLVED</span>
-                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>
+                      {fmtDate(inc.createdAt)}
+                    </span>
+                    {!inc.resolved && (
+                      <button 
+                        onClick={async () => {
+                          if (!token) return;
+                          setIncidents(prev => prev.map(item => item.id === inc.id ? { ...item, resolved: true } : item));
+                          try {
+                            await api.securityIncidents.resolve(inc.id, token);
+                          } catch (e) {
+                            console.error(e);
+                            if (token) load(token); // revert
+                          }
+                        }}
+                        style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#F0F0F0', padding: '4px 8px', borderRadius: 3, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}
+                      >
+                        Resolve
+                      </button>
+                    )}
+                    {inc.resolved && (
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#00E676' }}>✓ RESOLVED</span>
+                    )}
+                  </div>
+                </div>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: inc.resolved ? '#888' : '#F0F0F0', margin: '0 0 12px 0', lineHeight: 1.5 }}>
+                  {inc.description}
+                </p>
+                <div style={{ background: 'rgba(255,20,147,0.05)', padding: 12, borderRadius: 3, border: '1px solid rgba(255,20,147,0.1)', marginBottom: 12 }}>
+                  <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-pink-primary)', marginBottom: 4, textTransform: 'uppercase' }}>
+                    Recommendation
+                  </span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#D0D0D0' }}>
+                    {inc.recommendation}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#8A2BE2' }}>
+                    👤 Responsible: {inc.commitAuthor || 'Unknown'}
+                  </span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>
+                    Commit: {inc.commitHash.substring(0, 7)}
+                  </span>
                 </div>
               </div>
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: inc.resolved ? '#888' : '#F0F0F0', margin: '0 0 12px 0', lineHeight: 1.5 }}>
-                {inc.description}
-              </p>
-              <div style={{ background: 'rgba(255,20,147,0.05)', padding: 12, borderRadius: 3, border: '1px solid rgba(255,20,147,0.1)', marginBottom: 12 }}>
-                <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-pink-primary)', marginBottom: 4, textTransform: 'uppercase' }}>
-                  Recommendation
-                </span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#D0D0D0' }}>
-                  {inc.recommendation}
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#8A2BE2' }}>
-                  👤 Responsible: {inc.commitAuthor || 'Unknown'}
-                </span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>
-                  Commit: {inc.commitHash.substring(0, 7)}
-                </span>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       )}
 

@@ -24,7 +24,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Ethereal — Precision Uptime Monitoring',
+  title: 'PulseGuard — Precision Uptime & DevSecOps Monitoring',
   description: 'Real-time API and website monitoring. Uptime, SSL, response time. Built for engineers who care.',
 };
 

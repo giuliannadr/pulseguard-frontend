@@ -69,7 +69,7 @@ export default function SignupPage() {
           <div style={{ width: 28, height: 28, background: '#CAFF00', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: '#F0F0F0' }}>Ethereal</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: '#F0F0F0' }}>PulseGuard</span>
         </div>
         <div>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#CAFF00', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 16 }}>// Join</p>
@@ -95,7 +95,7 @@ export default function SignupPage() {
           <div style={{ width: 28, height: 28, background: '#CAFF00', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: '#F0F0F0' }}>Ethereal</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: '#F0F0F0' }}>PulseGuard</span>
         </div>
 
         <div style={{ width: '100%' }}>

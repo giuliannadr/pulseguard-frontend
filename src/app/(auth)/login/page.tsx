@@ -63,7 +63,7 @@ export default function LoginPage() {
               <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: '#F0F0F0' }}>Ethereal</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: '#F0F0F0' }}>PulseGuard</span>
         </div>
 
         <div>
@@ -106,7 +106,7 @@ export default function LoginPage() {
               <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: '#F0F0F0' }}>Ethereal</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: '#F0F0F0' }}>PulseGuard</span>
         </div>
 
         <div style={{ width: '100%' }}>

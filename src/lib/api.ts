@@ -12,6 +12,8 @@ export interface Monitor {
   expectedText?: string | null;
   intervalMinutes: number;
   isActive: boolean;
+  githubRepoUrl?: string | null;
+  githubWebhookId?: string | null;
   createdAt: string;
   updatedAt: string;
   checks?: Check[];
@@ -88,6 +90,8 @@ export const api = {
     securityIncidents: (id: string, token: string) => apiFetch<SecurityIncident[]>(`/monitors/${id}/security-incidents`, token),
     checkNow:(id: string, token: string) =>
                apiFetch<Check>(`/monitors/${id}/check-now`, token, { method: 'POST' }),
+    scanRepo: (id: string, token: string, githubToken: string) =>
+               apiFetch<any>(`/monitors/${id}/scan-repo`, token, { method: 'POST', headers: { 'x-github-token': githubToken } }),
   },
   github: {
     repos: (token: string, githubToken: string) => 
@@ -102,5 +106,15 @@ export const api = {
   securityIncidents: {
     listAll: (token: string) => apiFetch<SecurityIncident[]>('/security-incidents', token),
     resolve: (id: string, token: string) => apiFetch<void>(`/security-incidents/${id}/resolve`, token, { method: 'PATCH' }),
+  },
+  playground: {
+    testEndpoint: (payload: { url: string; method: string; headers?: Record<string, string>; body?: any }, token: string) =>
+      apiFetch<any>('/playground/test-endpoint', token, { method: 'POST', body: JSON.stringify(payload) }),
+    auditCode: (payload: { code: string; language: string }, token: string) =>
+      apiFetch<any>('/playground/audit-code', token, { method: 'POST', body: JSON.stringify(payload) }),
+    inspectDomain: (payload: { domain: string }, token: string) =>
+      apiFetch<any>('/playground/inspect-domain', token, { method: 'POST', body: JSON.stringify(payload) }),
+    simulateAttack: (payload: { url: string; attackType: string }, token: string) =>
+      apiFetch<any>('/playground/simulate-attack', token, { method: 'POST', body: JSON.stringify(payload) }),
   }
 };
