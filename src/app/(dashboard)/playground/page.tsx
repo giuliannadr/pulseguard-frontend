@@ -42,7 +42,7 @@ export default function PlaygroundPage() {
   }, []);
 
   // ── Tab 1: API Auditor States ──
-  const [apiUrl, setApiUrl] = useState('https://pulseguard-backend-production.up.railway.app/health');
+  const [apiUrl, setApiUrl] = useState('https://httpbin.org/get');
   const [apiMethod, setApiMethod] = useState('GET');
   const [apiHeaders, setApiHeaders] = useState('{\n  "Accept": "application/json"\n}');
   const [apiBody, setApiBody] = useState('{\n  \n}');
@@ -162,7 +162,7 @@ export default function PlaygroundPage() {
   // ── Tab 4: Hacking Simulator States ──
   const [hackTargetMode, setHackTargetMode] = useState<'monitor' | 'custom'>('custom');
   const [selectedMonitorId, setSelectedMonitorId] = useState('');
-  const [customHackUrl, setCustomHackUrl] = useState('https://pulseguard-backend-production.up.railway.app/health');
+  const [customHackUrl, setCustomHackUrl] = useState('https://httpbin.org/get');
   const [attackVector, setAttackVector] = useState('sqli');
   const [hackLogs, setHackLogs] = useState<string[]>([]);
   const [hackResult, setHackResult] = useState<any | null>(null);
