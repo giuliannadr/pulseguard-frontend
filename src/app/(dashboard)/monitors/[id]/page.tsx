@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect, useState, useCallback } from 'react';
+import { use, useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -161,7 +161,8 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
   const [showEdit, setShowEdit] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
-  const supabase = createClient();
+  const supabaseRef = useRef(createClient());
+  const supabase = supabaseRef.current;
 
   function showToast(msg: string, type: 'success' | 'error' = 'success') {
     setToast({ msg, type });
@@ -188,7 +189,6 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
   }, [id]);
 
   useEffect(() => {
-    const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) { router.replace('/login'); return; }
       supabase.auth.getSession().then(({ data: { session } }) => {
@@ -197,7 +197,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
         if (tok) load(tok);
       });
     });
-  }, [load, router]);
+  }, [load, router, supabase]);
 
   useEffect(() => {
     if (!token) return;

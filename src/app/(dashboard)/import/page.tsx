@@ -115,7 +115,7 @@ export default function ImportPage() {
 
   async function handleImport(e: React.FormEvent) {
     e.preventDefault();
-    if (!token) return;
+    if (!token) { setError('Session expired. Please refresh the page.'); return; }
     if (needsRepo && !selectedRepo) return;
     if (needsUrl && !url) return;
 
