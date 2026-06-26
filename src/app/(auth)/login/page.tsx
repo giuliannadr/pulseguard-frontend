@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 
-export default function LoginPage() {
+// Separated into its own component so useSearchParams() is inside <Suspense>
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email,        setEmail]        = useState('');
@@ -46,6 +47,84 @@ export default function LoginPage() {
     });
   }
 
+  return (
+    <div style={{ width: '100%' }}>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#CAFF00', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
+        // Auth
+      </p>
+      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, color: '#F0F0F0', margin: '0 0 32px', letterSpacing: '-0.02em' }}>
+        Welcome back
+      </h1>
+
+      {/* OAuth */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
+        <OAuthBtn provider="github" label="Continue with GitHub" loading={oauthLoading === 'github'} onClick={() => handleOAuth('github')} />
+        <OAuthBtn provider="google" label="Continue with Google" loading={oauthLoading === 'google'} onClick={() => handleOAuth('google')} />
+      </div>
+
+      {/* Divider */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
+        <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#2A2A2A', letterSpacing: '0.1em' }}>OR</span>
+        <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
+      </div>
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+          <label style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            Email
+          </label>
+          <input
+            className="input-strict"
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+          <label style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            Password
+          </label>
+          <input
+            className="input-strict"
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+
+        {error && (
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#FF1744', background: 'rgba(255,23,68,0.08)', border: '1px solid rgba(255,23,68,0.2)', borderRadius: 3, padding: '10px 14px' }}>
+            {error}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="btn-strict-primary"
+          style={{ marginTop: 4, width: '100%' }}
+        >
+          {loading ? 'Signing in...' : 'Sign In'}
+        </button>
+      </form>
+
+      <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#4A4A4A', textAlign: 'center', marginTop: 28 }}>
+        No account?{' '}
+        <Link href="/signup" style={{ color: '#CAFF00', textDecoration: 'none', fontWeight: 600 }}>
+          Create one
+        </Link>
+      </p>
+    </div>
+  );
+}
+
+export default function LoginPage() {
   return (
     <div
       style={{
@@ -110,7 +189,7 @@ export default function LoginPage() {
           width: '100%',
         }}
       >
-        {/* Logo (mobile / small) */}
+        {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 48, alignSelf: 'flex-start' }}>
           <div style={{ width: 28, height: 28, background: '#CAFF00', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -120,79 +199,9 @@ export default function LoginPage() {
           <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: '#F0F0F0' }}>PulseGuard</span>
         </div>
 
-        <div style={{ width: '100%' }}>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#CAFF00', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
-            // Auth
-          </p>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, color: '#F0F0F0', margin: '0 0 32px', letterSpacing: '-0.02em' }}>
-            Welcome back
-          </h1>
-
-          {/* OAuth */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
-            <OAuthBtn provider="github" label="Continue with GitHub" loading={oauthLoading === 'github'} onClick={() => handleOAuth('github')} />
-            <OAuthBtn provider="google" label="Continue with Google" loading={oauthLoading === 'google'} onClick={() => handleOAuth('google')} />
-          </div>
-
-          {/* Divider */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#2A2A2A', letterSpacing: '0.1em' }}>OR</span>
-            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-              <label style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                Email
-              </label>
-              <input
-                className="input-strict"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-              <label style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                Password
-              </label>
-              <input
-                className="input-strict"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            {error && (
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#FF1744', background: 'rgba(255,23,68,0.08)', border: '1px solid rgba(255,23,68,0.2)', borderRadius: 3, padding: '10px 14px' }}>
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-strict-primary"
-              style={{ marginTop: 4, width: '100%' }}
-            >
-              {loading ? 'Signing in...' : 'Sign In'}
-            </button>
-          </form>
-
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#4A4A4A', textAlign: 'center', marginTop: 28 }}>
-            No account?{' '}
-            <Link href="/signup" style={{ color: '#CAFF00', textDecoration: 'none', fontWeight: 600 }}>
-              Create one
-            </Link>
-          </p>
-        </div>
+        <Suspense fallback={<div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#4A4A4A' }}>Loading...</div>}>
+          <LoginForm />
+        </Suspense>
       </div>
 
       <style>{`
