@@ -18,6 +18,8 @@ export interface Monitor {
   notificationWebhookUrl?: string | null;
   notificationEmail?: string | null;
   maintenanceWindows?: MaintenanceWindow[] | null;
+  securityGrade?: string | null;
+  securityHeaders?: any | null;
   createdAt: string;
   updatedAt: string;
   checks?: Check[];
@@ -45,6 +47,8 @@ export interface Check {
   responseTimeMs: number | null;
   sslDaysLeft: number | null;
   errorMessage: string | null;
+  securityGrade?: string | null;
+  securityHeaders?: any | null;
   checkedAt: string;
 }
 
@@ -175,5 +179,9 @@ export const api = {
       apiFetch<any>('/playground/inspect-domain', token, { method: 'POST', body: JSON.stringify(payload) }),
     simulateAttack: (payload: { url: string; attackType: string }, token: string) =>
       apiFetch<any>('/playground/simulate-attack', token, { method: 'POST', body: JSON.stringify(payload) }),
+    generatePatch: (payload: { code: string; findings: string; language?: string }, token: string) =>
+      apiFetch<any>('/playground/generate-patch', token, { method: 'POST', body: JSON.stringify(payload) }),
+    networkDiagnostics: (payload: { url: string }, token: string) =>
+      apiFetch<any>('/playground/network-diagnostic', token, { method: 'POST', body: JSON.stringify(payload) }),
   },
 };

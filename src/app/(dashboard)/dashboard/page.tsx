@@ -18,6 +18,17 @@ function ms(val: number | null | undefined) {
   return `${val}ms`;
 }
 
+function getGradeColor(grade: string) {
+  if (!grade) return '#4A4A4A';
+  const g = grade.toUpperCase();
+  if (g.startsWith('A')) return '#00E676';
+  if (g.startsWith('B')) return '#CAFF00';
+  if (g.startsWith('C')) return '#FFB300';
+  if (g.startsWith('D')) return '#FF9100';
+  if (g.startsWith('F')) return '#FF1744';
+  return '#4A4A4A';
+}
+
 export default function DashboardPage() {
   const { t } = useTranslation();
   const [monitors, setMonitors] = useState<Monitor[]>([]);
@@ -129,14 +140,14 @@ export default function DashboardPage() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '1fr 80px 80px 60px 40px',
+              gridTemplateColumns: '1fr 80px 80px 80px 60px 40px',
               gap: 0,
               padding: '10px 20px',
               background: '#050505',
               borderBottom: '1px solid rgba(255,255,255,0.07)',
             }}
           >
-            {[t('dash_project'), t('dash_response'), t('dash_ssl'), 'Next Check', ''].map((h) => (
+            {[t('dash_project'), t('dash_response'), t('dash_ssl'), t('dash_sec_grade'), t('dash_interval'), ''].map((h) => (
               <span
                 key={h}
                 style={{
@@ -174,7 +185,7 @@ export default function DashboardPage() {
                   <div
                     style={{
                       display: 'grid',
-                      gridTemplateColumns: '1fr 80px 80px 60px 40px',
+                      gridTemplateColumns: '1fr 80px 80px 80px 60px 40px',
                       alignItems: 'center',
                       padding: '14px 20px',
                     }}
@@ -208,9 +219,29 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    {/* Next check */}
+                    {/* Security Grade */}
                     <div>
-                      <NextCheck lastCheckedAt={lastCheck?.checkedAt ?? null} intervalMinutes={monitor.intervalMinutes} />
+                      <span
+                        style={{
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: 11,
+                          fontWeight: 700,
+                          color: getGradeColor(monitor.securityGrade ?? ''),
+                          background: monitor.securityGrade ? 'rgba(255,255,255,0.03)' : 'transparent',
+                          border: monitor.securityGrade ? `1px solid ${getGradeColor(monitor.securityGrade)}` : 'none',
+                          padding: monitor.securityGrade ? '1px 6px' : '0',
+                          borderRadius: 2,
+                        }}
+                      >
+                        {monitor.securityGrade ?? '—'}
+                      </span>
+                    </div>
+
+                    {/* Interval */}
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 15, fontWeight: 600, color: '#4A4A4A' }}>
+                        {monitor.intervalMinutes}m
+                      </div>
                     </div>
 
                     {/* Arrow */}

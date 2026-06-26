@@ -135,19 +135,12 @@ export default function DashboardNav({ userEmail }: { userEmail: string | null }
             <Link
               key={link.href}
               href={link.href}
+              className={`sidebar-link ${active ? 'active-link' : ''}`}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '9px 12px',
-                borderRadius: 3,
-                fontSize: 13,
                 fontWeight: active ? 600 : 400,
                 color: active ? '#F0F0F0' : '#4A4A4A',
                 background: active ? 'rgba(255,255,255,0.05)' : 'transparent',
                 borderLeft: active ? '2px solid #CAFF00' : '2px solid transparent',
-                textDecoration: 'none',
-                transition: 'color 0.15s, background 0.15s',
               }}
             >
               <span style={{ color: active ? '#CAFF00' : 'currentColor', flexShrink: 0 }}>{link.icon}</span>

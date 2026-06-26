@@ -63,18 +63,18 @@ export default function LandingPage() {
           >
             Status
           </Link>
-          <Link href="/login" className="btn-strict-secondary" style={{ height: 34, fontSize: 12, padding: '0 16px' }}>
+          <Link href="/login" className="btn-glass" style={{ height: 34, fontSize: 12, padding: '0 16px' }}>
             Sign in
           </Link>
-          <Link href="/signup" className="btn-strict-primary" style={{ height: 34, fontSize: 12, padding: '0 16px' }}>
+          <Link href="/signup" className="btn-solid-glow" style={{ height: 34, fontSize: 12, padding: '0 16px' }}>
             Get started
           </Link>
         </div>
       </nav>
-
+ 
       {/* ── Hero ── */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-
+ 
         {/* Big headline section */}
         <section
           style={{
@@ -86,6 +86,8 @@ export default function LandingPage() {
             gridTemplateColumns: '1fr 400px',
             gap: 80,
             alignItems: 'center',
+            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(202,255,0,0.04) 1.5px, transparent 0)',
+            backgroundSize: '32px 32px'
           }}
           className="hero-grid"
         >
@@ -108,13 +110,15 @@ export default function LandingPage() {
                 Real-time monitoring
               </span>
             </div>
-
+ 
             <h1
               style={{
                 fontFamily: 'var(--font-display)',
                 fontSize: 'clamp(52px, 6vw, 80px)',
                 fontWeight: 800,
-                color: '#F0F0F0',
+                background: 'linear-gradient(135deg, #CAFF00 0%, #00E676 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
                 margin: '0 0 24px',
                 lineHeight: 1.0,
                 letterSpacing: '-0.035em',
@@ -123,7 +127,7 @@ export default function LandingPage() {
               Know before<br />
               your users do.
             </h1>
-
+ 
             <p
               style={{
                 fontFamily: 'var(--font-body)',
@@ -137,19 +141,19 @@ export default function LandingPage() {
               PulseGuard watches your APIs and websites 24/7. Get instant alerts on downtime,
               degraded performance, and expiring SSL certificates.
             </p>
-
+ 
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <Link href="/signup" className="btn-strict-primary" style={{ height: 48, fontSize: 13, padding: '0 28px' }}>
+              <Link href="/signup" className="btn-solid-glow" style={{ height: 48, fontSize: 13, padding: '0 28px' }}>
                 Start monitoring free
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
                 </svg>
               </Link>
-              <Link href="/status" className="btn-strict-secondary" style={{ height: 48, fontSize: 13, padding: '0 28px' }}>
+              <Link href="/status" className="btn-glass" style={{ height: 48, fontSize: 13, padding: '0 28px' }}>
                 View live status
               </Link>
             </div>
-
+ 
             {/* Quick stats */}
             <div style={{ display: 'flex', gap: 36, marginTop: 52, paddingTop: 36, borderTop: '1px solid rgba(255,255,255,0.07)' }}>
               {[['1min', 'Check interval'], ['SSL', 'Expiry tracking'], ['∞', 'Check history']].map(([v, l]) => (
@@ -160,10 +164,10 @@ export default function LandingPage() {
               ))}
             </div>
           </div>
-
+ 
           {/* Right — mock monitor card */}
           <div
-            className="hero-card"
+            className="hero-card scanline-overlay"
             style={{
               background: '#080808',
               border: '1px solid rgba(255,255,255,0.08)',

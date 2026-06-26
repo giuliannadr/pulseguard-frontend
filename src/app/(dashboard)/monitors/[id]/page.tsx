@@ -12,6 +12,17 @@ import { api, githubToken as ghTokenHelper, type Monitor, type Check, type Metri
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { UptimeBar } from '@/components/ui/UptimeBar';
 
+function getGradeColor(grade: string) {
+  if (!grade) return '#4A4A4A';
+  const g = grade.toUpperCase();
+  if (g.startsWith('A')) return '#00E676';
+  if (g.startsWith('B')) return '#CAFF00';
+  if (g.startsWith('C')) return '#FFB300';
+  if (g.startsWith('D')) return '#FF9100';
+  if (g.startsWith('F')) return '#FF1744';
+  return '#4A4A4A';
+}
+
 function fmtDate(d: string) {
   return new Date(d).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
@@ -258,6 +269,13 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
   const [showEdit, setShowEdit] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
+  // Network and Patch States
+  const [diagnosingNet, setDiagnosingNet] = useState(false);
+  const [netDiagnosticData, setNetDiagnosticData] = useState<any | null>(null);
+  const [generatingPatchId, setGeneratingPatchId] = useState<string | null>(null);
+  const [patchData, setPatchData] = useState<Record<string, { patch: string; explanation: string }>>({});
+  const [patchError, setPatchError] = useState<string | null>(null);
+
   const supabaseRef = useRef(createClient());
   const supabase = supabaseRef.current;
 
@@ -332,6 +350,46 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
       showToast(e.message || 'Scan failed. Reconnect GitHub in Settings.', 'error');
     } finally {
       setScanning(false);
+    }
+  }
+
+  async function handleRunNetworkDiagnostic() {
+    if (!token || !monitor?.url) return;
+    setDiagnosingNet(true);
+    try {
+      const res = await api.playground.networkDiagnostics({ url: monitor.url }, token);
+      setNetDiagnosticData(res);
+    } catch (e: any) {
+      showToast(e.message || 'Failed to run diagnostics', 'error');
+    } finally {
+      setDiagnosingNet(false);
+    }
+  }
+
+  async function handleGeneratePatch(incId: string, commitHash: string, description: string) {
+    if (!token || !monitor?.githubRepoUrl) return;
+    setGeneratingPatchId(incId);
+    setPatchError(null);
+    try {
+      const gToken = ghTokenHelper.get();
+      if (!gToken) throw new Error('Connect GitHub account to fetch commit diffs.');
+      const cleanUrl = monitor.githubRepoUrl.replace('.git', '');
+      const parts = cleanUrl.split('/');
+      const repo = parts.pop();
+      const owner = parts.pop();
+      if (!owner || !repo) throw new Error('Invalid repository.');
+      const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits/${commitHash}`, {
+        headers: { Authorization: `Bearer ${gToken}`, Accept: 'application/vnd.github.v3.diff' }
+      });
+      if (!res.ok) throw new Error(`Failed to fetch diff: HTTP ${res.status}`);
+      const diffText = await res.text();
+      const patchResult = await api.playground.generatePatch({ code: diffText, findings: description, language: 'diff' }, token);
+      setPatchData(prev => ({ ...prev, [incId]: { patch: patchResult.patch, explanation: patchResult.explanation } }));
+    } catch (e: any) {
+      setPatchError(e.message);
+      showToast(e.message, 'error');
+    } finally {
+      setGeneratingPatchId(null);
     }
   }
 
@@ -495,6 +553,163 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
         </div>
       )}
 
+      {/* Security Headers & Latency diagnostics panels */}
+      {monitor.url && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 16, marginBottom: 16 }}>
+          {/* Security Headers Panel */}
+          <div style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 3, padding: '20px 24px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>HTTP Security Headers</span>
+              {(monitor.securityGrade || checks[0]?.securityGrade) && (
+                <span style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: getGradeColor(monitor.securityGrade || checks[0]?.securityGrade || ''),
+                  background: 'rgba(255,255,255,0.03)',
+                  border: `1px solid ${getGradeColor(monitor.securityGrade || checks[0]?.securityGrade || '')}`,
+                  padding: '2px 8px',
+                  borderRadius: 2
+                }}>
+                  Grade {monitor.securityGrade || checks[0]?.securityGrade}
+                </span>
+              )}
+            </div>
+
+            {(monitor.securityHeaders || checks[0]?.securityHeaders) ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {[
+                  { key: 'csp', name: 'Content-Security-Policy', value: (monitor.securityHeaders || checks[0]?.securityHeaders)?.headers?.csp },
+                  { key: 'hsts', name: 'Strict-Transport-Security', value: (monitor.securityHeaders || checks[0]?.securityHeaders)?.headers?.hsts },
+                  { key: 'xFrame', name: 'X-Frame-Options', value: (monitor.securityHeaders || checks[0]?.securityHeaders)?.headers?.xFrame },
+                  { key: 'xContentType', name: 'X-Content-Type-Options', value: (monitor.securityHeaders || checks[0]?.securityHeaders)?.headers?.xContentType },
+                  { key: 'referrer', name: 'Referrer-Policy', value: (monitor.securityHeaders || checks[0]?.securityHeaders)?.headers?.referrer },
+                  { key: 'permissions', name: 'Permissions-Policy', value: (monitor.securityHeaders || checks[0]?.securityHeaders)?.headers?.permissions },
+                ].map((hdr) => {
+                  const present = !!hdr.value;
+                  return (
+                    <div key={hdr.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 8, borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                      <div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#FFF' }}>{hdr.name}</div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4A4A4A', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={hdr.value || undefined}>
+                          {hdr.value || 'Not configured'}
+                        </div>
+                      </div>
+                      <span style={{
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: 9,
+                        fontWeight: 'bold',
+                        color: present ? '#00E676' : '#FF1744',
+                        letterSpacing: '0.05em'
+                      }}>
+                        {present ? '[ SECURE ]' : '[ MISSING ]'}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 180 }}>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#4A4A4A', textAlign: 'center', margin: 0 }}>
+                  No security headers scanned yet.<br />Click "Check Now" above to run an evaluation.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Network Latency Breakdown Card */}
+          <div style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 3, padding: '20px 24px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Network Connection Breakdown</span>
+              <button
+                onClick={handleRunNetworkDiagnostic}
+                disabled={diagnosingNet}
+                className="btn-strict-secondary"
+                style={{ height: 26, fontSize: 10, padding: '0 10px', display: 'flex', alignItems: 'center', gap: 4 }}
+              >
+                {diagnosingNet ? <Spinner color="var(--color-violet-primary)" /> : null}
+                Run Diagnostic
+              </button>
+            </div>
+
+            {netDiagnosticData ? (
+              netDiagnosticData.success && netDiagnosticData.timings ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14, flex: 1 }}>
+                  {/* Segmented Phase Bar */}
+                  <div>
+                    <div style={{ display: 'flex', height: 8, borderRadius: 2, overflow: 'hidden', background: '#222', marginBottom: 12 }}>
+                      {[
+                        { name: 'DNS', val: netDiagnosticData.timings.dnsLookupMs, color: '#00E676' },
+                        { name: 'TCP', val: netDiagnosticData.timings.tcpConnectMs, color: '#CAFF00' },
+                        { name: 'TLS', val: netDiagnosticData.timings.tlsHandshakeMs, color: '#00B0FF' },
+                        { name: 'TTFB', val: Math.max(0, netDiagnosticData.timings.ttfbMs - (netDiagnosticData.timings.dnsLookupMs + netDiagnosticData.timings.tcpConnectMs + netDiagnosticData.timings.tlsHandshakeMs)), color: '#FF007F' }
+                      ].map((seg, idx) => {
+                        const pct = netDiagnosticData.timings.totalMs > 0 ? (seg.val / netDiagnosticData.timings.totalMs) * 100 : 0;
+                        if (pct <= 0) return null;
+                        return (
+                          <div
+                            key={idx}
+                            style={{
+                              width: `${pct}%`,
+                              backgroundColor: seg.color,
+                              height: '100%'
+                            }}
+                            title={`${seg.name}: ${seg.val}ms (${pct.toFixed(1)}%)`}
+                          />
+                        );
+                      })}
+                    </div>
+
+                    {/* Timeline legend */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                      {[
+                        { label: 'DNS Lookup', val: netDiagnosticData.timings.dnsLookupMs, color: '#00E676' },
+                        { label: 'TCP Conn', val: netDiagnosticData.timings.tcpConnectMs, color: '#CAFF00' },
+                        { label: 'TLS Handshake', val: netDiagnosticData.timings.tlsHandshakeMs, color: '#00B0FF' },
+                        { label: 'TTFB', val: netDiagnosticData.timings.ttfbMs, color: '#FF007F' }
+                      ].map((leg) => (
+                        <div key={leg.label}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
+                            <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: leg.color }} />
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4A4A4A' }}>{leg.label}</span>
+                          </div>
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#FFF', fontWeight: 'bold' }}>{leg.val}ms</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 10 }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A' }}>Total Latency:</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 'bold', color: '#CAFF00' }}>{netDiagnosticData.timings.totalMs}ms</span>
+                  </div>
+
+                  {/* AI Advice */}
+                  {netDiagnosticData.advice && (
+                    <div style={{ background: '#0F0F0F', border: '1px solid rgba(202,255,0,0.15)', borderRadius: 3, padding: 10 }}>
+                      <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 8, color: '#CAFF00', marginBottom: 4, letterSpacing: '0.1em' }}>AI SRE PERFORMANCE ADVICE</span>
+                      <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 11, color: '#AAA', lineHeight: 1.4 }}>{netDiagnosticData.advice}</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 180 }}>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#FF1744', textAlign: 'center', margin: 0 }}>
+                    Failed to run diagnostics:<br />{netDiagnosticData.error || 'Unknown network error'}
+                  </p>
+                </div>
+              )
+            ) : (
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 180, border: '1px dashed rgba(255,255,255,0.03)', borderRadius: 3 }}>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#4A4A4A', textAlign: 'center', margin: 0 }}>
+                  No diagnostic run yet.<br />Click "Run Diagnostic" to scan connections in real time.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Security Incidents */}
       {monitor.githubRepoUrl && (
         <div style={{ background: '#080808', border: incidents.length > 0 ? '1px solid var(--color-pink-primary)' : '1px solid rgba(255,255,255,0.07)', borderRadius: 3, overflow: 'hidden', marginBottom: 16 }}>
@@ -522,6 +737,28 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                   </span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>{fmtDate(inc.createdAt)}</span>
+                    {monitor.githubRepoUrl && !inc.resolved && (
+                      <button
+                        onClick={() => handleGeneratePatch(inc.id, inc.commitHash, inc.description)}
+                        disabled={generatingPatchId === inc.id}
+                        style={{
+                          background: 'rgba(202,255,0,0.05)',
+                          border: '1px solid rgba(202,255,0,0.3)',
+                          color: '#CAFF00',
+                          padding: '4px 8px',
+                          borderRadius: 3,
+                          fontSize: 10,
+                          fontFamily: 'var(--font-mono)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 4
+                        }}
+                      >
+                        {generatingPatchId === inc.id ? <Spinner color="#CAFF00" /> : null}
+                        AI Patch
+                      </button>
+                    )}
                     {!inc.resolved && (
                       <InlineResolve incidentId={inc.id} token={token} onResolved={() => {
                         setIncidents(prev => prev.map(item => item.id === inc.id ? { ...item, resolved: true } : item));
@@ -539,6 +776,34 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#666' }}>Author: {inc.commitAuthor || 'Unknown'}</span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>Commit: {inc.commitHash.substring(0, 7)}</span>
                 </div>
+
+                {patchData[inc.id] && (
+                  <div style={{ marginTop: 14, border: '1px solid rgba(202,255,0,0.3)', borderRadius: 3, background: '#050505', overflow: 'hidden' }}>
+                    <div style={{ padding: '8px 12px', background: 'rgba(202,255,0,0.05)', borderBottom: '1px solid rgba(202,255,0,0.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#CAFF00', fontWeight: 'bold' }}>AI SUGGESTED SECURITY PATCH (GIT DIFF)</span>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(patchData[inc.id].patch);
+                          showToast('Patch copied to clipboard');
+                        }}
+                        style={{ background: 'transparent', border: 'none', color: '#CAFF00', fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}
+                      >
+                        [ Copy Code ]
+                      </button>
+                    </div>
+                    <div style={{ padding: 12 }}>
+                      <pre style={{ margin: 0, overflowX: 'auto', fontFamily: 'var(--font-mono)', fontSize: 11, color: '#00FF00', lineHeight: 1.5, background: '#020202', padding: 8, borderRadius: 2 }}>
+                        <code>{patchData[inc.id].patch}</code>
+                      </pre>
+                      {patchData[inc.id].explanation && (
+                        <div style={{ marginTop: 10, borderTop: '1px dashed rgba(255,255,255,0.07)', paddingTop: 10 }}>
+                          <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 9, color: '#888', textTransform: 'uppercase', marginBottom: 4 }}>EXPLANATION</span>
+                          <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 12, color: '#AAA', lineHeight: 1.4 }}>{patchData[inc.id].explanation}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ))
           )}

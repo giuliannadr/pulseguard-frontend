@@ -210,3 +210,120 @@ body::after {
 
 /* ── Legacy compat (remove orb refs in JSX later) ─────────────── */
 .bg-orb-pink, .bg-orb-violet { display: none; }
+
+/* ── Glassmorphism & Neon styles ───────────────────────────────── */
+.glass-card {
+  background: rgba(8, 8, 8, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  padding: 24px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.glass-card:hover {
+  border-color: rgba(202, 255, 0, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(202, 255, 0, 0.05);
+}
+
+.btn-solid-glow {
+  height: 44px;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--color-acid);
+  color: #000;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border-radius: 3px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(202, 255, 0, 0.2);
+  transition: opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+}
+.btn-solid-glow:hover:not(:disabled) {
+  opacity: 0.95;
+  transform: translateY(-1px);
+  box-shadow: 0 0 20px rgba(202, 255, 0, 0.45);
+}
+.btn-solid-glow:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-glass {
+  height: 44px;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #F0F0F0;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+}
+.btn-glass:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(202, 255, 0, 0.25);
+  box-shadow: 0 0 15px rgba(202, 255, 0, 0.06);
+}
+
+/* Scanline / CRT overlay */
+.scanline-overlay {
+  position: relative;
+  overflow: hidden;
+}
+.scanline-overlay::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  background-size: 100% 3px, 6px 100%;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0.4;
+}
+
+/* Glowing text effects */
+.text-neon-glow {
+  text-shadow: 0 0 10px rgba(202, 255, 0, 0.3), 0 0 20px rgba(202, 255, 0, 0.1);
+}
+.text-neon-glow-red {
+  text-shadow: 0 0 10px rgba(255, 23, 68, 0.3), 0 0 20px rgba(255, 23, 68, 0.1);
+}
+
+/* Sidebar navigation interactions */
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 3px;
+  font-size: 13px;
+  text-decoration: none;
+  transition: color 0.15s ease, background-color 0.15s ease, padding-left 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.sidebar-link:hover:not(.active-link) {
+  color: #CAFF00 !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  padding-left: 16px;
+}
+.sidebar-link.active-link {
+  box-shadow: inset 3px 0 10px -3px rgba(202, 255, 0, 0.3);
+}

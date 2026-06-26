@@ -156,6 +156,13 @@ export default function PlaygroundPage() {
   const [dnsRunning, setDnsRunning] = useState(false);
   const [dnsError, setDnsError] = useState('');
 
+  // New states for Code Auditor patch and DNS/SSL latency breakdown
+  const [patchResult, setPatchResult] = useState<any | null>(null);
+  const [patchRunning, setPatchRunning] = useState(false);
+  const [latencyResult, setLatencyResult] = useState<any | null>(null);
+  const [latencyRunning, setLatencyRunning] = useState(false);
+  const [latencyError, setLatencyError] = useState('');
+
   // ── Tab 4: Hacking Simulator States ──
   const [hackTargetMode, setHackTargetMode] = useState<'monitor' | 'custom'>('custom');
   const [selectedMonitorId, setSelectedMonitorId] = useState('');
@@ -212,6 +219,7 @@ export default function PlaygroundPage() {
     setCodeRunning(true);
     setCodeError('');
     setCodeResult(null);
+    setPatchResult(null);
 
     try {
       const data = await api.playground.auditCode({
@@ -226,11 +234,31 @@ export default function PlaygroundPage() {
     }
   }
 
+  async function handleGenerateCodePatch() {
+    if (!token || !codeResult) return;
+    setPatchRunning(true);
+    setPatchResult(null);
+    try {
+      const data = await api.playground.generatePatch({
+        code: codeSnippet,
+        findings: (codeResult.findings || []).join('\n') + '\n' + (codeResult.recommendations || ''),
+        language: codeLanguage
+      }, token);
+      setPatchResult(data);
+    } catch (err: any) {
+      alert(err.message || 'Failed to generate patch');
+    } finally {
+      setPatchRunning(false);
+    }
+  }
+
   async function handleRunDns() {
     if (!token) return;
     setDnsRunning(true);
     setDnsError('');
     setDnsResult(null);
+    setLatencyResult(null);
+    setLatencyError('');
 
     try {
       const data = await api.playground.inspectDomain({
@@ -241,6 +269,25 @@ export default function PlaygroundPage() {
       setDnsError(err.message || 'Domain lookup failed');
     } finally {
       setDnsRunning(false);
+    }
+  }
+
+  async function handleRunDomainLatency() {
+    if (!token) return;
+    setLatencyRunning(true);
+    setLatencyError('');
+    setLatencyResult(null);
+    try {
+      let targetUrl = domainInput.trim();
+      if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+        targetUrl = 'https://' + targetUrl;
+      }
+      const data = await api.playground.networkDiagnostics({ url: targetUrl }, token);
+      setLatencyResult(data);
+    } catch (err: any) {
+      setLatencyError(err.message || 'Latency test failed');
+    } finally {
+      setLatencyRunning(false);
     }
   }
 
@@ -876,11 +923,50 @@ export default function PlaygroundPage() {
                     )}
                   </div>
 
-                  <div>
+                  <div style={{ marginBottom: 20 }}>
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4A4A4A', textTransform: 'uppercase', margin: '0 0 8px' }}>Actionable Recommendations</p>
                     <pre style={{ margin: 0, padding: 12, background: '#000', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', color: '#888', whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>
                       {codeResult.recommendations}
                     </pre>
+                  </div>
+
+                  {/* Generate Patch Button */}
+                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 16 }}>
+                    <button
+                      onClick={handleGenerateCodePatch}
+                      disabled={patchRunning}
+                      className="btn-strict-secondary"
+                      style={{ width: '100%', border: '1px solid rgba(202,255,0,0.3)', color: '#CAFF00', height: 38, fontSize: 12 }}
+                    >
+                      {patchRunning ? 'Generating Security Patch...' : 'Generate Secure Patch'}
+                    </button>
+
+                    {patchResult && (
+                      <div style={{ marginTop: 16, border: '1px solid rgba(202,255,0,0.2)', borderRadius: 3, background: '#020202', overflow: 'hidden' }}>
+                        <div style={{ padding: '6px 12px', background: 'rgba(202,255,0,0.03)', borderBottom: '1px solid rgba(202,255,0,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#CAFF00', fontWeight: 'bold' }}>AI SECURED CODE SUGGESTION</span>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(patchResult.patch);
+                              alert('Code copied to clipboard!');
+                            }}
+                            style={{ background: 'transparent', border: 'none', color: '#CAFF00', fontSize: 9, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}
+                          >
+                            [ Copy ]
+                          </button>
+                        </div>
+                        <div style={{ padding: 12 }}>
+                          <pre style={{ margin: 0, overflowX: 'auto', fontFamily: 'var(--font-mono)', fontSize: 11, color: '#00FF00', lineHeight: 1.4 }}>
+                            <code>{patchResult.patch}</code>
+                          </pre>
+                          {patchResult.explanation && (
+                            <p style={{ margin: '8px 0 0', fontFamily: 'var(--font-body)', fontSize: 11, color: '#888', lineHeight: 1.4 }}>
+                              {patchResult.explanation}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (
@@ -1050,6 +1136,97 @@ export default function PlaygroundPage() {
                         </>
                       )}
                     </div>
+                  </div>
+
+                  {/* Connection Latency Diagnostics Card */}
+                  <div style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 3, padding: 20 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                      <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: '#F0F0F0', margin: 0 }}>Connection Timing Breakdown</h4>
+                      {!latencyResult && !latencyRunning && (
+                        <button
+                          onClick={handleRunDomainLatency}
+                          style={{
+                            background: 'transparent',
+                            border: '1px solid rgba(202,255,0,0.3)',
+                            color: '#CAFF00',
+                            padding: '3px 8px',
+                            borderRadius: 3,
+                            fontSize: 10,
+                            fontFamily: 'var(--font-mono)',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Run Timing Diagnostic
+                        </button>
+                      )}
+                    </div>
+
+                    {latencyRunning && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 0' }}>
+                        <span style={{ width: 10, height: 10, border: '2px solid rgba(255,255,255,0.1)', borderTopColor: '#CAFF00', borderRadius: '50%', animation: 'pg-spin 0.7s linear infinite', display: 'inline-block' }} />
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#888' }}>Measuring TCP/TLS handshakes...</span>
+                      </div>
+                    )}
+
+                    {latencyError && (
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#FF1744', padding: '6px 0' }}>
+                        Error: {latencyError}
+                      </div>
+                    )}
+
+                    {latencyResult && latencyResult.success && latencyResult.timings && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                        {/* Segmented Phase Bar */}
+                        <div style={{ display: 'flex', height: 6, borderRadius: 2, overflow: 'hidden', background: '#222', marginTop: 4 }}>
+                          {[
+                            { name: 'DNS', val: latencyResult.timings.dnsLookupMs, color: '#00E676' },
+                            { name: 'TCP', val: latencyResult.timings.tcpConnectMs, color: '#CAFF00' },
+                            { name: 'TLS', val: latencyResult.timings.tlsHandshakeMs, color: '#00B0FF' },
+                            { name: 'TTFB', val: Math.max(0, latencyResult.timings.ttfbMs - (latencyResult.timings.dnsLookupMs + latencyResult.timings.tcpConnectMs + latencyResult.timings.tlsHandshakeMs)), color: '#FF007F' }
+                          ].map((seg, idx) => {
+                            const pct = latencyResult.timings.totalMs > 0 ? (seg.val / latencyResult.timings.totalMs) * 100 : 0;
+                            if (pct <= 0) return null;
+                            return (
+                              <div
+                                key={idx}
+                                style={{ width: `${pct}%`, backgroundColor: seg.color, height: '100%' }}
+                                title={`${seg.name}: ${seg.val}ms`}
+                              />
+                            );
+                          })}
+                        </div>
+
+                        {/* Legend Grid */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, fontSize: 11, fontFamily: 'var(--font-mono)' }}>
+                          {[
+                            { label: 'DNS Lookup', val: latencyResult.timings.dnsLookupMs, color: '#00E676' },
+                            { label: 'TCP Connection', val: latencyResult.timings.tcpConnectMs, color: '#CAFF00' },
+                            { label: 'TLS Handshake', val: latencyResult.timings.tlsHandshakeMs, color: '#00B0FF' },
+                            { label: 'TTFB (First Byte)', val: latencyResult.timings.ttfbMs, color: '#FF007F' }
+                          ].map((leg) => (
+                            <div key={leg.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                <span style={{ width: 5, height: 5, borderRadius: '50%', backgroundColor: leg.color }} />
+                                <span style={{ color: '#4A4A4A' }}>{leg.label}</span>
+                              </div>
+                              <span style={{ color: '#FFF', fontWeight: 'bold' }}>{leg.val}ms</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 8, fontSize: 11, fontFamily: 'var(--font-mono)' }}>
+                          <span style={{ color: '#4A4A4A' }}>Total Latency:</span>
+                          <span style={{ color: '#CAFF00', fontWeight: 'bold' }}>{latencyResult.timings.totalMs}ms</span>
+                        </div>
+
+                        {latencyResult.advice && (
+                          <div style={{ background: '#0F0F0F', border: '1px solid rgba(202,255,0,0.15)', borderRadius: 3, padding: 8, fontSize: 11 }}>
+                            <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 8, color: '#CAFF00', marginBottom: 2 }}>AI SRE SUGGESTION</span>
+                            <p style={{ margin: 0, color: '#AAA', lineHeight: 1.4 }}>{latencyResult.advice}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                 </div>

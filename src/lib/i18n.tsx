@@ -36,6 +36,7 @@ const translations = {
     dash_response: 'Response',
     dash_ssl: 'SSL',
     dash_interval: 'Int.',
+    dash_sec_grade: 'Sec. Grade',
     dash_empty_title: 'No projects monitored yet',
     dash_empty_desc: 'To get started, import a Git repository and configure its public URL.',
 
@@ -106,6 +107,7 @@ const translations = {
     dash_response: 'Respuesta',
     dash_ssl: 'SSL',
     dash_interval: 'Int.',
+    dash_sec_grade: 'Nota Seg.',
     dash_empty_title: 'No hay proyectos monitoreados',
     dash_empty_desc: 'Para comenzar, importa un repositorio de Git y configura su URL pública.',
 
