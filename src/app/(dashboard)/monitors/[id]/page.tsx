@@ -69,6 +69,15 @@ function DeleteConfirm({ onConfirm, onCancel }: { onConfirm: () => void; onCance
 }
 
 // Edit monitor modal
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+function pad(n: number) { return String(n).padStart(2, '0'); }
+
+function fmtWindow(w: import('@/lib/api').MaintenanceWindow) {
+  const days = w.days.map(d => DAYS[d]).join(', ');
+  return `${days} · ${pad(w.startHour)}:${pad(w.startMin)} – ${pad(w.endHour)}:${pad(w.endMin)}`;
+}
+
 function EditModal({ monitor, token, onSave, onClose }: {
   monitor: Monitor; token: string;
   onSave: (updated: Monitor) => void; onClose: () => void;
@@ -79,8 +88,24 @@ function EditModal({ monitor, token, onSave, onClose }: {
   const [expectedStatus, setExpectedStatus] = useState(String(monitor.expectedStatus));
   const [webhookUrl, setWebhookUrl] = useState(monitor.notificationWebhookUrl ?? '');
   const [email, setEmail] = useState(monitor.notificationEmail ?? '');
+  const [windows, setWindows] = useState<import('@/lib/api').MaintenanceWindow[]>(monitor.maintenanceWindows ?? []);
+  const [addingWindow, setAddingWindow] = useState(false);
+  const [newDays, setNewDays] = useState<number[]>([1, 2, 3, 4, 5]); // Mon-Fri default
+  const [newStart, setNewStart] = useState('02:00');
+  const [newEnd, setNewEnd] = useState('04:00');
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
+
+  function addWindow() {
+    const [sh, sm] = newStart.split(':').map(Number);
+    const [eh, em] = newEnd.split(':').map(Number);
+    if (newDays.length === 0) return;
+    setWindows(prev => [...prev, { days: newDays, startHour: sh, startMin: sm, endHour: eh, endMin: em }]);
+    setAddingWindow(false);
+    setNewDays([1, 2, 3, 4, 5]);
+    setNewStart('02:00');
+    setNewEnd('04:00');
+  }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -94,6 +119,7 @@ function EditModal({ monitor, token, onSave, onClose }: {
         expectedStatus: parseInt(expectedStatus),
         notificationWebhookUrl: webhookUrl.trim() || undefined,
         notificationEmail: email.trim() || undefined,
+        maintenanceWindows: windows,
       }, token);
       onSave(updated);
     } catch (e: any) {
@@ -104,13 +130,16 @@ function EditModal({ monitor, token, onSave, onClose }: {
     }
   }
 
+  const labelStyle: React.CSSProperties = { display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: '#666', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' };
+
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 100,
       background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
+      overflowY: 'auto', padding: '24px 0',
     }}>
-      <div style={{ background: '#0A0A0A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: 32, maxWidth: 520, width: '90%' }}>
+      <div style={{ background: '#0A0A0A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: 32, maxWidth: 540, width: '90%', margin: 'auto' }}>
         <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: '#F0F0F0', margin: '0 0 24px' }}>Edit Monitor</h3>
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {[
@@ -120,20 +149,84 @@ function EditModal({ monitor, token, onSave, onClose }: {
             { label: 'Notification Email', value: email, set: setEmail, placeholder: 'you@example.com', type: 'email' },
           ].map(f => (
             <div key={f.label}>
-              <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: '#666', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{f.label}</label>
+              <label style={labelStyle}>{f.label}</label>
               <input className="input-strict" type={f.type} value={f.value} onChange={e => f.set(e.target.value)} placeholder={f.placeholder} />
             </div>
           ))}
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
-              <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: '#666', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Check Interval (min)</label>
+              <label style={labelStyle}>Check Interval (min)</label>
               <input className="input-strict" type="number" min={1} max={60} value={interval} onChange={e => setInterval(e.target.value)} />
             </div>
             <div>
-              <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: '#666', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Expected Status</label>
+              <label style={labelStyle}>Expected Status</label>
               <input className="input-strict" type="number" min={100} max={599} value={expectedStatus} onChange={e => setExpectedStatus(e.target.value)} />
             </div>
           </div>
+
+          {/* Maintenance Windows */}
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <label style={{ ...labelStyle, marginBottom: 0 }}>Maintenance Windows</label>
+              {!addingWindow && (
+                <button type="button" onClick={() => setAddingWindow(true)}
+                  style={{ background: 'transparent', border: '1px solid rgba(202,255,0,0.3)', color: '#CAFF00', padding: '3px 10px', borderRadius: 3, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
+                  + Add
+                </button>
+              )}
+            </div>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: '#555', margin: '0 0 10px' }}>
+              Checks are skipped during these windows — no false alerts at maintenance time.
+            </p>
+
+            {windows.length === 0 && !addingWindow && (
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#3A3A3A', margin: 0 }}>No windows configured.</p>
+            )}
+
+            {windows.map((w, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: '#0F0F0F', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 3, marginBottom: 6 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#AAA' }}>{fmtWindow(w)}</span>
+                <button type="button" onClick={() => setWindows(prev => prev.filter((_, idx) => idx !== i))}
+                  style={{ background: 'transparent', border: 'none', color: '#FF1744', fontSize: 14, cursor: 'pointer', lineHeight: 1, padding: '0 4px' }}>×</button>
+              </div>
+            ))}
+
+            {addingWindow && (
+              <div style={{ background: '#0F0F0F', border: '1px solid rgba(202,255,0,0.15)', borderRadius: 4, padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div>
+                  <label style={labelStyle}>Days</label>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    {DAYS.map((d, i) => {
+                      const active = newDays.includes(i);
+                      return (
+                        <button key={d} type="button"
+                          onClick={() => setNewDays(prev => active ? prev.filter(x => x !== i) : [...prev, i].sort())}
+                          style={{ padding: '4px 10px', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer', border: active ? '1px solid #CAFF00' : '1px solid rgba(255,255,255,0.1)', background: active ? 'rgba(202,255,0,0.08)' : 'transparent', color: active ? '#CAFF00' : '#666' }}>
+                          {d}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div>
+                    <label style={labelStyle}>Start</label>
+                    <input className="input-strict" type="time" value={newStart} onChange={e => setNewStart(e.target.value)} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>End</label>
+                    <input className="input-strict" type="time" value={newEnd} onChange={e => setNewEnd(e.target.value)} />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button type="button" onClick={addWindow} className="btn-strict-primary" style={{ fontSize: 12, height: 32 }}>Add Window</button>
+                  <button type="button" onClick={() => setAddingWindow(false)} className="btn-strict-secondary" style={{ fontSize: 12, height: 32 }}>Cancel</button>
+                </div>
+              </div>
+            )}
+          </div>
+
           {err && <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#FF1744', margin: 0 }}>{err}</p>}
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
             <button type="button" onClick={onClose} className="btn-strict-secondary" style={{ fontSize: 13 }}>Cancel</button>
