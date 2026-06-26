@@ -43,16 +43,16 @@ export default function PublicStatusPage({ params }: { params: Promise<{ userId:
   const hasDown = monitors.some(m => m.status === 'down');
 
   return (
-    <div style={{ minHeight: '100dvh', background: '#000', color: '#F0F0F0' }}>
+    <div style={{ minHeight: '100dvh', background: '#03050F', color: '#F0F0F0' }}>
       {/* Nav */}
-      <div style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '16px 32px', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 24, height: 24, background: '#CAFF00', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ borderBottom: '1px solid rgba(0,240,255,0.15)', padding: '16px 32px', display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(3, 5, 20, 0.75)', backdropFilter: 'blur(12px)' }}>
+        <div style={{ width: 24, height: 24, background: 'var(--color-acid)', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-            <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#030514" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 14, color: '#F0F0F0' }}>PulseGuard</span>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A', marginLeft: 8 }}>// Status Page</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#6D7B9B', marginLeft: 8 }}>// Status Page</span>
       </div>
 
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px' }}>

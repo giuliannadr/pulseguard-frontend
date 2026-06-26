@@ -89,7 +89,7 @@ export default function DashboardNav({ userEmail }: { userEmail: string | null }
             style={{
               width: 28,
               height: 28,
-              background: '#CAFF00',
+              background: 'var(--color-acid)',
               borderRadius: 3,
               display: 'flex',
               alignItems: 'center',
@@ -98,7 +98,7 @@ export default function DashboardNav({ userEmail }: { userEmail: string | null }
             }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#030514" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
           <span
@@ -140,10 +140,10 @@ export default function DashboardNav({ userEmail }: { userEmail: string | null }
                 fontWeight: active ? 600 : 400,
                 color: active ? '#F0F0F0' : '#4A4A4A',
                 background: active ? 'rgba(255,255,255,0.05)' : 'transparent',
-                borderLeft: active ? '2px solid #CAFF00' : '2px solid transparent',
+                borderLeft: active ? '2px solid var(--color-acid)' : '2px solid transparent',
               }}
             >
-              <span style={{ color: active ? '#CAFF00' : 'currentColor', flexShrink: 0 }}>{link.icon}</span>
+              <span style={{ color: active ? 'var(--color-acid)' : 'currentColor', flexShrink: 0 }}>{link.icon}</span>
               {link.label}
             </Link>
           );
@@ -168,14 +168,14 @@ export default function DashboardNav({ userEmail }: { userEmail: string | null }
               width: 28,
               height: 28,
               borderRadius: 3,
-              background: '#CAFF00',
+              background: 'var(--color-acid)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontFamily: 'var(--font-mono)',
               fontSize: 11,
               fontWeight: 700,
-              color: '#000',
+              color: '#030514',
               flexShrink: 0,
             }}
           >

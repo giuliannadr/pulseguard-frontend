@@ -84,9 +84,14 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function pad(n: number) { return String(n).padStart(2, '0'); }
 
-function fmtWindow(w: import('@/lib/api').MaintenanceWindow) {
-  const days = w.days.map(d => DAYS[d]).join(', ');
-  return `${days} · ${pad(w.startHour)}:${pad(w.startMin)} – ${pad(w.endHour)}:${pad(w.endMin)}`;
+function fmtWindow(w: any) {
+  if (!w || !Array.isArray(w.days)) return 'Invalid window';
+  const days = w.days.map((d: number) => DAYS[d] ?? '').filter(Boolean).join(', ');
+  const sh = w.startHour ?? 0;
+  const sm = w.startMin ?? 0;
+  const eh = w.endHour ?? 0;
+  const em = w.endMin ?? 0;
+  return `${days} · ${pad(sh)}:${pad(sm)} – ${pad(eh)}:${pad(em)}`;
 }
 
 function EditModal({ monitor, token, onSave, onClose }: {
@@ -99,7 +104,9 @@ function EditModal({ monitor, token, onSave, onClose }: {
   const [expectedStatus, setExpectedStatus] = useState(String(monitor.expectedStatus));
   const [webhookUrl, setWebhookUrl] = useState(monitor.notificationWebhookUrl ?? '');
   const [email, setEmail] = useState(monitor.notificationEmail ?? '');
-  const [windows, setWindows] = useState<import('@/lib/api').MaintenanceWindow[]>(monitor.maintenanceWindows ?? []);
+  const [windows, setWindows] = useState<import('@/lib/api').MaintenanceWindow[]>(
+    Array.isArray(monitor.maintenanceWindows) ? monitor.maintenanceWindows : []
+  );
   const [addingWindow, setAddingWindow] = useState(false);
   const [newDays, setNewDays] = useState<number[]>([1, 2, 3, 4, 5]); // Mon-Fri default
   const [newStart, setNewStart] = useState('02:00');
@@ -122,12 +129,28 @@ function EditModal({ monitor, token, onSave, onClose }: {
     e.preventDefault();
     setSaving(true);
     setErr('');
+
+    const intervalVal = parseInt(interval);
+    const statusVal = parseInt(expectedStatus);
+
+    if (isNaN(intervalVal) || intervalVal < 1) {
+      setErr('Interval must be a valid number (at least 1 minute)');
+      setSaving(false);
+      return;
+    }
+
+    if (isNaN(statusVal) || statusVal < 100 || statusVal > 599) {
+      setErr('Expected Status must be a valid HTTP status code (100-599)');
+      setSaving(false);
+      return;
+    }
+
     try {
       const updated = await api.monitors.update(monitor.id, {
         name: name.trim(),
         url: url.trim() || undefined,
-        intervalMinutes: parseInt(interval),
-        expectedStatus: parseInt(expectedStatus),
+        intervalMinutes: intervalVal,
+        expectedStatus: statusVal,
         notificationWebhookUrl: webhookUrl.trim() || undefined,
         notificationEmail: email.trim() || undefined,
         maintenanceWindows: windows,
@@ -136,7 +159,6 @@ function EditModal({ monitor, token, onSave, onClose }: {
     } catch (e: any) {
       const msg = e.message;
       setErr(Array.isArray(msg) ? msg.join(', ') : (msg ?? 'Unknown error'));
-    } finally {
       setSaving(false);
     }
   }
@@ -555,7 +577,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
 
       {/* Security Headers & Latency diagnostics panels */}
       {monitor.url && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 16, marginBottom: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginBottom: 16 }}>
           {/* Security Headers Panel */}
           <div style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 3, padding: '20px 24px', display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
