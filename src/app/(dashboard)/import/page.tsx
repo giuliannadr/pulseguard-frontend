@@ -55,6 +55,7 @@ export default function ImportPage() {
   const [selectedRepo, setSelectedRepo] = useState<any | null>(null);
   const [url, setUrl] = useState('');
   const [name, setName] = useState('');
+  const [notificationEmail, setNotificationEmail] = useState('');
   const [importing, setImporting] = useState(false);
   const [error, setError] = useState('');
 
@@ -133,6 +134,7 @@ export default function ImportPage() {
         expectedStatus: 200,
         intervalMinutes: 5,
         notificationWebhookUrl: savedWebhook || undefined,
+        notificationEmail: notificationEmail.trim() || undefined,
       }, token);
 
       // Connect GitHub repo if needed
@@ -210,6 +212,23 @@ export default function ImportPage() {
           />
           <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: '#555', margin: '8px 0 0' }}>
             Leave blank to auto-fill from repo name or URL.
+          </p>
+        </div>
+
+        {/* Notification email */}
+        <div style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 6, padding: 24 }}>
+          <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 11, color: '#888', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            Alert Email <span style={{ color: '#4A4A4A', textTransform: 'none', fontSize: 10 }}>(optional)</span>
+          </label>
+          <input
+            className="input-strict"
+            type="email"
+            placeholder="you@example.com"
+            value={notificationEmail}
+            onChange={e => setNotificationEmail(e.target.value)}
+          />
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: '#555', margin: '8px 0 0' }}>
+            Get emailed when this monitor goes down. Requires RESEND_API_KEY on the server.
           </p>
         </div>
 

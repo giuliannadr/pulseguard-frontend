@@ -78,6 +78,7 @@ function EditModal({ monitor, token, onSave, onClose }: {
   const [interval, setInterval] = useState(String(monitor.intervalMinutes));
   const [expectedStatus, setExpectedStatus] = useState(String(monitor.expectedStatus));
   const [webhookUrl, setWebhookUrl] = useState(monitor.notificationWebhookUrl ?? '');
+  const [email, setEmail] = useState(monitor.notificationEmail ?? '');
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
 
@@ -92,6 +93,7 @@ function EditModal({ monitor, token, onSave, onClose }: {
         intervalMinutes: parseInt(interval),
         expectedStatus: parseInt(expectedStatus),
         notificationWebhookUrl: webhookUrl.trim() || undefined,
+        notificationEmail: email.trim() || undefined,
       }, token);
       onSave(updated);
     } catch (e: any) {
@@ -115,6 +117,7 @@ function EditModal({ monitor, token, onSave, onClose }: {
             { label: 'Name', value: name, set: setName, placeholder: 'My API', type: 'text' },
             { label: 'URL', value: url, set: setUrl, placeholder: 'https://...', type: 'url' },
             { label: 'Notification Webhook (Discord / Slack)', value: webhookUrl, set: setWebhookUrl, placeholder: 'https://discord.com/api/webhooks/...', type: 'url' },
+            { label: 'Notification Email', value: email, set: setEmail, placeholder: 'you@example.com', type: 'email' },
           ].map(f => (
             <div key={f.label}>
               <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: '#666', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{f.label}</label>
@@ -152,6 +155,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
   const [checks, setChecks] = useState<Check[]>([]);
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [incidents, setIncidents] = useState<SecurityIncident[]>([]);
+  const [downtime, setDowntime] = useState<import('@/lib/api').DowntimeWindow[]>([]);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -171,16 +175,18 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
 
   const load = useCallback(async (tok: string) => {
     try {
-      const [mon, chks, mets, incs] = await Promise.all([
+      const [mon, chks, mets, incs, dtw] = await Promise.all([
         api.monitors.get(id, tok),
         api.monitors.checks(id, tok, 200),
         api.monitors.metrics(id, tok),
         api.monitors.securityIncidents(id, tok).catch(() => []),
+        api.monitors.downtime(id, tok).catch(() => []),
       ]);
       setMonitor(mon);
       setChecks(chks);
       setMetrics(mets);
       setIncidents(incs);
+      setDowntime(dtw);
     } catch (e: any) {
       setError(e.message ?? 'Failed to load monitor');
     } finally {
@@ -424,15 +430,9 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>{fmtDate(inc.createdAt)}</span>
                     {!inc.resolved && (
-                      <button
-                        onClick={async () => {
-                          if (!token) return;
-                          setIncidents(prev => prev.map(item => item.id === inc.id ? { ...item, resolved: true } : item));
-                          try { await api.securityIncidents.resolve(inc.id, token); }
-                          catch { if (token) load(token); }
-                        }}
-                        style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#F0F0F0', padding: '4px 8px', borderRadius: 3, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}
-                      >Resolve</button>
+                      <InlineResolve incidentId={inc.id} token={token} onResolved={() => {
+                        setIncidents(prev => prev.map(item => item.id === inc.id ? { ...item, resolved: true } : item));
+                      }} />
                     )}
                     {inc.resolved && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#00E676' }}>✓ RESOLVED</span>}
                   </div>
@@ -492,7 +492,65 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
         </div>
       )}
 
+      {/* Downtime history */}
+      {downtime.length > 0 && (
+        <div style={{ background: '#080808', border: '1px solid rgba(255,23,68,0.15)', borderRadius: 3, overflow: 'hidden', marginTop: 16 }}>
+          <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#FF1744', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Downtime History</span>
+          </div>
+          {downtime.map((w, i) => {
+            const durationSec = Math.round(w.durationMs / 1000);
+            const durationStr = durationSec < 60 ? `${durationSec}s` : durationSec < 3600 ? `${Math.round(durationSec / 60)}m` : `${(durationSec / 3600).toFixed(1)}h`;
+            return (
+              <div key={i} style={{ padding: '14px 24px', borderBottom: i < downtime.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#F0F0F0' }}>{fmtDate(w.start)}</span>
+                  {w.end && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A', marginLeft: 8 }}>→ {fmtDate(w.end)}</span>}
+                  {!w.end && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#FF1744', marginLeft: 8, letterSpacing: '0.08em' }}>ONGOING</span>}
+                </div>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 600, color: '#FF1744' }}>{durationStr}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       <style>{`@keyframes pg-spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
+
+function InlineResolve({ incidentId, token, onResolved }: { incidentId: string; token: string | null; onResolved: () => void }) {
+  const [confirming, setConfirming] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  if (!confirming) {
+    return (
+      <button onClick={() => setConfirming(true)}
+        style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#F0F0F0', padding: '4px 8px', borderRadius: 3, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
+        Resolve
+      </button>
+    );
+  }
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#FFB300' }}>Confirm?</span>
+      <button
+        disabled={loading}
+        onClick={async () => {
+          if (!token) return;
+          setLoading(true);
+          try { await api.securityIncidents.resolve(incidentId, token); onResolved(); }
+          catch { setConfirming(false); }
+          finally { setLoading(false); }
+        }}
+        style={{ background: 'rgba(0,230,118,0.1)', border: '1px solid #00E676', color: '#00E676', padding: '4px 8px', borderRadius: 3, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
+        {loading ? '...' : 'Yes'}
+      </button>
+      <button onClick={() => setConfirming(false)}
+        style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: '#888', padding: '4px 8px', borderRadius: 3, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
+        No
+      </button>
     </div>
   );
 }

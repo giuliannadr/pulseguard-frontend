@@ -13,7 +13,9 @@ export default function SettingsPage() {
   
   const [token, setToken] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [githubConnected, setGithubConnected] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Preference Settings
@@ -32,6 +34,7 @@ export default function SettingsPage() {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) { setLoading(false); return; }
       setUserEmail(user.email ?? null);
+      setUserId(user.id);
       supabase.auth.getSession().then(({ data: { session } }) => {
         setToken(session?.access_token ?? null);
         if (ghTokenHelper.get()) setGithubConnected(true);
@@ -331,6 +334,31 @@ export default function SettingsPage() {
                 {githubConnected ? t('btn_reconnect_gh') : t('btn_connect_gh')}
               </button>
             </div>
+
+            {userId && (
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 20 }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: '#F0F0F0', margin: '0 0 6px' }}>
+                  Public Status Page
+                </h3>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#888', lineHeight: 1.5, margin: '0 0 14px 0' }}>
+                  Share this URL so anyone can see your monitors' live status without logging in.
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <code style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#CAFF00', background: 'rgba(202,255,0,0.05)', border: '1px solid rgba(202,255,0,0.15)', padding: '8px 14px', borderRadius: 3, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {typeof window !== 'undefined' ? `${window.location.origin}/s/${userId}` : `/s/${userId}`}
+                  </code>
+                  <button
+                    onClick={() => {
+                      const url = `${window.location.origin}/s/${userId}`;
+                      navigator.clipboard.writeText(url).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+                    }}
+                    style={{ background: copied ? 'rgba(0,230,118,0.1)' : 'transparent', border: `1px solid ${copied ? '#00E676' : 'rgba(255,255,255,0.15)'}`, color: copied ? '#00E676' : '#F0F0F0', padding: '8px 14px', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
+                  >
+                    {copied ? '✓ Copied' : 'Copy URL'}
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 20 }}>
               <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: '#F0F0F0', margin: '0 0 8px' }}>

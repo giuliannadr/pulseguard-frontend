@@ -136,7 +136,7 @@ export default function DashboardPage() {
               borderBottom: '1px solid rgba(255,255,255,0.07)',
             }}
           >
-            {[t('dash_project'), t('dash_response'), t('dash_ssl'), t('dash_interval'), ''].map((h) => (
+            {[t('dash_project'), t('dash_response'), t('dash_ssl'), 'Next Check', ''].map((h) => (
               <span
                 key={h}
                 style={{
@@ -208,11 +208,9 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    {/* Interval */}
+                    {/* Next check */}
                     <div>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 15, fontWeight: 600, color: '#4A4A4A' }}>
-                        {monitor.intervalMinutes}m
-                      </div>
+                      <NextCheck lastCheckedAt={lastCheck?.checkedAt ?? null} intervalMinutes={monitor.intervalMinutes} />
                     </div>
 
                     {/* Arrow */}
@@ -241,48 +239,65 @@ export default function DashboardPage() {
 
 function EmptyState() {
   const { t } = useTranslation();
+  const steps = [
+    { n: '1', title: 'Add a monitor', desc: 'Paste any URL or connect a GitHub repo. Takes 30 seconds.', cta: true },
+    { n: '2', title: 'Set up alerts', desc: 'Add a Discord/Slack webhook or email in Settings → Preferences.' },
+    { n: '3', title: 'Go to sleep', desc: 'PulseGuard checks every minute and alerts you when something breaks.' },
+  ];
   return (
-    <div
-      style={{
-        border: '1px dashed rgba(255,255,255,0.1)',
-        borderRadius: 3,
-        padding: '80px 40px',
-        textAlign: 'center',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-      }}
-    >
-      <div
-        style={{
-          width: 48,
-          height: 48,
-          background: '#CAFF00',
-          borderRadius: 3,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 20,
-        }}
-      >
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-        </svg>
-      </div>
-      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 800, color: '#F0F0F0', margin: '0 0 8px' }}>
+    <div style={{ border: '1px dashed rgba(255,255,255,0.07)', borderRadius: 6, padding: '56px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0 }}>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#CAFF00', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px' }}>
+        // Getting started
+      </p>
+      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 800, color: '#F0F0F0', margin: '0 0 8px', textAlign: 'center' }}>
         {t('dash_empty_title')}
       </h3>
-      <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#4A4A4A', margin: '0 0 28px', maxWidth: 320 }}>
+      <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#555', margin: '0 0 40px', maxWidth: 340, textAlign: 'center', lineHeight: 1.6 }}>
         {t('dash_empty_desc')}
       </p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 36, width: '100%', maxWidth: 680 }}>
+        {steps.map((s) => (
+          <div key={s.n} style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 4, padding: '20px 20px' }}>
+            <div style={{ width: 28, height: 28, background: s.n === '1' ? '#CAFF00' : 'rgba(255,255,255,0.05)', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: s.n === '1' ? '#000' : '#4A4A4A' }}>{s.n}</span>
+            </div>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: '#F0F0F0', margin: '0 0 6px' }}>{s.title}</p>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: '#555', margin: 0, lineHeight: 1.6 }}>{s.desc}</p>
+          </div>
+        ))}
+      </div>
       <Link href="/import" style={{ textDecoration: 'none' }}>
-        <button className="btn-strict-primary">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+        <button className="btn-strict-primary" style={{ height: 42, fontSize: 13, padding: '0 28px' }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
           {t('btn_import')}
         </button>
       </Link>
+    </div>
+  );
+}
+
+function NextCheck({ lastCheckedAt, intervalMinutes }: { lastCheckedAt: string | null; intervalMinutes: number }) {
+  const [label, setLabel] = useState('—');
+
+  useEffect(() => {
+    function compute() {
+      if (!lastCheckedAt) { setLabel(`${intervalMinutes}m`); return; }
+      const nextMs = new Date(lastCheckedAt).getTime() + intervalMinutes * 60_000;
+      const diffS = Math.round((nextMs - Date.now()) / 1000);
+      if (diffS <= 0) { setLabel('now'); return; }
+      if (diffS < 60) { setLabel(`${diffS}s`); return; }
+      setLabel(`${Math.ceil(diffS / 60)}m`);
+    }
+    compute();
+    const id = setInterval(compute, 5000);
+    return () => clearInterval(id);
+  }, [lastCheckedAt, intervalMinutes]);
+
+  return (
+    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 600, color: label === 'now' ? '#CAFF00' : '#4A4A4A' }}>
+      {label}
     </div>
   );
 }

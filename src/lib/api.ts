@@ -16,9 +16,25 @@ export interface Monitor {
   githubRepoUrl?: string | null;
   githubWebhookId?: string | null;
   notificationWebhookUrl?: string | null;
+  notificationEmail?: string | null;
+  maintenanceWindows?: MaintenanceWindow[] | null;
   createdAt: string;
   updatedAt: string;
   checks?: Check[];
+}
+
+export interface MaintenanceWindow {
+  days: number[]; // 0=Sun..6=Sat
+  startHour: number;
+  startMin: number;
+  endHour: number;
+  endMin: number;
+}
+
+export interface DowntimeWindow {
+  start: string;
+  end: string | null;
+  durationMs: number;
 }
 
 export interface Check {
@@ -58,6 +74,8 @@ export interface CreateMonitorPayload {
   expectedText?: string;
   intervalMinutes?: number;
   notificationWebhookUrl?: string;
+  notificationEmail?: string;
+  maintenanceWindows?: MaintenanceWindow[];
 }
 
 async function apiFetch<T>(path: string, token: string, options?: RequestInit): Promise<T> {
@@ -132,6 +150,7 @@ export const api = {
                apiFetch<Check>(`/monitors/${id}/check-now`, token, { method: 'POST' }),
     scanRepo: (id: string, token: string, ghToken: string) =>
                apiFetch<any>(`/monitors/${id}/scan-repo`, token, { method: 'POST', headers: { 'x-github-token': ghToken } }),
+    downtime: (id: string, token: string) => apiFetch<DowntimeWindow[]>(`/monitors/${id}/downtime`, token),
   },
   github: {
     repos: (token: string, ghToken: string) =>
