@@ -113,7 +113,7 @@ export default function ImportPage() {
   async function handleImport(e: React.FormEvent) {
     e.preventDefault();
     if (!token) return;
-    if (needsRepo && !selectedRepo && mode !== 'url-only') return;
+    if (needsRepo && !selectedRepo) return;
     if (needsUrl && !url) return;
 
     setError('');
@@ -123,11 +123,13 @@ export default function ImportPage() {
       const monitorName = name.trim() || selectedRepo?.name || new URL(url).hostname;
 
       // Create monitor (url is optional for repo-only mode)
+      const savedWebhook = typeof window !== 'undefined' ? localStorage.getItem('pg_webhook_url') ?? undefined : undefined;
       const monitor = await api.monitors.create({
         name: monitorName,
         url: needsUrl ? url : undefined,
         expectedStatus: 200,
         intervalMinutes: 5,
+        notificationWebhookUrl: savedWebhook || undefined,
       }, token);
 
       // Connect GitHub repo if needed
@@ -145,7 +147,7 @@ export default function ImportPage() {
 
   const canSubmit = !importing &&
     (!needsUrl || url.length > 0) &&
-    (!needsRepo || selectedRepo !== null || mode === 'url-only');
+    (!needsRepo || selectedRepo !== null);
 
   return (
     <div style={{ width: '100%', animation: 'pg-fade-in 0.35s ease-out both', maxWidth: 800, margin: '0 auto' }}>

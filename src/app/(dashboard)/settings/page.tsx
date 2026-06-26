@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useTranslation, type Language } from '@/lib/i18n';
-import { api } from '@/lib/api';
+import { api, githubToken as ghTokenHelper } from '@/lib/api';
 
 type Tab = 'pref' | 'integ';
 
@@ -27,16 +27,14 @@ export default function SettingsPage() {
     setWebhookUrl(savedWebhook);
 
     const supabase = createClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const tok = session?.access_token ?? null;
-      setToken(tok);
-      setUserEmail(session?.user?.email ?? null);
-      
-      const ghToken = localStorage.getItem('gh_provider_token');
-      if (ghToken) {
-        setGithubConnected(true);
-      }
-      setLoading(false);
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) { setLoading(false); return; }
+      setUserEmail(user.email ?? null);
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setToken(session?.access_token ?? null);
+        if (ghTokenHelper.get()) setGithubConnected(true);
+        setLoading(false);
+      });
     });
   }, []);
 

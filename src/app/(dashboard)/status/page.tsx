@@ -24,12 +24,12 @@ export default function StatusPage() {
   }, []);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.access_token) {
-        loadMonitors(session.access_token);
-      } else {
-        setLoading(false);
-      }
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) { setLoading(false); return; }
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.access_token) loadMonitors(session.access_token);
+        else setLoading(false);
+      });
     });
   }, [loadMonitors]);
 

@@ -39,11 +39,14 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const tok = session?.access_token ?? null;
-      setToken(tok);
-      if (tok) loadMonitors(tok);
-      else setLoading(false);
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) { setLoading(false); return; }
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        const tok = session?.access_token ?? null;
+        setToken(tok);
+        if (tok) loadMonitors(tok);
+        else setLoading(false);
+      });
     });
   }, [loadMonitors]);
 
@@ -184,9 +187,11 @@ export default function DashboardPage() {
                         </span>
                         <StatusBadge status={status} showPulse={false} />
                       </div>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>
-                        {monitor.url}
-                      </span>
+                      {monitor.url && (
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>
+                          {monitor.url}
+                        </span>
+                      )}
                     </div>
 
                     {/* Response */}

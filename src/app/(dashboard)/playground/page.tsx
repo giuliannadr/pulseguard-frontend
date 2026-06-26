@@ -263,6 +263,7 @@ export default function PlaygroundPage() {
         setHackRunning(false);
         return;
       }
+      if (!mon.url) { setHackError('This monitor has no URL configured'); setHackRunning(false); return; }
       targetUrl = mon.url;
     } else {
       targetUrl = customHackUrl;

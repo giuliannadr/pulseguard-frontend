@@ -31,11 +31,14 @@ export default function SecurityPage() {
   }, []);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const tok = session?.access_token ?? null;
-      setToken(tok);
-      if (tok) loadIncidents(tok);
-      else setLoading(false);
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) { setLoading(false); return; }
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        const tok = session?.access_token ?? null;
+        setToken(tok);
+        if (tok) loadIncidents(tok);
+        else setLoading(false);
+      });
     });
   }, [loadIncidents]);
 

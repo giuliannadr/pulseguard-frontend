@@ -15,6 +15,7 @@ export interface Monitor {
   isActive: boolean;
   githubRepoUrl?: string | null;
   githubWebhookId?: string | null;
+  notificationWebhookUrl?: string | null;
   createdAt: string;
   updatedAt: string;
   checks?: Check[];
@@ -56,6 +57,7 @@ export interface CreateMonitorPayload {
   expectedStatus?: number;
   expectedText?: string;
   intervalMinutes?: number;
+  notificationWebhookUrl?: string;
 }
 
 async function apiFetch<T>(path: string, token: string, options?: RequestInit): Promise<T> {
@@ -119,7 +121,7 @@ export const api = {
     get:     (id: string, token: string) => apiFetch<Monitor>(`/monitors/${id}`, token),
     create:  (payload: CreateMonitorPayload, token: string) =>
                apiFetch<Monitor>('/monitors', token, { method: 'POST', body: JSON.stringify(payload) }),
-    update:  (id: string, payload: Partial<CreateMonitorPayload & { isActive: boolean }>, token: string) =>
+    update:  (id: string, payload: Partial<CreateMonitorPayload & { isActive: boolean; notificationWebhookUrl?: string }>, token: string) =>
                apiFetch<Monitor>(`/monitors/${id}`, token, { method: 'PATCH', body: JSON.stringify(payload) }),
     delete:  (id: string, token: string) => apiFetch<void>(`/monitors/${id}`, token, { method: 'DELETE' }),
     checks:  (id: string, token: string, limit = 100) =>
