@@ -44,7 +44,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         height: '100dvh',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#000',
+        background: '#03050F',
         color: '#666',
         fontFamily: 'var(--font-body)',
         fontSize: 14,
@@ -59,7 +59,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       style={{
         display: 'flex',
         height: '100dvh',
-        background: '#000',
+        background: '#03050F',
         overflow: 'hidden',
         color: '#F0F0F0',
         fontFamily: 'var(--font-body)',

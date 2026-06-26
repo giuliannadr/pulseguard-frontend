@@ -369,7 +369,7 @@ export default function PlaygroundPage() {
       case 'high': return '#FF5252';
       case 'medium': return '#FFB300';
       case 'low': return '#00E676';
-      default: return '#CAFF00';
+      default: return 'var(--color-acid)';
     }
   }
 
@@ -389,7 +389,7 @@ export default function PlaygroundPage() {
       
       {/* ── Title Header ── */}
       <div style={{ marginBottom: 32 }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#CAFF00', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
           // {t('play_sub')}
         </p>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: '#F0F0F0', margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
@@ -413,10 +413,10 @@ export default function PlaygroundPage() {
             onClick={() => setActiveTab(t.id as Tab)}
             style={{
               padding: '8px 16px',
-              background: activeTab === t.id ? 'rgba(202,255,0,0.05)' : 'transparent',
-              border: activeTab === t.id ? '1px solid rgba(202,255,0,0.3)' : '1px solid transparent',
+              background: activeTab === t.id ? 'rgba(0,240,255,0.05)' : 'transparent',
+              border: activeTab === t.id ? '1px solid rgba(0,240,255,0.3)' : '1px solid transparent',
               borderRadius: 3,
-              color: activeTab === t.id ? '#CAFF00' : '#888',
+              color: activeTab === t.id ? 'var(--color-acid)' : '#888',
               fontFamily: 'var(--font-mono)',
               fontSize: 12,
               cursor: 'pointer',
@@ -446,7 +446,7 @@ export default function PlaygroundPage() {
                      setApiMethod('GET');
                      setApiHeaders('{\n  "Accept": "application/json"\n}');
                    }}
-                   style={{ background: '#000', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 2, padding: '4px 8px', color: '#CAFF00', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
+                   style={{ background: '#000', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 2, padding: '4px 8px', color: 'var(--color-acid)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
                  >
                    GET Public IP
                  </button>
@@ -457,7 +457,7 @@ export default function PlaygroundPage() {
                      setApiHeaders('{\n  "Content-Type": "application/json"\n}');
                      setApiBody('{\n  "username": "admin",\n  "action": "test"\n}');
                    }}
-                   style={{ background: '#000', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 2, padding: '4px 8px', color: '#CAFF00', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
+                   style={{ background: '#000', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 2, padding: '4px 8px', color: 'var(--color-acid)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
                  >
                    POST Echo HTTPBin
                  </button>
@@ -467,7 +467,7 @@ export default function PlaygroundPage() {
                      setApiMethod('GET');
                      setApiHeaders('{\n  "User-Agent": "PulseGuard"\n}');
                    }}
-                   style={{ background: '#000', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 2, padding: '4px 8px', color: '#CAFF00', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
+                   style={{ background: '#000', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 2, padding: '4px 8px', color: 'var(--color-acid)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
                  >
                    GET GitHub User
                  </button>
@@ -626,7 +626,7 @@ export default function PlaygroundPage() {
                         <div style={{ fontSize: 9, color: '#4A4A4A', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', marginTop: 4 }}>Status</div>
                       </div>
                       <div style={{ borderRight: '1px solid rgba(255,255,255,0.07)' }}>
-                        <div style={{ fontSize: 18, fontFamily: 'var(--font-mono)', color: '#CAFF00', fontWeight: 'bold' }}>
+                        <div style={{ fontSize: 18, fontFamily: 'var(--font-mono)', color: 'var(--color-acid)', fontWeight: 'bold' }}>
                           {apiResult.latencyMs}ms
                         </div>
                         <div style={{ fontSize: 9, color: '#4A4A4A', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', marginTop: 4 }}>Latency</div>
@@ -684,7 +684,7 @@ export default function PlaygroundPage() {
                      setCodeLanguage('dockerfile');
                      setCodeSnippet('FROM ubuntu:latest\nRUN apt-get update && apt-get install -y curl\n# BAD PRACTICE: running container as root user\nUSER root\nCMD ["bash"]');
                    }}
-                   style={{ background: '#000', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 2, padding: '4px 8px', color: '#CAFF00', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
+                   style={{ background: '#000', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 2, padding: '4px 8px', color: 'var(--color-acid)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
                  >
                    Insecure Dockerfile
                  </button>
@@ -693,7 +693,7 @@ export default function PlaygroundPage() {
                      setCodeLanguage('javascript');
                      setCodeSnippet('const express = require("express");\nconst app = express();\nconst pg = require("pg");\nconst client = new pg.Client();\n\napp.get("/users", (req, res) => {\n  // VULNERABLE: Direct SQL injection concatenation\n  const sql = "SELECT * FROM users WHERE name = \'" + req.query.name + "\'";\n  client.query(sql, (err, result) => {\n    res.json(result.rows);\n  });\n});');
                    }}
-                   style={{ background: '#000', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 2, padding: '4px 8px', color: '#CAFF00', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
+                   style={{ background: '#000', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 2, padding: '4px 8px', color: 'var(--color-acid)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
                  >
                    SQL Injection Code
                  </button>
@@ -702,7 +702,7 @@ export default function PlaygroundPage() {
                      setCodeLanguage('dependencies');
                      setCodeSnippet('{\n  "name": "vulnerable-app",\n  "dependencies": {\n    "express": "^4.16.0",\n    "lodash": "4.17.4",\n    "mongoose": "5.7.5"\n  }\n}');
                    }}
-                   style={{ background: '#000', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 2, padding: '4px 8px', color: '#CAFF00', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
+                   style={{ background: '#000', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 2, padding: '4px 8px', color: 'var(--color-acid)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
                  >
                    Vulnerable Dependencies
                  </button>
@@ -936,21 +936,21 @@ export default function PlaygroundPage() {
                       onClick={handleGenerateCodePatch}
                       disabled={patchRunning}
                       className="btn-strict-secondary"
-                      style={{ width: '100%', border: '1px solid rgba(202,255,0,0.3)', color: '#CAFF00', height: 38, fontSize: 12 }}
+                      style={{ width: '100%', border: '1px solid rgba(0,240,255,0.3)', color: 'var(--color-acid)', height: 38, fontSize: 12 }}
                     >
                       {patchRunning ? 'Generating Security Patch...' : 'Generate Secure Patch'}
                     </button>
 
                     {patchResult && (
-                      <div style={{ marginTop: 16, border: '1px solid rgba(202,255,0,0.2)', borderRadius: 3, background: '#020202', overflow: 'hidden' }}>
-                        <div style={{ padding: '6px 12px', background: 'rgba(202,255,0,0.03)', borderBottom: '1px solid rgba(202,255,0,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#CAFF00', fontWeight: 'bold' }}>AI SECURED CODE SUGGESTION</span>
+                      <div style={{ marginTop: 16, border: '1px solid rgba(0,240,255,0.2)', borderRadius: 3, background: '#020202', overflow: 'hidden' }}>
+                        <div style={{ padding: '6px 12px', background: 'rgba(0,240,255,0.03)', borderBottom: '1px solid rgba(0,240,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-acid)', fontWeight: 'bold' }}>AI SECURED CODE SUGGESTION</span>
                           <button
                             onClick={() => {
                               navigator.clipboard.writeText(patchResult.patch);
                               alert('Code copied to clipboard!');
                             }}
-                            style={{ background: 'transparent', border: 'none', color: '#CAFF00', fontSize: 9, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}
+                            style={{ background: 'transparent', border: 'none', color: 'var(--color-acid)', fontSize: 9, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}
                           >
                             [ Copy ]
                           </button>
@@ -992,19 +992,19 @@ export default function PlaygroundPage() {
                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4A4A4A', textTransform: 'uppercase', marginRight: 4 }}>Load Preset:</span>
                  <button
                    onClick={() => setDomainInput('github.com')}
-                   style={{ background: '#000', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 2, padding: '4px 8px', color: '#CAFF00', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
+                   style={{ background: '#000', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 2, padding: '4px 8px', color: 'var(--color-acid)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
                  >
                    github.com
                  </button>
                  <button
                    onClick={() => setDomainInput('google.com')}
-                   style={{ background: '#000', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 2, padding: '4px 8px', color: '#CAFF00', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
+                   style={{ background: '#000', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 2, padding: '4px 8px', color: 'var(--color-acid)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
                  >
                    google.com
                  </button>
                  <button
                    onClick={() => setDomainInput('vercel.com')}
-                   style={{ background: '#000', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 2, padding: '4px 8px', color: '#CAFF00', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
+                   style={{ background: '#000', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 2, padding: '4px 8px', color: 'var(--color-acid)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
                  >
                    vercel.com
                  </button>
@@ -1062,9 +1062,9 @@ export default function PlaygroundPage() {
                         width: 42,
                         height: 42,
                         borderRadius: '50%',
-                        background: 'rgba(202,255,0,0.1)',
-                        border: '2px solid #CAFF00',
-                        color: '#CAFF00',
+                        background: 'rgba(0,240,255,0.1)',
+                        border: '2px solid var(--color-acid)',
+                        color: 'var(--color-acid)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -1147,8 +1147,8 @@ export default function PlaygroundPage() {
                           onClick={handleRunDomainLatency}
                           style={{
                             background: 'transparent',
-                            border: '1px solid rgba(202,255,0,0.3)',
-                            color: '#CAFF00',
+                            border: '1px solid rgba(0,240,255,0.3)',
+                            color: 'var(--color-acid)',
                             padding: '3px 8px',
                             borderRadius: 3,
                             fontSize: 10,
@@ -1163,7 +1163,7 @@ export default function PlaygroundPage() {
 
                     {latencyRunning && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 0' }}>
-                        <span style={{ width: 10, height: 10, border: '2px solid rgba(255,255,255,0.1)', borderTopColor: '#CAFF00', borderRadius: '50%', animation: 'pg-spin 0.7s linear infinite', display: 'inline-block' }} />
+                        <span style={{ width: 10, height: 10, border: '2px solid rgba(255,255,255,0.1)', borderTopColor: 'var(--color-acid)', borderRadius: '50%', animation: 'pg-spin 0.7s linear infinite', display: 'inline-block' }} />
                         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#888' }}>Measuring TCP/TLS handshakes...</span>
                       </div>
                     )}
@@ -1180,7 +1180,7 @@ export default function PlaygroundPage() {
                         <div style={{ display: 'flex', height: 6, borderRadius: 2, overflow: 'hidden', background: '#222', marginTop: 4 }}>
                           {[
                             { name: 'DNS', val: latencyResult.timings.dnsLookupMs, color: '#00E676' },
-                            { name: 'TCP', val: latencyResult.timings.tcpConnectMs, color: '#CAFF00' },
+                            { name: 'TCP', val: latencyResult.timings.tcpConnectMs, color: 'var(--color-acid)' },
                             { name: 'TLS', val: latencyResult.timings.tlsHandshakeMs, color: '#00B0FF' },
                             { name: 'TTFB', val: Math.max(0, latencyResult.timings.ttfbMs - (latencyResult.timings.dnsLookupMs + latencyResult.timings.tcpConnectMs + latencyResult.timings.tlsHandshakeMs)), color: '#FF007F' }
                           ].map((seg, idx) => {
@@ -1200,7 +1200,7 @@ export default function PlaygroundPage() {
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, fontSize: 11, fontFamily: 'var(--font-mono)' }}>
                           {[
                             { label: 'DNS Lookup', val: latencyResult.timings.dnsLookupMs, color: '#00E676' },
-                            { label: 'TCP Connection', val: latencyResult.timings.tcpConnectMs, color: '#CAFF00' },
+                            { label: 'TCP Connection', val: latencyResult.timings.tcpConnectMs, color: 'var(--color-acid)' },
                             { label: 'TLS Handshake', val: latencyResult.timings.tlsHandshakeMs, color: '#00B0FF' },
                             { label: 'TTFB (First Byte)', val: latencyResult.timings.ttfbMs, color: '#FF007F' }
                           ].map((leg) => (
@@ -1216,12 +1216,12 @@ export default function PlaygroundPage() {
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 8, fontSize: 11, fontFamily: 'var(--font-mono)' }}>
                           <span style={{ color: '#4A4A4A' }}>Total Latency:</span>
-                          <span style={{ color: '#CAFF00', fontWeight: 'bold' }}>{latencyResult.timings.totalMs}ms</span>
+                          <span style={{ color: 'var(--color-acid)', fontWeight: 'bold' }}>{latencyResult.timings.totalMs}ms</span>
                         </div>
 
                         {latencyResult.advice && (
-                          <div style={{ background: '#0F0F0F', border: '1px solid rgba(202,255,0,0.15)', borderRadius: 3, padding: 8, fontSize: 11 }}>
-                            <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 8, color: '#CAFF00', marginBottom: 2 }}>AI SRE SUGGESTION</span>
+                          <div style={{ background: '#0F0F0F', border: '1px solid rgba(0,240,255,0.15)', borderRadius: 3, padding: 8, fontSize: 11 }}>
+                            <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--color-acid)', marginBottom: 2 }}>AI SRE SUGGESTION</span>
                             <p style={{ margin: 0, color: '#AAA', lineHeight: 1.4 }}>{latencyResult.advice}</p>
                           </div>
                         )}

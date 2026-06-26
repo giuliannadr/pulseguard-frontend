@@ -159,7 +159,7 @@ export default function ImportPage() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 32, fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>
         <Link href="/dashboard" style={{ color: '#4A4A4A', textDecoration: 'none' }}>Dashboard</Link>
         <span>/</span>
-        <span style={{ color: '#CAFF00' }}>Add Monitor</span>
+        <span style={{ color: 'var(--color-acid)' }}>Add Monitor</span>
       </div>
 
       <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: '#F0F0F0', margin: '0 0 8px', letterSpacing: '-0.02em' }}>
@@ -177,8 +177,8 @@ export default function ImportPage() {
             type="button"
             onClick={() => setMode(m.id)}
             style={{
-              background: mode === m.id ? 'rgba(202,255,0,0.06)' : '#080808',
-              border: `1px solid ${mode === m.id ? '#CAFF00' : 'rgba(255,255,255,0.08)'}`,
+              background: mode === m.id ? 'rgba(0,240,255,0.06)' : '#080808',
+              border: `1px solid ${mode === m.id ? 'var(--color-acid)' : 'rgba(255,255,255,0.08)'}`,
               borderRadius: 6,
               padding: '16px',
               cursor: 'pointer',
@@ -186,7 +186,7 @@ export default function ImportPage() {
               transition: 'border-color 0.15s',
             }}
           >
-            <div style={{ color: mode === m.id ? '#CAFF00' : '#888', marginBottom: 10 }}>{m.icon}</div>
+            <div style={{ color: mode === m.id ? 'var(--color-acid)' : '#888', marginBottom: 10 }}>{m.icon}</div>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700, color: mode === m.id ? '#F0F0F0' : '#888', marginBottom: 6 }}>
               {m.label}
             </div>
@@ -236,7 +236,7 @@ export default function ImportPage() {
         {needsUrl && (
           <div style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 6, padding: 24 }}>
             <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 11, color: '#888', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-              URL to monitor <span style={{ color: '#CAFF00' }}>*</span>
+              URL to monitor <span style={{ color: 'var(--color-acid)' }}>*</span>
             </label>
             <input
               className="input-strict"
@@ -263,7 +263,7 @@ export default function ImportPage() {
                   <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.379.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
                 </svg>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: '#F0F0F0', fontWeight: 600 }}>
-                  GitHub Repository {selectedRepo && <span style={{ color: '#CAFF00' }}>— {selectedRepo.full_name}</span>}
+                  GitHub Repository {selectedRepo && <span style={{ color: 'var(--color-acid)' }}>— {selectedRepo.full_name}</span>}
                 </span>
               </div>
               {!githubToken && (
@@ -301,7 +301,7 @@ export default function ImportPage() {
                         justifyContent: 'space-between',
                         padding: '12px 24px',
                         borderBottom: idx < repos.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
-                        background: isSelected ? 'rgba(202,255,0,0.03)' : 'transparent',
+                        background: isSelected ? 'rgba(0,240,255,0.03)' : 'transparent',
                       }}
                     >
                       <div>
@@ -339,12 +339,12 @@ export default function ImportPage() {
 
         {/* Split-project tip */}
         {mode === 'full' && (
-          <div style={{ display: 'flex', gap: 12, background: 'rgba(202,255,0,0.04)', border: '1px solid rgba(202,255,0,0.12)', borderRadius: 6, padding: '14px 16px' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CAFF00" strokeWidth="2" style={{ flexShrink: 0, marginTop: 1 }}>
+          <div style={{ display: 'flex', gap: 12, background: 'rgba(0,240,255,0.04)', border: '1px solid rgba(0,240,255,0.12)', borderRadius: 6, padding: '14px 16px' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-acid)" strokeWidth="2" style={{ flexShrink: 0, marginTop: 1 }}>
               <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
             <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#888', margin: 0, lineHeight: 1.6 }}>
-              <strong style={{ color: '#CAFF00' }}>Split project (front + back)?</strong> Create one monitor for your frontend and a second one for your backend. Each gets its own URL check and repo scanner.
+              <strong style={{ color: 'var(--color-acid)' }}>Split project (front + back)?</strong> Create one monitor for your frontend and a second one for your backend. Each gets its own URL check and repo scanner.
             </p>
           </div>
         )}

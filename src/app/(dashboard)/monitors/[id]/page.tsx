@@ -16,7 +16,7 @@ function getGradeColor(grade: string) {
   if (!grade) return '#4A4A4A';
   const g = grade.toUpperCase();
   if (g.startsWith('A')) return '#00E676';
-  if (g.startsWith('B')) return '#CAFF00';
+  if (g.startsWith('B')) return 'var(--color-acid)';
   if (g.startsWith('C')) return '#FFB300';
   if (g.startsWith('D')) return '#FF9100';
   if (g.startsWith('F')) return '#FF1744';
@@ -35,7 +35,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return (
     <div style={{ background: '#0F0F0F', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 3, padding: '10px 14px' }}>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A', marginBottom: 6 }}>{label}</p>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 600, color: '#CAFF00', margin: 0 }}>{payload[0]?.value}ms</p>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 600, color: 'var(--color-acid)', margin: 0 }}>{payload[0]?.value}ms</p>
     </div>
   );
 };
@@ -204,7 +204,7 @@ function EditModal({ monitor, token, onSave, onClose }: {
               <label style={{ ...labelStyle, marginBottom: 0 }}>Maintenance Windows</label>
               {!addingWindow && (
                 <button type="button" onClick={() => setAddingWindow(true)}
-                  style={{ background: 'transparent', border: '1px solid rgba(202,255,0,0.3)', color: '#CAFF00', padding: '3px 10px', borderRadius: 3, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
+                  style={{ background: 'transparent', border: '1px solid rgba(0,240,255,0.3)', color: 'var(--color-acid)', padding: '3px 10px', borderRadius: 3, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
                   + Add
                 </button>
               )}
@@ -226,7 +226,7 @@ function EditModal({ monitor, token, onSave, onClose }: {
             ))}
 
             {addingWindow && (
-              <div style={{ background: '#0F0F0F', border: '1px solid rgba(202,255,0,0.15)', borderRadius: 4, padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ background: '#0F0F0F', border: '1px solid rgba(0,240,255,0.15)', borderRadius: 4, padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div>
                   <label style={labelStyle}>Days</label>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -235,7 +235,7 @@ function EditModal({ monitor, token, onSave, onClose }: {
                       return (
                         <button key={d} type="button"
                           onClick={() => setNewDays(prev => active ? prev.filter(x => x !== i) : [...prev, i].sort())}
-                          style={{ padding: '4px 10px', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer', border: active ? '1px solid #CAFF00' : '1px solid rgba(255,255,255,0.1)', background: active ? 'rgba(202,255,0,0.08)' : 'transparent', color: active ? '#CAFF00' : '#666' }}>
+                          style={{ padding: '4px 10px', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer', border: active ? '1px solid var(--color-acid)' : '1px solid rgba(255,255,255,0.1)', background: active ? 'rgba(0,240,255,0.08)' : 'transparent', color: active ? 'var(--color-acid)' : '#666' }}>
                           {d}
                         </button>
                       );
@@ -444,7 +444,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
     return (
       <div style={{ textAlign: 'center', padding: '80px 40px' }}>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: '#FF1744', marginBottom: 16 }}>{error}</p>
-        <Link href="/dashboard" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#CAFF00' }}>← Back to dashboard</Link>
+        <Link href="/dashboard" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-acid)' }}>← Back to dashboard</Link>
       </div>
     );
   }
@@ -461,10 +461,11 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
   const uptimeColor = uptimePct == null ? '#4A4A4A' : uptimePct >= 99 ? 'var(--color-violet-primary)' : uptimePct >= 95 ? '#FFDF00' : 'var(--color-pink-primary)';
 
   return (
-    <div style={{ width: '100%', animation: 'pg-fade-in 0.35s ease-out both' }}>
-      {toast && <Toast msg={toast.msg} type={toast.type} />}
+    <>
       {showDeleteConfirm && <DeleteConfirm onConfirm={handleDelete} onCancel={() => setShowDeleteConfirm(false)} />}
       {showEdit && token && <EditModal monitor={monitor} token={token} onSave={(m) => { setMonitor(m); setShowEdit(false); showToast('Monitor updated'); }} onClose={() => setShowEdit(false)} />}
+      <div style={{ width: '100%', animation: 'pg-fade-in 0.35s ease-out both' }}>
+        {toast && <Toast msg={toast.msg} type={toast.type} />}
 
       {/* Breadcrumb */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 32, fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>
@@ -504,8 +505,8 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           {monitor.githubRepoUrl && (
-            <button onClick={handleScanRepo} disabled={scanning} className="btn-strict-secondary" style={{ height: 38, fontSize: 12, border: '1px solid rgba(202,255,0,0.3)', color: '#CAFF00', background: 'rgba(202,255,0,0.03)' }}>
-              {scanning ? <Spinner color="#CAFF00" /> : <ShieldIcon />}
+            <button onClick={handleScanRepo} disabled={scanning} className="btn-strict-secondary" style={{ height: 38, fontSize: 12, border: '1px solid rgba(0,240,255,0.3)', color: 'var(--color-acid)', background: 'rgba(0,240,255,0.03)' }}>
+              {scanning ? <Spinner color="var(--color-acid)" /> : <ShieldIcon />}
               Scan Commits
             </button>
           )}
@@ -662,7 +663,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                     <div style={{ display: 'flex', height: 8, borderRadius: 2, overflow: 'hidden', background: '#222', marginBottom: 12 }}>
                       {[
                         { name: 'DNS', val: netDiagnosticData.timings.dnsLookupMs, color: '#00E676' },
-                        { name: 'TCP', val: netDiagnosticData.timings.tcpConnectMs, color: '#CAFF00' },
+                        { name: 'TCP', val: netDiagnosticData.timings.tcpConnectMs, color: 'var(--color-acid)' },
                         { name: 'TLS', val: netDiagnosticData.timings.tlsHandshakeMs, color: '#00B0FF' },
                         { name: 'TTFB', val: Math.max(0, netDiagnosticData.timings.ttfbMs - (netDiagnosticData.timings.dnsLookupMs + netDiagnosticData.timings.tcpConnectMs + netDiagnosticData.timings.tlsHandshakeMs)), color: '#FF007F' }
                       ].map((seg, idx) => {
@@ -686,7 +687,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
                       {[
                         { label: 'DNS Lookup', val: netDiagnosticData.timings.dnsLookupMs, color: '#00E676' },
-                        { label: 'TCP Conn', val: netDiagnosticData.timings.tcpConnectMs, color: '#CAFF00' },
+                        { label: 'TCP Conn', val: netDiagnosticData.timings.tcpConnectMs, color: 'var(--color-acid)' },
                         { label: 'TLS Handshake', val: netDiagnosticData.timings.tlsHandshakeMs, color: '#00B0FF' },
                         { label: 'TTFB', val: netDiagnosticData.timings.ttfbMs, color: '#FF007F' }
                       ].map((leg) => (
@@ -703,13 +704,13 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 10 }}>
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A' }}>Total Latency:</span>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 'bold', color: '#CAFF00' }}>{netDiagnosticData.timings.totalMs}ms</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 'bold', color: 'var(--color-acid)' }}>{netDiagnosticData.timings.totalMs}ms</span>
                   </div>
 
                   {/* AI Advice */}
                   {netDiagnosticData.advice && (
-                    <div style={{ background: '#0F0F0F', border: '1px solid rgba(202,255,0,0.15)', borderRadius: 3, padding: 10 }}>
-                      <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 8, color: '#CAFF00', marginBottom: 4, letterSpacing: '0.1em' }}>AI SRE PERFORMANCE ADVICE</span>
+                    <div style={{ background: '#0F0F0F', border: '1px solid rgba(0,240,255,0.15)', borderRadius: 3, padding: 10 }}>
+                      <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--color-acid)', marginBottom: 4, letterSpacing: '0.1em' }}>AI SRE PERFORMANCE ADVICE</span>
                       <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 11, color: '#AAA', lineHeight: 1.4 }}>{netDiagnosticData.advice}</p>
                     </div>
                   )}
@@ -746,7 +747,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
           {incidents.length === 0 ? (
             <div style={{ padding: '32px 24px', textAlign: 'center' }}>
               <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, margin: '0 0 16px', color: '#888' }}>No security alerts yet.</p>
-              <button onClick={handleScanRepo} disabled={scanning} style={{ background: 'rgba(202,255,0,0.03)', border: '1px solid rgba(202,255,0,0.2)', color: '#CAFF00', padding: '8px 20px', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
+              <button onClick={handleScanRepo} disabled={scanning} style={{ background: 'rgba(0,240,255,0.03)', border: '1px solid rgba(0,240,255,0.2)', color: 'var(--color-acid)', padding: '8px 20px', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
                 {scanning ? 'Scanning...' : 'Scan Recent Commits'}
               </button>
             </div>
@@ -764,9 +765,9 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                         onClick={() => handleGeneratePatch(inc.id, inc.commitHash, inc.description)}
                         disabled={generatingPatchId === inc.id}
                         style={{
-                          background: 'rgba(202,255,0,0.05)',
-                          border: '1px solid rgba(202,255,0,0.3)',
-                          color: '#CAFF00',
+                          background: 'rgba(0,240,255,0.05)',
+                          border: '1px solid rgba(0,240,255,0.3)',
+                          color: 'var(--color-acid)',
                           padding: '4px 8px',
                           borderRadius: 3,
                           fontSize: 10,
@@ -777,7 +778,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                           gap: 4
                         }}
                       >
-                        {generatingPatchId === inc.id ? <Spinner color="#CAFF00" /> : null}
+                        {generatingPatchId === inc.id ? <Spinner color="var(--color-acid)" /> : null}
                         AI Patch
                       </button>
                     )}
@@ -800,15 +801,15 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                 </div>
 
                 {patchData[inc.id] && (
-                  <div style={{ marginTop: 14, border: '1px solid rgba(202,255,0,0.3)', borderRadius: 3, background: '#050505', overflow: 'hidden' }}>
-                    <div style={{ padding: '8px 12px', background: 'rgba(202,255,0,0.05)', borderBottom: '1px solid rgba(202,255,0,0.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#CAFF00', fontWeight: 'bold' }}>AI SUGGESTED SECURITY PATCH (GIT DIFF)</span>
+                  <div style={{ marginTop: 14, border: '1px solid rgba(0,240,255,0.3)', borderRadius: 3, background: '#050505', overflow: 'hidden' }}>
+                    <div style={{ padding: '8px 12px', background: 'rgba(0,240,255,0.05)', borderBottom: '1px solid rgba(0,240,255,0.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', fontWeight: 'bold' }}>AI SUGGESTED SECURITY PATCH (GIT DIFF)</span>
                       <button
                         onClick={() => {
                           navigator.clipboard.writeText(patchData[inc.id].patch);
                           showToast('Patch copied to clipboard');
                         }}
-                        style={{ background: 'transparent', border: 'none', color: '#CAFF00', fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--color-acid)', fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}
                       >
                         [ Copy Code ]
                       </button>
@@ -897,6 +898,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
 
       <style>{`@keyframes pg-spin { to { transform: rotate(360deg); } }`}</style>
     </div>
+    </>
   );
 }
 

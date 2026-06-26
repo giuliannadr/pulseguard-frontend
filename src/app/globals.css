@@ -108,7 +108,7 @@ body::after {
 .input-strict:focus {
   outline: none;
   border-color: var(--color-acid);
-  box-shadow: 0 0 0 1px rgba(202, 255, 0, 0.15);
+  box-shadow: 0 0 0 1px rgba(0,240,255, 0.15);
 }
 
 /* ── Buttons ──────────────────────────────────────────────────── */

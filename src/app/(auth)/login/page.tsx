@@ -49,10 +49,10 @@ function LoginForm() {
 
   return (
     <div style={{ width: '100%' }}>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#CAFF00', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
         // Auth
       </p>
-      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, color: '#F0F0F0', margin: '0 0 32px', letterSpacing: '-0.02em' }}>
+      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: '#F0F0F0', margin: '0 0 32px', letterSpacing: '-0.02em' }}>
         Welcome back
       </h1>
 
@@ -65,14 +65,14 @@ function LoginForm() {
       {/* Divider */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
         <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#2A2A2A', letterSpacing: '0.1em' }}>OR</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-2)', letterSpacing: '0.1em' }}>OR</span>
         <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
       </div>
 
       {/* Form */}
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-          <label style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+          <label style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-text-2)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             Email
           </label>
           <input
@@ -82,10 +82,11 @@ function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            style={{ borderRadius: 12 }}
           />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-          <label style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+          <label style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-text-2)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             Password
           </label>
           <input
@@ -95,11 +96,12 @@ function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            style={{ borderRadius: 12 }}
           />
         </div>
 
         {error && (
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#FF1744', background: 'rgba(255,23,68,0.08)', border: '1px solid rgba(255,23,68,0.2)', borderRadius: 3, padding: '10px 14px' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-pink-primary)', background: 'rgba(255,0,127,0.08)', border: '1px solid rgba(255,0,127,0.2)', borderRadius: 12, padding: '10px 14px' }}>
             {error}
           </div>
         )}
@@ -107,16 +109,16 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="btn-strict-primary"
-          style={{ marginTop: 4, width: '100%' }}
+          className="btn-solid-glow"
+          style={{ marginTop: 4, width: '100%', borderRadius: 999 }}
         >
           {loading ? 'Signing in...' : 'Sign In'}
         </button>
       </form>
 
-      <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#4A4A4A', textAlign: 'center', marginTop: 28 }}>
+      <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-text-2)', textAlign: 'center', marginTop: 28 }}>
         No account?{' '}
-        <Link href="/signup" style={{ color: '#CAFF00', textDecoration: 'none', fontWeight: 600 }}>
+        <Link href="/signup" style={{ color: 'var(--color-acid)', textDecoration: 'none', fontWeight: 600 }}>
           Create one
         </Link>
       </p>
@@ -130,48 +132,98 @@ export default function LoginPage() {
       style={{
         minHeight: '100dvh',
         display: 'flex',
-        background: '#000',
+        background: '#03050F',
         fontFamily: 'var(--font-body)',
+        overflow: 'hidden',
       }}
     >
-      {/* Left panel — brand */}
+      {/* Left panel — brand mockup */}
       <div
         style={{
           display: 'none',
           flex: 1,
-          background: '#080808',
-          borderRight: '1px solid rgba(255,255,255,0.06)',
+          background: '#080C24',
+          borderRight: '1px solid rgba(0, 240, 255, 0.1)',
           padding: '60px 64px',
           flexDirection: 'column',
           justifyContent: 'space-between',
+          position: 'relative',
+          overflow: 'hidden',
+          backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0, 240, 255, 0.05) 1.5px, transparent 0)',
+          backgroundSize: '24px 24px'
         }}
         className="auth-left-panel"
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 28, height: 28, background: '#CAFF00', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {/* Glow Effects */}
+        <div style={{
+          position: 'absolute', top: '-10%', left: '-10%', width: '40vw', height: '40vw',
+          background: 'radial-gradient(circle, rgba(0, 240, 255, 0.12) 0%, transparent 70%)',
+          filter: 'blur(80px)', pointerEvents: 'none'
+        }} />
+        <div style={{
+          position: 'absolute', bottom: '-10%', right: '-10%', width: '40vw', height: '40vw',
+          background: 'radial-gradient(circle, rgba(255, 0, 127, 0.08) 0%, transparent 70%)',
+          filter: 'blur(80px)', pointerEvents: 'none'
+        }} />
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, zIndex: 10 }}>
+          <div style={{ width: 28, height: 28, background: 'var(--color-acid)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#030514" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
           <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: '#F0F0F0' }}>PulseGuard</span>
         </div>
 
+        {/* Mockup Dashboard Cards */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20, zIndex: 10, margin: '40px 0', maxWidth: 440 }}>
+          
+          {/* Main Balance/Uptime Card */}
+          <div className="glass-card" style={{ borderRadius: 24, padding: 24, background: 'linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(255, 0, 127, 0.15) 100%)', border: '1px solid rgba(0, 240, 255, 0.25)' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Global Performance</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 12, marginBottom: 8 }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 800, color: '#F0F0F0', margin: 0 }}>99.98%</h3>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#00F0FF', background: 'rgba(0, 240, 255, 0.1)', padding: '2px 8px', borderRadius: 999 }}>+0.02% today</span>
+            </div>
+            <div style={{ display: 'flex', gap: 3, height: 12, marginTop: 16 }}>
+              {[...Array(24)].map((_, i) => (
+                <div key={i} style={{ flex: 1, background: i === 15 ? '#FF007F' : '#00F0FF', opacity: 0.8, borderRadius: 1.5 }} />
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            {/* Latency card */}
+            <div className="glass-card" style={{ borderRadius: 20, padding: 20, background: 'rgba(8, 12, 36, 0.7)' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-2)', textTransform: 'uppercase' }}>Avg Latency</span>
+              <div style={{ fontSize: 24, fontWeight: 700, color: '#F0F0F0', marginTop: 8, fontFamily: 'var(--font-mono)' }}>34.2ms</div>
+              <div style={{ height: 32, display: 'flex', alignItems: 'flex-end', gap: 4, marginTop: 12 }}>
+                {[6, 8, 4, 9, 12, 7, 5, 8, 10, 6].map((h, i) => (
+                  <div key={i} style={{ flex: 1, background: 'var(--color-acid)', height: `${(h/12)*100}%`, opacity: 0.6, borderRadius: 2 }} />
+                ))}
+              </div>
+            </div>
+
+            {/* Incidents card */}
+            <div className="glass-card" style={{ borderRadius: 20, padding: 20, background: 'rgba(8, 12, 36, 0.7)' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-2)', textTransform: 'uppercase' }}>Sec Shield</span>
+              <div style={{ fontSize: 20, fontWeight: 700, color: '#00F0FF', marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Secured
+              </div>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-text-2)', margin: '14px 0 0' }}>0 Active Incidents</p>
+            </div>
+          </div>
+
+        </div>
+
         <div>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#CAFF00', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 16 }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 16 }}>
             // Precision monitoring
           </p>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 40, fontWeight: 800, color: '#F0F0F0', lineHeight: 1.1, letterSpacing: '-0.03em', margin: 0 }}>
             Know when<br />things break<br />before users do.
           </h2>
-        </div>
-
-        <div style={{ display: 'flex', gap: 40 }}>
-          {[['99.9%', 'avg uptime tracked'], ['<50ms', 'check latency'], ['24/7', 'monitoring']].map(([v, l]) => (
-            <div key={l}>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 22, fontWeight: 600, color: '#CAFF00', marginBottom: 4 }}>{v}</div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A', letterSpacing: '0.08em' }}>{l}</div>
-            </div>
-          ))}
         </div>
       </div>
 
@@ -191,15 +243,15 @@ export default function LoginPage() {
       >
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 48, alignSelf: 'flex-start' }}>
-          <div style={{ width: 28, height: 28, background: '#CAFF00', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 28, height: 28, background: 'var(--color-acid)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#030514" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
           <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: '#F0F0F0' }}>PulseGuard</span>
         </div>
 
-        <Suspense fallback={<div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#4A4A4A' }}>Loading...</div>}>
+        <Suspense fallback={<div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-2)' }}>Loading...</div>}>
           <LoginForm />
         </Suspense>
       </div>
@@ -232,8 +284,8 @@ function OAuthBtn({ provider, label, loading, onClick }: { provider: string; lab
       type="button"
       onClick={onClick}
       disabled={loading}
-      className="btn-strict-secondary"
-      style={{ width: '100%', justifyContent: 'center', gap: 10 }}
+      className="btn-glass"
+      style={{ width: '100%', justifyContent: 'center', gap: 10, borderRadius: 999 }}
     >
       {icon}
       {label}

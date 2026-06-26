@@ -42,7 +42,7 @@ export default function StatusPage() {
     <div style={{ width: '100%', maxWidth: 800, margin: '0 auto', animation: 'pg-fade-in 0.35s ease-out both' }}>
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: 48 }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#CAFF00', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
           // Infrastructure
         </p>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 800, color: '#F0F0F0', margin: '0 0 8px', letterSpacing: '-0.02em' }}>

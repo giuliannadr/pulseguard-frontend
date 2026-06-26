@@ -85,7 +85,7 @@ export default function SettingsPage() {
             {
               title: 'Integration Test Successful',
               description: 'This is a test alert sent from the PulseGuard Dashboard.',
-              color: 13303552, // #CAFF00 in decimal
+              color: 13303552, // var(--color-acid) in decimal
               fields: [
                 { name: 'Status', value: '🟢 Operational', inline: true },
                 { name: 'Environment', value: 'Production', inline: true }
@@ -135,7 +135,7 @@ export default function SettingsPage() {
       
       {/* Header */}
       <div style={{ marginBottom: 32 }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#CAFF00', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
           // System Config
         </p>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: '#F0F0F0', margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
@@ -157,10 +157,10 @@ export default function SettingsPage() {
             onClick={() => setActiveTab(t.id as Tab)}
             style={{
               padding: '8px 16px',
-              background: activeTab === t.id ? 'rgba(202,255,0,0.05)' : 'transparent',
-              border: activeTab === t.id ? '1px solid rgba(202,255,0,0.3)' : '1px solid transparent',
+              background: activeTab === t.id ? 'rgba(0,240,255,0.05)' : 'transparent',
+              border: activeTab === t.id ? '1px solid rgba(0,240,255,0.3)' : '1px solid transparent',
               borderRadius: 3,
-              color: activeTab === t.id ? '#CAFF00' : '#888',
+              color: activeTab === t.id ? 'var(--color-acid)' : '#888',
               fontFamily: 'var(--font-mono)',
               fontSize: 12,
               cursor: 'pointer',
@@ -193,9 +193,9 @@ export default function SettingsPage() {
                   onClick={() => setLanguage('en')}
                   style={{
                     padding: '8px 18px',
-                    background: language === 'en' ? 'rgba(202,255,0,0.05)' : 'transparent',
-                    border: language === 'en' ? '1px solid #CAFF00' : '1px solid rgba(255,255,255,0.1)',
-                    color: language === 'en' ? '#CAFF00' : '#888',
+                    background: language === 'en' ? 'rgba(0,240,255,0.05)' : 'transparent',
+                    border: language === 'en' ? '1px solid var(--color-acid)' : '1px solid rgba(255,255,255,0.1)',
+                    color: language === 'en' ? 'var(--color-acid)' : '#888',
                     fontFamily: 'var(--font-mono)',
                     fontSize: 12,
                     borderRadius: 3,
@@ -210,9 +210,9 @@ export default function SettingsPage() {
                   onClick={() => setLanguage('es')}
                   style={{
                     padding: '8px 18px',
-                    background: language === 'es' ? 'rgba(202,255,0,0.05)' : 'transparent',
-                    border: language === 'es' ? '1px solid #CAFF00' : '1px solid rgba(255,255,255,0.1)',
-                    color: language === 'es' ? '#CAFF00' : '#888',
+                    background: language === 'es' ? 'rgba(0,240,255,0.05)' : 'transparent',
+                    border: language === 'es' ? '1px solid var(--color-acid)' : '1px solid rgba(255,255,255,0.1)',
+                    color: language === 'es' ? 'var(--color-acid)' : '#888',
                     fontFamily: 'var(--font-mono)',
                     fontSize: 12,
                     borderRadius: 3,
@@ -280,7 +280,7 @@ export default function SettingsPage() {
                   type="button"
                   onClick={handleApplyWebhookToAll}
                   disabled={applyingToAll || !webhookUrl}
-                  style={{ background: 'transparent', border: '1px solid rgba(202,255,0,0.2)', color: webhookUrl ? '#CAFF00' : '#4A4A4A', padding: '6px 12px', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: webhookUrl ? 'pointer' : 'not-allowed' }}
+                  style={{ background: 'transparent', border: '1px solid rgba(0,240,255,0.2)', color: webhookUrl ? 'var(--color-acid)' : '#4A4A4A', padding: '6px 12px', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: webhookUrl ? 'pointer' : 'not-allowed' }}
                 >
                   {applyingToAll ? 'Applying...' : 'Apply to all existing monitors'}
                 </button>
@@ -344,7 +344,7 @@ export default function SettingsPage() {
                   Share this URL so anyone can see your monitors' live status without logging in.
                 </p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <code style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#CAFF00', background: 'rgba(202,255,0,0.05)', border: '1px solid rgba(202,255,0,0.15)', padding: '8px 14px', borderRadius: 3, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <code style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-acid)', background: 'rgba(0,240,255,0.05)', border: '1px solid rgba(0,240,255,0.15)', padding: '8px 14px', borderRadius: 3, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {typeof window !== 'undefined' ? `${window.location.origin}/s/${userId}` : `/s/${userId}`}
                   </code>
                   <button

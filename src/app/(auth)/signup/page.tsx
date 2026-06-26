@@ -36,21 +36,21 @@ export default function SignupPage() {
 
   if (done) {
     return (
-      <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000', padding: 32 }}>
-        <div style={{ textAlign: 'center', background: '#080808', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3, padding: '52px 48px', maxWidth: 400, width: '100%', animation: 'pg-fade-in 0.35s ease-out both' }}>
-          <div style={{ width: 48, height: 48, background: '#CAFF00', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+      <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#03050F', padding: 32 }}>
+        <div style={{ textAlign: 'center', background: 'rgba(8, 12, 36, 0.65)', border: '1px solid rgba(0, 240, 255, 0.15)', borderRadius: 24, padding: '52px 48px', maxWidth: 400, width: '100%', animation: 'pg-fade-in 0.35s ease-out both', backdropFilter: 'blur(12px)' }}>
+          <div style={{ width: 48, height: 48, background: 'var(--color-acid)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-              <polyline points="20 6 9 17 4 12" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <polyline points="20 6 9 17 4 12" stroke="#030514" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 800, color: '#F0F0F0', margin: '0 0 10px', letterSpacing: '-0.02em' }}>
             Check your inbox
           </h2>
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: '#4A4A4A', margin: '0 0 28px', lineHeight: 1.6 }}>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--color-text-2)', margin: '0 0 28px', lineHeight: 1.6 }}>
             Confirmation link sent to{' '}
-            <span style={{ color: '#CAFF00', fontFamily: 'var(--font-mono)', fontSize: 12 }}>{email}</span>
+            <span style={{ color: 'var(--color-acid)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>{email}</span>
           </p>
-          <Link href="/login" className="btn-strict-secondary" style={{ display: 'inline-flex', width: '100%', justifyContent: 'center' }}>
+          <Link href="/login" className="btn-glass" style={{ display: 'inline-flex', width: '100%', justifyContent: 'center', borderRadius: 999 }}>
             Back to login
           </Link>
         </div>
@@ -59,47 +59,80 @@ export default function SignupPage() {
   }
 
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', background: '#000', fontFamily: 'var(--font-body)' }}>
+    <div style={{ minHeight: '100dvh', display: 'flex', background: '#03050F', fontFamily: 'var(--font-body)', overflow: 'hidden' }}>
+      
       {/* Left brand panel */}
       <div
         className="auth-left-panel"
-        style={{ display: 'none', flex: 1, background: '#080808', borderRight: '1px solid rgba(255,255,255,0.06)', padding: '60px 64px', flexDirection: 'column', justifyContent: 'space-between' }}
+        style={{
+          display: 'none',
+          flex: 1,
+          background: '#080C24',
+          borderRight: '1px solid rgba(0, 240, 255, 0.1)',
+          padding: '60px 64px',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          position: 'relative',
+          overflow: 'hidden',
+          backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0, 240, 255, 0.05) 1.5px, transparent 0)',
+          backgroundSize: '24px 24px'
+        }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 28, height: 28, background: '#CAFF00', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        {/* Glow Effects */}
+        <div style={{
+          position: 'absolute', top: '-10%', left: '-10%', width: '40vw', height: '40vw',
+          background: 'radial-gradient(circle, rgba(0, 240, 255, 0.12) 0%, transparent 70%)',
+          filter: 'blur(80px)', pointerEvents: 'none'
+        }} />
+        <div style={{
+          position: 'absolute', bottom: '-10%', right: '-10%', width: '40vw', height: '40vw',
+          background: 'radial-gradient(circle, rgba(255, 0, 127, 0.08) 0%, transparent 70%)',
+          filter: 'blur(80px)', pointerEvents: 'none'
+        }} />
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, zIndex: 10 }}>
+          <div style={{ width: 28, height: 28, background: 'var(--color-acid)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#030514" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </div>
           <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: '#F0F0F0' }}>PulseGuard</span>
         </div>
+
+        {/* Feature list mockup cards */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, zIndex: 10, margin: '40px 0', maxWidth: 440 }}>
+          {[
+            { title: 'Real-time uptime checks', desc: 'Monitor your websites and APIs every 60 seconds.', badge: '1 min' },
+            { title: 'SSL certificate warnings', desc: 'Get notified before your certificates expire.', badge: 'SSL' },
+            { title: 'Response latency analytics', desc: 'Gorgeous visual charts detail response history.', badge: 'Charts' },
+          ].map((feat, i) => (
+            <div key={i} className="glass-card" style={{ borderRadius: 20, padding: 18, background: 'rgba(8, 12, 36, 0.7)', border: '1px solid rgba(0, 240, 255, 0.15)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: '#F0F0F0' }}>{feat.title}</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-acid)', border: '1px solid rgba(0, 240, 255, 0.25)', padding: '2px 6px', borderRadius: 999 }}>{feat.badge}</span>
+              </div>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-text-2)', margin: 0 }}>{feat.desc}</p>
+            </div>
+          ))}
+        </div>
+
         <div>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#CAFF00', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 16 }}>// Join</p>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 16 }}>// Join</p>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 40, fontWeight: 800, color: '#F0F0F0', lineHeight: 1.1, letterSpacing: '-0.03em', margin: 0 }}>
             Monitor smarter.<br />Sleep better.
           </h2>
         </div>
-        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {['Real-time uptime checks every minute', 'SSL certificate expiry alerts', 'Response time history & analytics', 'Instant down alerts by email'].map((f) => (
-            <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 12, fontFamily: 'var(--font-body)', fontSize: 13, color: '#4A4A4A' }}>
-              <span style={{ width: 18, height: 18, background: 'rgba(202,255,0,0.1)', border: '1px solid rgba(202,255,0,0.3)', borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#CAFF00" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              </span>
-              {f}
-            </li>
-          ))}
-        </ul>
       </div>
 
       {/* Right form panel */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 32px', maxWidth: 480, margin: '0 auto', width: '100%' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 48, alignSelf: 'flex-start' }}>
-          <div style={{ width: 28, height: 28, background: '#CAFF00', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          <div style={{ width: 28, height: 28, background: 'var(--color-acid)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#030514" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </div>
           <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: '#F0F0F0' }}>PulseGuard</span>
         </div>
 
         <div style={{ width: '100%' }}>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#CAFF00', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>// New account</p>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>// New account</p>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, color: '#F0F0F0', margin: '0 0 32px', letterSpacing: '-0.02em' }}>
             Get started free
           </h1>
@@ -111,32 +144,32 @@ export default function SignupPage() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
             <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#2A2A2A', letterSpacing: '0.1em' }}>OR</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-2)', letterSpacing: '0.1em' }}>OR</span>
             <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
           </div>
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-              <label style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Email</label>
-              <input className="input-strict" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <label style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-text-2)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Email</label>
+              <input className="input-strict" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ borderRadius: 12 }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-              <label style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Password</label>
-              <input className="input-strict" type="password" placeholder="Min. 8 characters" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
+              <label style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-text-2)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Password</label>
+              <input className="input-strict" type="password" placeholder="Min. 8 characters" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} style={{ borderRadius: 12 }} />
             </div>
             {error && (
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#FF1744', background: 'rgba(255,23,68,0.08)', border: '1px solid rgba(255,23,68,0.2)', borderRadius: 3, padding: '10px 14px' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-pink-primary)', background: 'rgba(255,0,127,0.08)', border: '1px solid rgba(255,0,127,0.2)', borderRadius: 12, padding: '10px 14px' }}>
                 {error}
               </div>
             )}
-            <button type="submit" disabled={loading} className="btn-strict-primary" style={{ marginTop: 4, width: '100%' }}>
+            <button type="submit" disabled={loading} className="btn-solid-glow" style={{ marginTop: 4, width: '100%', borderRadius: 999 }}>
               {loading ? 'Creating...' : 'Create Account'}
             </button>
           </form>
 
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#4A4A4A', textAlign: 'center', marginTop: 28 }}>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-text-2)', textAlign: 'center', marginTop: 28 }}>
             Already have an account?{' '}
-            <Link href="/login" style={{ color: '#CAFF00', textDecoration: 'none', fontWeight: 600 }}>Sign in</Link>
+            <Link href="/login" style={{ color: 'var(--color-acid)', textDecoration: 'none', fontWeight: 600 }}>Sign in</Link>
           </p>
         </div>
       </div>
@@ -161,7 +194,7 @@ function OAuthBtn({ provider, label, loading, onClick }: { provider: string; lab
   );
 
   return (
-    <button type="button" onClick={onClick} disabled={loading} className="btn-strict-secondary" style={{ width: '100%', justifyContent: 'center', gap: 10 }}>
+    <button type="button" onClick={onClick} disabled={loading} className="btn-glass" style={{ width: '100%', justifyContent: 'center', gap: 10, borderRadius: 999 }}>
       {icon}
       {label}
     </button>
