@@ -77,7 +77,7 @@ function EditModal({ monitor, token, onSave, onClose }: {
   const [url, setUrl] = useState(monitor.url ?? '');
   const [interval, setInterval] = useState(String(monitor.intervalMinutes));
   const [expectedStatus, setExpectedStatus] = useState(String(monitor.expectedStatus));
-  const [webhookUrl, setWebhookUrl] = useState((monitor as any).notificationWebhookUrl ?? '');
+  const [webhookUrl, setWebhookUrl] = useState(monitor.notificationWebhookUrl ?? '');
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
 
@@ -92,10 +92,11 @@ function EditModal({ monitor, token, onSave, onClose }: {
         intervalMinutes: parseInt(interval),
         expectedStatus: parseInt(expectedStatus),
         notificationWebhookUrl: webhookUrl.trim() || undefined,
-      } as any, token);
+      }, token);
       onSave(updated);
     } catch (e: any) {
-      setErr(e.message);
+      const msg = e.message;
+      setErr(Array.isArray(msg) ? msg.join(', ') : (msg ?? 'Unknown error'));
     } finally {
       setSaving(false);
     }
@@ -483,7 +484,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                 {check.sslDaysLeft != null ? `${check.sslDaysLeft}d` : '—'}
               </span>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#2A2A2A' }}>{fmtDate(check.checkedAt)}</span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#FF1744', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <span title={check.errorMessage ?? undefined} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#FF1744', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: check.errorMessage ? 'help' : 'default' }}>
                 {check.errorMessage ?? ''}
               </span>
             </div>

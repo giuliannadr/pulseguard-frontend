@@ -63,13 +63,16 @@ export default function ImportPage() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const tok = session?.access_token ?? null;
-      const freshGToken = session?.provider_token ?? null;
-      if (freshGToken) ghTokenHelper.set(freshGToken);
-      const gToken = freshGToken ?? ghTokenHelper.get();
-      setToken(tok);
-      setGithubToken(gToken);
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        const tok = session?.access_token ?? null;
+        const freshGToken = session?.provider_token ?? null;
+        if (freshGToken) ghTokenHelper.set(freshGToken);
+        const gToken = freshGToken ?? ghTokenHelper.get();
+        setToken(tok);
+        setGithubToken(gToken);
+      });
     });
   }, []);
 

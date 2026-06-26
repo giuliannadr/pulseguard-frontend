@@ -20,6 +20,8 @@ export default function SettingsPage() {
   const [webhookUrl, setWebhookUrl] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [testStatus, setTestStatus] = useState('');
+  const [applyingToAll, setApplyingToAll] = useState(false);
+  const [applyResult, setApplyResult] = useState('');
 
   useEffect(() => {
     // Load local settings
@@ -43,6 +45,22 @@ export default function SettingsPage() {
     localStorage.setItem('pg_webhook_url', webhookUrl);
     setSuccessMsg(t('settings_saved'));
     setTimeout(() => setSuccessMsg(''), 3000);
+  }
+
+  async function handleApplyWebhookToAll() {
+    if (!token || !webhookUrl) return;
+    setApplyingToAll(true);
+    setApplyResult('');
+    try {
+      const monitors = await api.monitors.list(token);
+      await Promise.all(monitors.map(m => api.monitors.update(m.id, { notificationWebhookUrl: webhookUrl }, token)));
+      setApplyResult(`Applied to ${monitors.length} monitor${monitors.length !== 1 ? 's' : ''}.`);
+    } catch {
+      setApplyResult('Failed to apply. Try again.');
+    } finally {
+      setApplyingToAll(false);
+      setTimeout(() => setApplyResult(''), 4000);
+    }
   }
 
   async function handleSendTestWebhook() {
@@ -254,6 +272,24 @@ export default function SettingsPage() {
                   {testStatus}
                 </div>
               )}
+              <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                <button
+                  type="button"
+                  onClick={handleApplyWebhookToAll}
+                  disabled={applyingToAll || !webhookUrl}
+                  style={{ background: 'transparent', border: '1px solid rgba(202,255,0,0.2)', color: webhookUrl ? '#CAFF00' : '#4A4A4A', padding: '6px 12px', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: webhookUrl ? 'pointer' : 'not-allowed' }}
+                >
+                  {applyingToAll ? 'Applying...' : 'Apply to all existing monitors'}
+                </button>
+                {applyResult && (
+                  <span style={{ marginLeft: 12, fontSize: 11, fontFamily: 'var(--font-mono)', color: applyResult.includes('Failed') ? '#FF1744' : '#00E676' }}>
+                    {applyResult}
+                  </span>
+                )}
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: '#555', margin: '6px 0 0' }}>
+                  Saves this webhook URL on all your current monitors.
+                </p>
+              </div>
             </div>
 
             {/* Msg Success */}
@@ -305,7 +341,7 @@ export default function SettingsPage() {
                 <span style={{ color: '#F0F0F0' }}>{userEmail || '—'}</span>
                 
                 <span style={{ color: '#4A4A4A' }}>Status:</span>
-                <span style={{ color: '#00E676' }}>Active Session</span>
+                <span style={{ color: '#00E676' }}>{t('settings_active_session') || 'Active Session'}</span>
               </div>
             </div>
           </div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { api, type Monitor } from '@/lib/api';
+import { api, githubToken as ghTokenHelper, type Monitor } from '@/lib/api';
 import { useTranslation } from '@/lib/i18n';
 
 type Tab = 'api' | 'code' | 'dns' | 'hacking';
@@ -17,27 +17,24 @@ export default function PlaygroundPage() {
 
   // Supabase Auth
   useEffect(() => {
-    setGithubToken(localStorage.getItem('gh_provider_token'));
     const supabase = createClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const tok = session?.access_token ?? null;
-      setToken(tok);
-      const freshGToken = session?.provider_token ?? null;
-      if (freshGToken) {
-        localStorage.setItem('gh_provider_token', freshGToken);
-        setGithubToken(freshGToken);
-      }
-      if (tok) {
-        api.monitors.list(tok).then(data => {
-          setMonitors(data);
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) { setLoadingMonitors(false); return; }
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        const tok = session?.access_token ?? null;
+        setToken(tok);
+        const freshGToken = session?.provider_token ?? null;
+        if (freshGToken) ghTokenHelper.set(freshGToken);
+        setGithubToken(freshGToken ?? ghTokenHelper.get());
+        if (tok) {
+          api.monitors.list(tok)
+            .then(data => setMonitors(data))
+            .catch(() => {})
+            .finally(() => setLoadingMonitors(false));
+        } else {
           setLoadingMonitors(false);
-        }).catch(err => {
-          console.error(err);
-          setLoadingMonitors(false);
-        });
-      } else {
-        setLoadingMonitors(false);
-      }
+        }
+      });
     });
   }, []);
 
