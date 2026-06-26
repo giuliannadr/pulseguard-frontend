@@ -44,6 +44,9 @@ export default function DashboardPage() {
   const [monitors, setMonitors] = useState<Monitor[]>([]);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
+  
+  // Interactive selected monitor card index
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
   const supabase = createClient();
 
@@ -85,11 +88,14 @@ export default function DashboardPage() {
   const downCount     = monitors.filter((m) => getLastStatus(m) === 'down').length;
   const degradedCount = monitors.filter((m) => getLastStatus(m) === 'degraded').length;
 
+  // Selected monitor for the credit card mock deck
+  const selectedMonitor = monitors[selectedIndex] || monitors[0] || null;
+
   // Prepare data for the Bar Chart (latency flow)
   const barChartData = monitors.map(m => {
     const lastCheck = m.checks?.[0];
     return {
-      name: m.name.substring(0, 12),
+      name: m.name.substring(0, 10),
       ms: lastCheck?.responseTimeMs ?? 0
     };
   }).filter(d => d.ms > 0);
@@ -101,12 +107,12 @@ export default function DashboardPage() {
     { name: 'Degraded', value: degradedCount, color: '#FFB300' }
   ].filter(d => d.value > 0);
 
-  // If there are no data entries for status breakdown, default placeholder
+  // Default placeholder if empty
   if (pieChartData.length === 0 && !loading) {
     pieChartData.push({ name: 'No monitors', value: 1, color: 'rgba(255,255,255,0.05)' });
   }
 
-  // General Average Uptime & Latency calculations
+  // General Uptime & Latency calculations
   const avgLatency = barChartData.length > 0
     ? Math.round(barChartData.reduce((acc, curr) => acc + curr.ms, 0) / barChartData.length)
     : 0;
@@ -116,328 +122,369 @@ export default function DashboardPage() {
     : 100;
 
   const customTooltipStyle = {
-    background: '#0B133A',
-    border: '1px solid rgba(0, 240, 255, 0.2)',
-    borderRadius: '12px',
-    padding: '10px 14px',
+    background: 'rgba(11, 19, 58, 0.9)',
+    border: '1px solid rgba(0, 240, 255, 0.25)',
+    borderRadius: '16px',
+    padding: '12px 16px',
     color: '#F0F0F0',
     fontFamily: 'var(--font-mono)',
     fontSize: '12px',
-    boxShadow: '0 8px 32px 0 rgba(0,0,0,0.37)'
+    boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+    backdropFilter: 'blur(12px)'
   };
 
   return (
     <div style={{ width: '100%', animation: 'pg-fade-in 0.35s ease-out both' }}>
 
-      {/* ── Header ── */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32, gap: 16, flexWrap: 'wrap' }}>
+      {/* ── Top Header (Ethereal styled) ── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 40, gap: 24, flexWrap: 'wrap' }}>
         <div>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
-            // {t('dash_system')}
-          </p>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: '#F0F0F0', margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
-            {t('nav_projects')}
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 800, color: '#F0F0F0', margin: 0, letterSpacing: '-0.02em' }}>
+            My Dashboard
           </h1>
         </div>
-        <Link href="/import" style={{ textDecoration: 'none' }}>
-          <button className="btn-solid-glow" style={{ height: 40, fontSize: 12, padding: '0 24px', borderRadius: 999 }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" style={{ marginRight: 6 }}>
-              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            {t('btn_import')}
+        {/* Top icons bar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <button className="btn-glass" style={{ width: 40, height: 40, padding: 0, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           </button>
-        </Link>
+          <button className="btn-glass" style={{ width: 40, height: 40, padding: 0, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </button>
+          <div style={{ width: 40, height: 40, borderRadius: '50%', border: '2px solid rgba(0, 240, 255, 0.4)', background: 'linear-gradient(135deg, #00F0FF 0%, #FF007F 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 'bold', color: '#030514', boxShadow: '0 0 10px rgba(0,240,255,0.2)' }}>
+            PG
+          </div>
+        </div>
       </div>
 
-      {/* ── Dashboard Cards Grid (Resumen) ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr', gap: 20, marginBottom: 28 }} className="dashboard-summary-grid">
-        
-        {/* Main Performance Balance Card */}
-        <div className="glass-card" style={{
-          borderRadius: 24,
-          padding: 24,
-          background: 'linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(255, 0, 127, 0.15) 100%)',
-          border: '1px solid rgba(0, 240, 255, 0.25)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between'
-        }}>
-          <div>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>System Health</span>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 12 }}>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 800, color: '#F0F0F0', margin: 0 }}>{loading ? '—' : `${uptimeRatio}%`}</h3>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-acid)' }}>{upCount} / {monitors.length} Active</span>
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
-            <Link href="/import" style={{ textDecoration: 'none' }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', height: 32, padding: '0 16px', background: 'rgba(255, 255, 255, 0.08)', borderRadius: 999, color: '#F0F0F0', fontSize: 11, fontWeight: 600, border: '1px solid rgba(255, 255, 255, 0.15)', cursor: 'pointer' }}>
-                Add New
-              </span>
-            </Link>
-            <span style={{ display: 'inline-flex', alignItems: 'center', height: 32, padding: '0 16px', background: 'transparent', borderRadius: 999, color: 'var(--color-acid)', fontSize: 11, fontWeight: 600, border: '1px solid rgba(0, 240, 255, 0.25)' }}>
-              Avg Latency: {loading ? '—' : `${avgLatency}ms`}
-            </span>
-          </div>
-        </div>
-
-        {/* Operational card */}
-        <div className="glass-card" style={{ borderRadius: 24, padding: 24, background: 'rgba(8, 12, 36, 0.65)', border: '1px solid rgba(0, 240, 255, 0.15)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#6D7B9B', textTransform: 'uppercase' }}>{t('dash_operational')}</span>
-            <div style={{ fontSize: 44, fontWeight: 800, color: '#00F0FF', marginTop: 12, fontFamily: 'var(--font-display)' }}>{loading ? '—' : upCount}</div>
-          </div>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B' }}>Active check running</span>
-        </div>
-
-        {/* Down card */}
-        <div className="glass-card" style={{ borderRadius: 24, padding: 24, background: 'rgba(8, 12, 36, 0.65)', border: '1px solid rgba(0, 240, 255, 0.15)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#6D7B9B', textTransform: 'uppercase' }}>{t('dash_down')}</span>
-            <div style={{ fontSize: 44, fontWeight: 800, color: '#FF007F', marginTop: 12, fontFamily: 'var(--font-display)' }}>{loading ? '—' : downCount}</div>
-          </div>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B' }}>Requires immediate review</span>
-        </div>
-
-        {/* Degraded card */}
-        <div className="glass-card" style={{ borderRadius: 24, padding: 24, background: 'rgba(8, 12, 36, 0.65)', border: '1px solid rgba(0, 240, 255, 0.15)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#6D7B9B', textTransform: 'uppercase' }}>{t('dash_degraded')}</span>
-            <div style={{ fontSize: 44, fontWeight: 800, color: '#FFB300', marginTop: 12, fontFamily: 'var(--font-display)' }}>{loading ? '—' : degradedCount}</div>
-          </div>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B' }}>High response times</span>
-        </div>
-
-      </div>
-
-      {/* ── Graphics Row ── */}
-      {!loading && monitors.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 20, marginBottom: 28 }} className="dashboard-charts-grid">
-          
-          {/* Latency Flow Bar Chart */}
-          <div className="glass-card" style={{ borderRadius: 24, padding: 24, background: 'rgba(8, 12, 36, 0.65)', display: 'flex', flexDirection: 'column' }}>
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: '#F0F0F0', margin: '0 0 20px' }}>Latency Flow (ms)</h3>
-            <div style={{ height: 180, width: '100%', flex: 1 }}>
-              {barChartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={barChartData} margin={{ top: 0, right: 0, left: -24, bottom: 0 }}>
-                    <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#6D7B9B', fontFamily: 'var(--font-mono)' }} tickLine={false} axisLine={false} />
-                    <YAxis tick={{ fontSize: 9, fill: '#6D7B9B', fontFamily: 'var(--font-mono)' }} tickLine={false} axisLine={false} />
-                    <RechartsTooltip contentStyle={customTooltipStyle} cursor={{ fill: 'rgba(0, 240, 255, 0.03)' }} />
-                    <Bar dataKey="ms" fill="#00F0FF" radius={[6, 6, 0, 0]}>
-                      {barChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.ms > 1000 ? '#FFB300' : 'var(--color-acid)'} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#6D7B9B', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
-                  No latency metrics collected yet.
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Status Breakdown Donut Chart */}
-          <div className="glass-card" style={{ borderRadius: 24, padding: 24, background: 'rgba(8, 12, 36, 0.65)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: '#F0F0F0', margin: '0 0 10px', alignSelf: 'flex-start' }}>Status Split</h3>
-            <div style={{ height: 140, width: '100%', position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieChartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={45}
-                    outerRadius={60}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {pieChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip contentStyle={customTooltipStyle} />
-                </PieChart>
-              </ResponsiveContainer>
-              {/* Inner ring text */}
-              <div style={{ position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <span style={{ fontSize: 20, fontWeight: 800, fontFamily: 'var(--font-display)', color: '#F0F0F0', lineHeight: 1 }}>{monitors.length}</span>
-                <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: '#6D7B9B', textTransform: 'uppercase', marginTop: 2 }}>Services</span>
-              </div>
-            </div>
-            {/* Legend indicators */}
-            <div style={{ display: 'flex', gap: 14, justifyContent: 'center', marginTop: 12, flexWrap: 'wrap' }}>
-              {pieChartData.map(d => (
-                <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: d.color }} />
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#6D7B9B' }}>{d.name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-        </div>
-      )}
-
-      {/* ── Monitor list ── */}
+      {/* ── Main Dashboard Split Grid (Ethereal 2-Column structure) ── */}
       {loading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {[...Array(3)].map((_, i) => (
-            <div key={i} style={{ height: 72, background: 'rgba(8, 12, 36, 0.4)', borderRadius: 20, opacity: 0.5 }} />
-          ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div style={{ height: 180, background: 'rgba(255,255,255,0.02)', borderRadius: 24, opacity: 0.5 }} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+            <div style={{ height: 220, background: 'rgba(255,255,255,0.02)', borderRadius: 24, opacity: 0.5 }} />
+            <div style={{ height: 220, background: 'rgba(255,255,255,0.02)', borderRadius: 24, opacity: 0.5 }} />
+          </div>
         </div>
       ) : monitors.length === 0 ? (
         <EmptyState />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }} className="monitors-deck">
-          <div style={{ display: 'flex', padding: '0 20px', marginBottom: -4 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#6D7B9B', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-              Active Monitor Deck ({monitors.length})
-            </span>
-          </div>
-
-          {monitors.map((monitor) => {
-            const status    = getLastStatus(monitor);
-            const lastCheck = monitor.checks?.[0];
-            const isDown    = status === 'down';
-            return (
-              <Link
-                key={monitor.id}
-                href={`/monitors/${monitor.id}`}
-                style={{ textDecoration: 'none', display: 'block' }}
-              >
-                <div
-                  className="glass-card monitor-row-card"
-                  style={{
-                    borderRadius: 20,
-                    padding: '16px 24px',
-                    background: isDown ? 'rgba(255, 0, 127, 0.03)' : 'rgba(8, 12, 36, 0.65)',
-                    border: isDown ? '1px solid rgba(255, 0, 127, 0.25)' : '1px solid rgba(0, 240, 255, 0.15)',
-                    transition: 'all 0.2s ease',
-                    boxShadow: '0 4px 20px 0 rgba(0, 0, 0, 0.15)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 12
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.borderColor = isDown ? 'rgba(255, 0, 127, 0.45)' : 'rgba(0, 240, 255, 0.35)';
-                    e.currentTarget.style.boxShadow = isDown ? '0 8px 30px rgba(255, 0, 127, 0.1)' : '0 8px 30px rgba(0, 240, 255, 0.08)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.borderColor = isDown ? 'rgba(255, 0, 127, 0.25)' : 'rgba(0, 240, 255, 0.15)';
-                    e.currentTarget.style.boxShadow = '0 4px 20px 0 rgba(0, 0, 0, 0.15)';
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-                    
-                    {/* Project details */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 180, flex: 1.5 }}>
-                      <StatusBadge status={status} showPulse={true} />
-                      <div>
-                        <h4 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: '#F0F0F0', margin: '0 0 4px' }}>
-                          {monitor.name}
-                        </h4>
-                        {monitor.url && (
-                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#6D7B9B', wordBreak: 'break-all' }}>
-                            {monitor.url}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Stats metrics */}
-                    <div style={{ display: 'flex', gap: 32, alignItems: 'center', flexWrap: 'wrap' }}>
-                      
-                      {/* Latency */}
-                      <div>
-                        <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B', textTransform: 'uppercase', marginBottom: 2 }}>Response</span>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: lastCheck?.responseTimeMs && lastCheck.responseTimeMs > 1000 ? '#FFB300' : '#F0F0F0' }}>
-                          {ms(lastCheck?.responseTimeMs)}
-                        </span>
-                      </div>
-
-                      {/* SSL status */}
-                      <div>
-                        <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B', textTransform: 'uppercase', marginBottom: 2 }}>SSL Days</span>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: (lastCheck?.sslDaysLeft ?? 999) < 14 ? '#FF007F' : '#00F0FF' }}>
-                          {lastCheck?.sslDaysLeft != null ? `${lastCheck.sslDaysLeft}d` : '—'}
-                        </span>
-                      </div>
-
-                      {/* Security grade */}
-                      <div>
-                        <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B', textTransform: 'uppercase', marginBottom: 2 }}>Sec Grade</span>
-                        <span
-                          style={{
-                            fontFamily: 'var(--font-mono)',
-                            fontSize: 11,
-                            fontWeight: 700,
-                            color: getGradeColor(monitor.securityGrade ?? ''),
-                            background: 'rgba(8, 12, 36, 0.4)',
-                            border: `1px solid ${getGradeColor(monitor.securityGrade ?? '')}`,
-                            padding: '1px 6px',
-                            borderRadius: 999,
-                          }}
-                        >
-                          {monitor.securityGrade ?? '—'}
-                        </span>
-                      </div>
-
-                      {/* Check Interval */}
-                      <div>
-                        <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B', textTransform: 'uppercase', marginBottom: 2 }}>Interval</span>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 600, color: '#6D7B9B' }}>
-                          {monitor.intervalMinutes}m
-                        </span>
-                      </div>
-
-                      {/* Next Check timer */}
-                      <div>
-                        <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B', textTransform: 'uppercase', marginBottom: 2 }}>Next</span>
-                        <NextCheck lastCheckedAt={lastCheck?.checkedAt ?? null} intervalMinutes={monitor.intervalMinutes} />
-                      </div>
-
-                    </div>
-
-                    {/* Arrow arrow */}
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginLeft: 8 }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6D7B9B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="9 18 15 12 9 6"/>
-                      </svg>
-                    </div>
-
+        <div className="dashboard-layout-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1.1fr', gap: 32 }}>
+          
+          {/* ── LEFT COLUMN ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+            
+            {/* Header statistics block (Total balance equivalent) */}
+            <div className="dashboard-top-row" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 20 }}>
+              
+              {/* Main Uptime Hero Card */}
+              <div className="glass-card" style={{
+                borderRadius: 28,
+                padding: 28,
+                background: 'linear-gradient(135deg, rgba(0, 240, 255, 0.12) 0%, rgba(112, 0, 255, 0.12) 50%, rgba(255, 0, 127, 0.12) 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                minHeight: 180,
+                boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2)'
+              }}>
+                <div>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Operational Health</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 14 }}>
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '48px', fontWeight: 800, color: '#F0F0F0', margin: 0, letterSpacing: '-0.03em', lineHeight: 1 }}>{uptimeRatio}%</h3>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#00F0FF', background: 'rgba(0, 240, 255, 0.1)', padding: '3px 10px', borderRadius: 999 }}>+0.02% vs last week</span>
                   </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+                  <Link href="/import" style={{ textDecoration: 'none' }}>
+                    <button className="btn-solid-glow" style={{ height: 36, fontSize: 11, padding: '0 20px', borderRadius: 999 }}>
+                      Add Monitor
+                    </button>
+                  </Link>
+                  <Link href="/playground" style={{ textDecoration: 'none' }}>
+                    <button className="btn-glass" style={{ height: 36, fontSize: 11, padding: '0 20px', borderRadius: 999 }}>
+                      Security Console
+                    </button>
+                  </Link>
+                </div>
+              </div>
 
-                  {/* Dynamic mini Uptime timeline bar inside card */}
-                  {monitor.checks && monitor.checks.length > 0 && (
-                    <div style={{ borderTop: '1px dashed rgba(0, 240, 255, 0.1)', paddingTop: 12 }}>
-                      <UptimeBar checks={monitor.checks} segments={60} />
+              {/* Smaller details cards stacked */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                
+                {/* Active Checks */}
+                <div className="glass-card" style={{ flex: 1, padding: '18px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'rgba(255, 255, 255, 0.02)' }}>
+                  <div>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B', textTransform: 'uppercase' }}>Active Monitors</span>
+                    <div style={{ fontSize: '28px', fontWeight: 800, color: '#00F0FF', marginTop: 6 }}>{monitors.length} Services</div>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B' }}>All systems checked</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#00F0FF', background: 'rgba(0, 240, 255, 0.08)', padding: '2px 6px', borderRadius: 4 }}>+12%</span>
+                  </div>
+                </div>
+
+                {/* Avg Latency */}
+                <div className="glass-card" style={{ flex: 1, padding: '18px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'rgba(255, 255, 255, 0.02)' }}>
+                  <div>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B', textTransform: 'uppercase' }}>System Latency</span>
+                    <div style={{ fontSize: '28px', fontWeight: 800, color: '#FF007F', marginTop: 6 }}>{avgLatency} ms</div>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B' }}>Checks latency average</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#FF007F', background: 'rgba(255, 0, 127, 0.08)', padding: '2px 6px', borderRadius: 4 }}>STABLE</span>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+            {/* Charts Row */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 20 }}>
+              
+              {/* Latency Bar Chart */}
+              <div className="glass-card" style={{ padding: 24, background: 'rgba(255, 255, 255, 0.02)', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 15, fontWeight: 700, color: '#F0F0F0', margin: 0 }}>Latency Flow</h3>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B', textTransform: 'uppercase' }}>Monthly</span>
+                </div>
+                <div style={{ height: 160, width: '100%' }}>
+                  {barChartData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={barChartData} margin={{ top: 0, right: 0, left: -24, bottom: 0 }}>
+                        <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#6D7B9B', fontFamily: 'var(--font-mono)' }} tickLine={false} axisLine={false} />
+                        <YAxis tick={{ fontSize: 9, fill: '#6D7B9B', fontFamily: 'var(--font-mono)' }} tickLine={false} axisLine={false} />
+                        <RechartsTooltip contentStyle={customTooltipStyle} cursor={{ fill: 'rgba(255, 255, 255, 0.02)' }} />
+                        <Bar dataKey="ms" fill="var(--color-acid)" radius={[6, 6, 0, 0]}>
+                          {barChartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.ms > 1000 ? '#FFB300' : 'var(--color-acid)'} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#6D7B9B', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
+                      No metrics.
                     </div>
                   )}
-
                 </div>
-              </Link>
-            );
-          })}
+              </div>
+
+              {/* Status Split Doughnut */}
+              <div className="glass-card" style={{ padding: 24, background: 'rgba(255, 255, 255, 0.02)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 15, fontWeight: 700, color: '#F0F0F0', margin: '0 0 10px', alignSelf: 'flex-start' }}>Status Split</h3>
+                <div style={{ height: 120, width: '100%', position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={pieChartData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={42}
+                        outerRadius={55}
+                        paddingAngle={3}
+                        dataKey="value"
+                      >
+                        {pieChartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <RechartsTooltip contentStyle={customTooltipStyle} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div style={{ position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <span style={{ fontSize: 18, fontWeight: 800, fontFamily: 'var(--font-display)', color: '#F0F0F0', lineHeight: 1 }}>{monitors.length}</span>
+                    <span style={{ fontSize: 8, fontFamily: 'var(--font-mono)', color: '#6D7B9B', textTransform: 'uppercase', marginTop: 2 }}>Services</span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 10, flexWrap: 'wrap' }}>
+                  {pieChartData.map(d => (
+                    <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: d.color }} />
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B' }}>{d.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+
+            {/* Performance timeline deck */}
+            <div className="glass-card" style={{ padding: 24, background: 'rgba(255, 255, 255, 0.02)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#6D7B9B', textTransform: 'uppercase' }}>Recent Incidents Log</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B' }}>System logs active</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {monitors.slice(0, 3).map((m, i) => (
+                  <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', background: 'rgba(255,255,255,0.01)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.04)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <StatusBadge status={getLastStatus(m)} showPulse={false} />
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 700, color: '#F0F0F0' }}>{m.name}</span>
+                    </div>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#6D7B9B' }}>{m.url ? m.url.replace('https://', '') : 'GitHub scan'}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+
+          {/* ── RIGHT COLUMN (Ethereal credit card deck simulation) ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+            
+            {/* Stacked cards header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 800, color: '#F0F0F0', margin: 0 }}>
+                My Services
+              </h3>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-acid)' }}>
+                {monitors.length} Active
+              </span>
+            </div>
+
+            {/* Stacked credit cards visualization */}
+            <div style={{ position: 'relative', height: 210, marginBottom: 12 }}>
+              {/* Back Card 3 */}
+              <div style={{
+                position: 'absolute', top: 0, left: 16, right: 16, height: 180,
+                background: 'linear-gradient(135deg, #FF007F 0%, #7000FF 100%)',
+                borderRadius: 24, opacity: 0.25, transform: 'scale(0.9)',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                transition: 'all 0.3s ease'
+              }} />
+              {/* Middle Card 2 */}
+              <div style={{
+                position: 'absolute', top: 10, left: 8, right: 8, height: 180,
+                background: 'linear-gradient(135deg, #00F0FF 0%, #0072FF 100%)',
+                borderRadius: 24, opacity: 0.4, transform: 'scale(0.95)',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                transition: 'all 0.3s ease'
+              }} />
+              {/* Front Card 1 (Frosted Glass Card) */}
+              <div className="glass-card" style={{
+                position: 'absolute', top: 20, left: 0, right: 0, height: 180,
+                borderRadius: 24, padding: 24,
+                background: 'rgba(255, 255, 255, 0.04)',
+                backdropFilter: 'blur(30px) saturate(180%)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+                transition: 'all 0.3s ease'
+              }}>
+                {/* Logo & Status */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ width: 18, height: 18, background: 'var(--color-acid)', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#030514" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </div>
+                    <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.7)', fontWeight: 'bold', letterSpacing: '0.05em' }}>PULSE CARD</span>
+                  </div>
+                  <div style={{ padding: '2px 8px', borderRadius: 999, background: selectedMonitor && getLastStatus(selectedMonitor) === 'up' ? 'rgba(0, 240, 255, 0.1)' : 'rgba(255, 0, 127, 0.1)', border: selectedMonitor && getLastStatus(selectedMonitor) === 'up' ? '1px solid rgba(0, 240, 255, 0.3)' : '1px solid rgba(255, 0, 127, 0.3)' }}>
+                    <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: selectedMonitor && getLastStatus(selectedMonitor) === 'up' ? '#00F0FF' : '#FF007F', fontWeight: 'bold' }}>
+                      ● {selectedMonitor ? getLastStatus(selectedMonitor).toUpperCase() : 'EMPTY'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Service Details */}
+                <div>
+                  <h4 style={{ margin: '0 0 4px', fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 800, color: '#F0F0F0', letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {selectedMonitor ? selectedMonitor.name : 'No services configured'}
+                  </h4>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#6D7B9B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {selectedMonitor?.url ? selectedMonitor.url.replace('https://', '').replace('http://', '') : 'No URL'}
+                  </div>
+                </div>
+
+                {/* Card footer details */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <span style={{ display: 'block', fontSize: 8, color: '#6D7B9B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>Response Time</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: '#00F0FF' }}>
+                      {selectedMonitor ? ms(selectedMonitor.checks?.[0]?.responseTimeMs) : '—'}
+                    </span>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ display: 'block', fontSize: 8, color: '#6D7B9B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>SSL Certificate</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: '#FF007F' }}>
+                      {selectedMonitor?.checks?.[0]?.sslDaysLeft != null ? `${selectedMonitor.checks[0].sslDaysLeft}d` : '—'}
+                    </span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Ethereal styled Services List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#6D7B9B', textTransform: 'uppercase', letterSpacing: '0.08em', paddingLeft: 4 }}>
+                Recent Activities
+              </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {monitors.map((m, index) => {
+                  const active = index === selectedIndex;
+                  const status = getLastStatus(m);
+                  return (
+                    <div
+                      key={m.id}
+                      onClick={() => setSelectedIndex(index)}
+                      style={{
+                        padding: '12px 16px',
+                        borderRadius: 16,
+                        background: active ? 'rgba(255, 255, 255, 0.04)' : 'transparent',
+                        border: active ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid transparent',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                      }}
+                      onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.015)'; }}
+                      onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent'; }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+                        <div style={{ width: 24, height: 24, borderRadius: '50%', background: status === 'up' ? 'rgba(0, 240, 255, 0.08)' : 'rgba(255, 0, 127, 0.08)', border: status === 'up' ? '1px solid rgba(0, 240, 255, 0.2)' : '1px solid rgba(255, 0, 127, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: status === 'up' ? '#00F0FF' : '#FF007F' }} />
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 13, color: '#F0F0F0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.name}</div>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.url ? m.url.replace('https://', '') : 'GitHub Commits'}</div>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 'bold', color: active ? 'var(--color-acid)' : '#F0F0F0' }}>
+                          {ms(m.checks?.[0]?.responseTimeMs)}
+                        </span>
+                        <Link href={`/monitors/${m.id}`} style={{ display: 'flex', alignItems: 'center' }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6D7B9B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: active ? 1 : 0.4 }}>
+                            <polyline points="9 18 15 12 9 6"/>
+                          </svg>
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+          </div>
+
         </div>
       )}
 
       {/* Styled Responsive Queries */}
       <style>{`
-        @media (max-width: 900px) {
-          .dashboard-summary-grid {
-            grid-template-columns: 1fr 1fr !important;
-          }
-          .dashboard-charts-grid {
+        @media (max-width: 990px) {
+          .dashboard-layout-grid {
             grid-template-columns: 1fr !important;
+            gap: 40px !important;
           }
         }
         @media (max-width: 600px) {
-          .dashboard-summary-grid {
+          .dashboard-top-row {
             grid-template-columns: 1fr !important;
           }
         }
@@ -455,7 +502,7 @@ function EmptyState() {
     { n: '3', title: 'Go to sleep', desc: 'PulseGuard checks every minute and alerts you when something breaks.' },
   ];
   return (
-    <div style={{ border: '1px dashed rgba(0, 240, 255, 0.2)', borderRadius: 24, padding: '56px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0, background: 'rgba(8, 12, 36, 0.4)' }}>
+    <div style={{ border: '1px dashed rgba(0, 240, 255, 0.2)', borderRadius: 28, padding: '56px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0, background: 'rgba(8, 12, 36, 0.4)', backdropFilter: 'blur(12px)' }}>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px' }}>
         // Getting started
       </p>
@@ -467,7 +514,7 @@ function EmptyState() {
       </p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 36, width: '100%', maxWidth: 680 }} className="empty-steps-grid">
         {steps.map((s) => (
-          <div key={s.n} className="glass-card" style={{ borderRadius: 20, padding: '20px' }}>
+          <div key={s.n} className="glass-card" style={{ borderRadius: 24, padding: '20px' }}>
             <div style={{ width: 28, height: 28, background: s.n === '1' ? 'var(--color-acid)' : 'rgba(255,255,255,0.05)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: s.n === '1' ? '#030514' : '#6D7B9B' }}>{s.n}</span>
             </div>
@@ -489,30 +536,6 @@ function EmptyState() {
           .empty-steps-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
-    </div>
-  );
-}
-
-function NextCheck({ lastCheckedAt, intervalMinutes }: { lastCheckedAt: string | null; intervalMinutes: number }) {
-  const [label, setLabel] = useState('—');
-
-  useEffect(() => {
-    function compute() {
-      if (!lastCheckedAt) { setLabel(`${intervalMinutes}m`); return; }
-      const nextMs = new Date(lastCheckedAt).getTime() + intervalMinutes * 60_000;
-      const diffS = Math.round((nextMs - Date.now()) / 1000);
-      if (diffS <= 0) { setLabel('now'); return; }
-      if (diffS < 60) { setLabel(`${diffS}s`); return; }
-      setLabel(`${Math.ceil(diffS / 60)}m`);
-    }
-    compute();
-    const id = setInterval(compute, 5000);
-    return () => clearInterval(id);
-  }, [lastCheckedAt, intervalMinutes]);
-
-  return (
-    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 600, color: label === 'now' ? 'var(--color-acid)' : '#6D7B9B' }}>
-      {label}
     </div>
   );
 }

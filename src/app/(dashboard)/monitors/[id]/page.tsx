@@ -526,16 +526,16 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
 
       {/* Metrics */}
       {monitor.url && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, marginBottom: 24, border: '1px solid rgba(255,255,255,0.07)', borderRadius: 3, overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }} className="metrics-deck">
           {[
             { label: 'Uptime', value: uptimePct != null ? `${uptimePct}%` : '—', color: uptimeColor },
             { label: 'Avg Response', value: metrics?.avgResponseMs != null ? `${metrics.avgResponseMs}ms` : '—', color: '#F0F0F0' },
-            { label: 'SSL Expires', value: checks[0]?.sslDaysLeft != null ? `${checks[0].sslDaysLeft}d` : '—', color: checks[0]?.sslDaysLeft != null && checks[0].sslDaysLeft < 14 ? '#FF1744' : '#F0F0F0' },
-            { label: 'Total Checks', value: metrics?.totalChecks ?? '—', color: '#4A4A4A' },
+            { label: 'SSL Expires', value: checks[0]?.sslDaysLeft != null ? `${checks[0].sslDaysLeft}d` : '—', color: checks[0]?.sslDaysLeft != null && checks[0].sslDaysLeft < 14 ? 'var(--color-pink-primary)' : '#F0F0F0' },
+            { label: 'Total Checks', value: metrics?.totalChecks ?? '—', color: 'var(--color-text-2)' },
           ].map((m, i) => (
-            <div key={m.label} style={{ padding: '20px 24px', background: '#080808', borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.07)' : 'none' }}>
+            <div key={m.label} className="glass-card" style={{ padding: '20px 24px', borderRadius: 20 }}>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 28, fontWeight: 600, color: m.color, lineHeight: 1, marginBottom: 6 }}>{m.value}</div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{m.label}</div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-2)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{m.label}</div>
             </div>
           ))}
         </div>
@@ -543,9 +543,9 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
 
       {/* Uptime bar */}
       {checks.length > 0 && monitor.url && (
-        <div style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 3, padding: '20px 24px', marginBottom: 16 }}>
+        <div className="glass-card" style={{ padding: '20px 24px', marginBottom: 16, borderRadius: 24 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Last {Math.min(checks.length, 90)} checks</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-2)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Last {Math.min(checks.length, 90)} checks</span>
             {uptimePct != null && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600, color: uptimeColor }}>{uptimePct}% uptime</span>}
           </div>
           <UptimeBar checks={checks} segments={90} />
@@ -554,8 +554,8 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
 
       {/* Chart */}
       {chartData.length > 1 && (
-        <div style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 3, padding: '20px 24px', marginBottom: 16 }}>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 20px' }}>Response time (ms)</p>
+        <div className="glass-card" style={{ padding: '20px 24px', marginBottom: 16, borderRadius: 24 }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-2)', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 20px' }}>Response time (ms)</p>
           <div style={{ height: 200, width: '100%' }}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData} margin={{ top: 4, right: 0, left: -24, bottom: 0 }}>
@@ -580,7 +580,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
       {monitor.url && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginBottom: 16 }}>
           {/* Security Headers Panel */}
-          <div style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 3, padding: '20px 24px', display: 'flex', flexDirection: 'column' }}>
+          <div className="glass-card" style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', borderRadius: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>HTTP Security Headers</span>
               {(monitor.securityGrade || checks[0]?.securityGrade) && (
@@ -641,7 +641,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
           </div>
 
           {/* Network Latency Breakdown Card */}
-          <div style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 3, padding: '20px 24px', display: 'flex', flexDirection: 'column' }}>
+          <div className="glass-card" style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', borderRadius: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Network Connection Breakdown</span>
               <button
@@ -735,7 +735,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
 
       {/* Security Incidents */}
       {monitor.githubRepoUrl && (
-        <div style={{ background: '#080808', border: incidents.length > 0 ? '1px solid var(--color-pink-primary)' : '1px solid rgba(255,255,255,0.07)', borderRadius: 3, overflow: 'hidden', marginBottom: 16 }}>
+        <div className="glass-card" style={{ padding: 24, border: incidents.length > 0 ? '1px solid var(--color-pink-primary)' : '1px solid rgba(255,255,255,0.07)', borderRadius: 24, marginBottom: 16 }}>
           <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: incidents.length > 0 ? 'var(--color-pink-primary)' : '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 'bold' }}>
               Security Incidents
@@ -875,7 +875,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
 
       {/* Downtime history */}
       {downtime.length > 0 && (
-        <div style={{ background: '#080808', border: '1px solid rgba(255,23,68,0.15)', borderRadius: 3, overflow: 'hidden', marginTop: 16 }}>
+        <div className="glass-card" style={{ padding: 24, border: '1px solid rgba(255,23,68,0.25)', borderRadius: 24, marginTop: 16 }}>
           <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#FF1744', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Downtime History</span>
           </div>
