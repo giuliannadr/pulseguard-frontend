@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 
-export default function DashboardNav({ userEmail }: { userEmail: string | null }) {
+export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: string | null; onCloseMobile?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useTranslation();
@@ -135,6 +135,7 @@ export default function DashboardNav({ userEmail }: { userEmail: string | null }
             <Link
               key={link.href}
               href={link.href}
+              onClick={() => onCloseMobile?.()}
               className={`sidebar-link ${active ? 'active-link' : ''}`}
               style={{
                 fontWeight: active ? 600 : 400,
