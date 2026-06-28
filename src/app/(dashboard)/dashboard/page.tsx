@@ -29,14 +29,14 @@ function ms(val: number | null | undefined) {
 }
 
 function getGradeColor(grade: string) {
-  if (!grade) return '#6D7B9B';
+  if (!grade) return 'var(--color-txt-secondary)';
   const g = grade.toUpperCase();
   if (g.startsWith('A')) return '#00F0FF';
   if (g.startsWith('B')) return '#FFB300';
   if (g.startsWith('C')) return '#FFB300';
   if (g.startsWith('D')) return '#FF007F';
   if (g.startsWith('F')) return '#FF007F';
-  return '#6D7B9B';
+  return 'var(--color-txt-secondary)';
 }
 
 const CustomTooltip = ({ active, payload }: any) => {
@@ -47,7 +47,7 @@ const CustomTooltip = ({ active, payload }: any) => {
         border: '1px solid rgba(0, 240, 255, 0.3)',
         borderRadius: '12px',
         padding: '10px 14px',
-        color: '#F0F0F0',
+        color: 'var(--color-txt-primary)',
         fontFamily: 'var(--font-mono)',
         fontSize: '11px',
         boxShadow: '0 8px 30px rgba(0,0,0,0.6)',
@@ -69,14 +69,14 @@ const CustomPieTooltip = ({ active, payload }: any) => {
         border: '1px solid rgba(0, 240, 255, 0.3)',
         borderRadius: '12px',
         padding: '10px 14px',
-        color: '#F0F0F0',
+        color: 'var(--color-txt-primary)',
         fontFamily: 'var(--font-mono)',
         fontSize: '11px',
         boxShadow: '0 8px 30px rgba(0,0,0,0.6)',
         backdropFilter: 'blur(12px)'
       }}>
         <div style={{ fontWeight: 'bold', color: payload[0].payload.color || 'var(--color-acid)', marginBottom: 2 }}>{payload[0].name}</div>
-        <div style={{ color: '#F0F0F0' }}>Checks count: {payload[0].value}</div>
+        <div style={{ color: 'var(--color-txt-primary)' }}>Checks count: {payload[0].value}</div>
       </div>
     );
   }
@@ -182,14 +182,14 @@ export default function DashboardPage() {
   const checksDegraded = selectedMonitor?.checks?.filter(c => c.status === 'degraded').length ?? 0;
 
   const pieChartData = [
-    { name: 'Operational', value: checksUp, color: '#00F0FF' },
-    { name: 'Down', value: checksDown, color: '#FF007F' },
-    { name: 'Degraded', value: checksDegraded, color: '#FFB300' }
+    { name: 'Operational', value: checksUp, color: 'var(--color-status-up)' },
+    { name: 'Down', value: checksDown, color: 'var(--color-status-down)' },
+    { name: 'Degraded', value: checksDegraded, color: 'var(--color-status-degraded)' }
   ].filter(d => d.value > 0);
 
   // Default placeholder if empty
   if (pieChartData.length === 0 && !loading) {
-    pieChartData.push({ name: 'No checks', value: 1, color: 'rgba(255,255,255,0.05)' });
+    pieChartData.push({ name: 'No checks', value: 1, color: 'var(--color-border-main)' });
   }
 
   // Calculate selected monitor metrics
@@ -207,7 +207,7 @@ export default function DashboardPage() {
     border: '1px solid rgba(0, 240, 255, 0.25)',
     borderRadius: '16px',
     padding: '12px 16px',
-    color: '#F0F0F0',
+    color: 'var(--color-txt-primary)',
     fontFamily: 'var(--font-mono)',
     fontSize: '12px',
     boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
@@ -223,12 +223,12 @@ export default function DashboardPage() {
         {/* ── Top Header ── */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 40, gap: 24, flexWrap: 'wrap' }}>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 800, color: '#F0F0F0', margin: 0, letterSpacing: '-0.02em' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 800, color: 'var(--color-txt-primary)', margin: 0, letterSpacing: '-0.02em' }}>
               My Dashboard
             </h1>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{ width: 40, height: 40, borderRadius: '50%', border: '2px solid rgba(0, 240, 255, 0.4)', background: 'linear-gradient(135deg, #00F0FF 0%, #FF007F 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 'bold', color: '#030514', boxShadow: '0 0 10px rgba(0,240,255,0.2)' }}>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', border: '2px solid rgba(0, 240, 255, 0.4)', background: 'linear-gradient(135deg, #00F0FF 0%, #FF007F 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 'bold', color: 'var(--color-bg-base)', boxShadow: '0 0 10px rgba(0,240,255,0.2)' }}>
               PG
             </div>
           </div>
@@ -244,7 +244,7 @@ export default function DashboardPage() {
       {/* ── Top Header ── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 40, gap: 24, flexWrap: 'wrap' }}>
         <div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 800, color: '#F0F0F0', margin: 0, letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 800, color: 'var(--color-txt-primary)', margin: 0, letterSpacing: '-0.02em' }}>
             My Dashboard
           </h1>
         </div>
@@ -256,7 +256,7 @@ export default function DashboardPage() {
           <button className="btn-glass" style={{ width: 40, height: 40, padding: 0, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           </button>
-          <div style={{ width: 40, height: 40, borderRadius: '50%', border: '2px solid rgba(0, 240, 255, 0.4)', background: 'linear-gradient(135deg, #00F0FF 0%, #FF007F 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 'bold', color: '#030514', boxShadow: '0 0 10px rgba(0,240,255,0.2)' }}>
+          <div style={{ width: 40, height: 40, borderRadius: '50%', border: '2px solid var(--color-border-hover)', background: 'linear-gradient(135deg, var(--color-brand-primary) 0%, var(--color-accent-amber) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 'bold', color: 'var(--color-txt-btn-primary)', boxShadow: '0 0 10px rgba(45,27,105,0.2)' }}>
             PG
           </div>
         </div>
@@ -273,31 +273,31 @@ export default function DashboardPage() {
             
             {/* Main Uptime Hero Card */}
             <div className="glass-card" style={{
-              borderRadius: 28,
+              borderRadius: 20,
               padding: 28,
-              background: 'linear-gradient(135deg, rgba(0, 240, 255, 0.12) 0%, rgba(112, 0, 255, 0.12) 50%, rgba(255, 0, 127, 0.12) 100%)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
+              background: 'linear-gradient(135deg, rgba(45, 27, 105, 0.08) 0%, rgba(196, 181, 253, 0.08) 100%)',
+              border: '1px solid var(--color-border-main)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
               minHeight: 180,
-              boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2)'
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.03)'
             }}>
               <div>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>System Health</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-brand-primary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>System Health</span>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 14 }}>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '48px', fontWeight: 800, color: '#F0F0F0', margin: 0, letterSpacing: '-0.03em', lineHeight: 1 }}>{uptimeRatio}%</h3>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#00F0FF' }}>{upCount} / {monitors.length} Active</span>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '48px', fontWeight: 800, color: 'var(--color-txt-primary)', margin: 0, letterSpacing: '-0.03em', lineHeight: 1 }}>{uptimeRatio}%</h3>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-brand-primary)' }}>{upCount} / {monitors.length} Active</span>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
                 <Link href="/import" style={{ textDecoration: 'none' }}>
-                  <button className="btn-solid-glow" style={{ height: 36, fontSize: 11, padding: '0 20px', borderRadius: 999 }}>
+                  <button className="btn-solid-glow" style={{ height: 36, fontSize: 11, padding: '0 20px', borderRadius: 8 }}>
                     Add Monitor
                   </button>
                 </Link>
                 <Link href="/playground" style={{ textDecoration: 'none' }}>
-                  <button className="btn-glass" style={{ height: 36, fontSize: 11, padding: '0 20px', borderRadius: 999 }}>
+                  <button className="btn-glass" style={{ height: 36, fontSize: 11, padding: '0 20px', borderRadius: 8 }}>
                     Security Console
                   </button>
                 </Link>
@@ -308,32 +308,32 @@ export default function DashboardPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               
               {/* Active Checks */}
-              <div className="glass-card" style={{ flex: 1, padding: '18px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'rgba(255, 255, 255, 0.02)' }}>
+              <div className="glass-card" style={{ flex: 1, padding: '18px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'var(--color-bg-card)', borderRadius: 12 }}>
                 <div>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B', textTransform: 'uppercase' }}>Active Monitors</span>
-                  <div style={{ fontSize: '28px', fontWeight: 800, color: '#00F0FF', marginTop: 6 }}>{monitors.length} Services</div>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-secondary)', textTransform: 'uppercase' }}>Active Monitors</span>
+                  <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--color-brand-primary)', marginTop: 6 }}>{monitors.length} Services</div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B' }}>All systems checked</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#00F0FF', background: 'rgba(0, 240, 255, 0.08)', padding: '2px 6px', borderRadius: 4 }}>+12%</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)' }}>All systems checked</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-brand-primary)', background: 'var(--color-brand-light)', padding: '2px 6px', borderRadius: 4 }}>+12%</span>
                 </div>
               </div>
 
               {/* Avg Latency */}
-              <div className="glass-card" style={{ flex: 1, padding: '18px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'rgba(255, 255, 255, 0.02)' }}>
+              <div className="glass-card" style={{ flex: 1, padding: '18px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'var(--color-bg-card)', borderRadius: 12 }}>
                 <div>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B', textTransform: 'uppercase' }}>System Latency</span>
-                  <div style={{ fontSize: '28px', fontWeight: 800, color: '#FF007F', marginTop: 6 }}>{avgLatency} ms</div>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-secondary)', textTransform: 'uppercase' }}>System Latency</span>
+                  <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--color-accent-amber)', marginTop: 6 }}>{avgLatency} ms</div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B' }}>Checks latency average</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#FF007F', background: 'rgba(255, 0, 127, 0.08)', padding: '2px 6px', borderRadius: 4 }}>STABLE</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)' }}>Checks latency average</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-accent-amber)', background: 'var(--color-accent-amber-light)', padding: '2px 6px', borderRadius: 4 }}>STABLE</span>
                 </div>
               </div>
 
-            </div>
-
           </div>
+
+        </div>
 
           {/* Charts Row (Responsive wrapper) */}
           <div className="db-row-2">
@@ -341,17 +341,17 @@ export default function DashboardPage() {
             {/* Latency Flow Bar Chart */}
             <div className="glass-card" style={{ padding: 24, background: 'rgba(255, 255, 255, 0.02)', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: '#F0F0F0', margin: 0 }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: 'var(--color-txt-primary)', margin: 0 }}>
                   {selectedMonitor ? `${selectedMonitor.name} Latency` : 'Latency Flow'}
                 </h3>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: '#6D7B9B', textTransform: 'uppercase' }}>Recent Checks</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--color-txt-secondary)', textTransform: 'uppercase' }}>Recent Checks</span>
               </div>
               <div style={{ height: 160, width: '100%', position: 'relative' }}>
                 {barChartData.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={barChartData} margin={{ top: 0, right: 0, left: -24, bottom: 0 }}>
-                      <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#6D7B9B', fontFamily: 'var(--font-mono)' }} tickLine={false} axisLine={false} />
-                      <YAxis tick={{ fontSize: 9, fill: '#6D7B9B', fontFamily: 'var(--font-mono)' }} tickLine={false} axisLine={false} />
+                      <XAxis dataKey="name" tick={{ fontSize: 9, fill: 'var(--color-txt-secondary)', fontFamily: 'var(--font-mono)' }} tickLine={false} axisLine={false} />
+                      <YAxis tick={{ fontSize: 9, fill: 'var(--color-txt-secondary)', fontFamily: 'var(--font-mono)' }} tickLine={false} axisLine={false} />
                       <RechartsTooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255, 255, 255, 0.02)' }} />
                       <Bar dataKey="ms" fill="var(--color-acid)" radius={[6, 6, 0, 0]}>
                         {barChartData.map((entry, index) => (
@@ -361,7 +361,7 @@ export default function DashboardPage() {
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#6D7B9B', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
+                  <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: 'var(--color-txt-secondary)', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
                     No check metrics.
                   </div>
                 )}
@@ -370,7 +370,7 @@ export default function DashboardPage() {
 
             {/* Status Split Doughnut */}
             <div className="glass-card" style={{ padding: 24, background: 'rgba(255, 255, 255, 0.02)', display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 0 }}>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: '#F0F0F0', margin: '0 0 10px', alignSelf: 'flex-start' }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: 'var(--color-txt-primary)', margin: '0 0 10px', alignSelf: 'flex-start' }}>
                 {selectedMonitor ? `${selectedMonitor.name} Stats` : 'Status Split'}
               </h3>
               <div style={{ height: 120, width: '100%', position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
@@ -393,17 +393,17 @@ export default function DashboardPage() {
                   </PieChart>
                 </ResponsiveContainer>
                 <div style={{ position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontSize: 18, fontWeight: 800, fontFamily: 'var(--font-display)', color: '#F0F0F0', lineHeight: 1 }}>
+                  <span style={{ fontSize: 18, fontWeight: 800, fontFamily: 'var(--font-display)', color: 'var(--color-txt-primary)', lineHeight: 1 }}>
                     {selectedMonitor ? selectedUptimeRatio : 100}%
                   </span>
-                  <span style={{ fontSize: 8, fontFamily: 'var(--font-mono)', color: '#6D7B9B', textTransform: 'uppercase', marginTop: 2 }}>Uptime</span>
+                  <span style={{ fontSize: 8, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-secondary)', textTransform: 'uppercase', marginTop: 2 }}>Uptime</span>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 10, flexWrap: 'wrap' }}>
                 {pieChartData.map(d => (
                   <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                     <span style={{ width: 6, height: 6, borderRadius: '50%', background: d.color }} />
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B' }}>{d.name} ({d.value})</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-secondary)' }}>{d.name} ({d.value})</span>
                   </div>
                 ))}
               </div>
@@ -414,8 +414,8 @@ export default function DashboardPage() {
           {/* Performance timeline deck */}
           <div className="glass-card" style={{ padding: 24, background: 'rgba(255, 255, 255, 0.02)', minWidth: 0 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#6D7B9B', textTransform: 'uppercase' }}>Recent Incidents Log</span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B' }}>System logs active</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-secondary)', textTransform: 'uppercase' }}>Recent Incidents Log</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-secondary)' }}>System logs active</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {incidents.length > 0 ? (
@@ -423,7 +423,7 @@ export default function DashboardPage() {
                   <div key={inc.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', background: 'rgba(255,255,255,0.01)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.04)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
                       <StatusBadge status={inc.status} showPulse={false} />
-                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 700, color: '#F0F0F0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{inc.monitorName}</span>
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 700, color: 'var(--color-txt-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{inc.monitorName}</span>
                     </div>
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#FF007F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '50%', paddingLeft: 8 }}>
                       {inc.errorMessage || 'Status Check Failed'}
@@ -437,10 +437,10 @@ export default function DashboardPage() {
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
                   </div>
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 700, color: '#F0F0F0' }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 700, color: 'var(--color-txt-primary)' }}>
                     All Systems Operational
                   </span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#6D7B9B', textAlign: 'center' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-secondary)', textAlign: 'center' }}>
                     No incident reports in the last checks history.
                   </span>
                 </div>
@@ -455,7 +455,7 @@ export default function DashboardPage() {
           
           {/* Stacked cards header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 800, color: '#F0F0F0', margin: 0 }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 800, color: 'var(--color-txt-primary)', margin: 0 }}>
               My Services
             </h3>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-acid)' }}>
@@ -504,8 +504,8 @@ export default function DashboardPage() {
               borderRadius: 24, padding: 24,
               background: 'rgba(255, 255, 255, 0.04)',
               backdropFilter: 'blur(30px) saturate(180%)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+              border: '1px solid var(--color-border-main)',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 0 var(--color-border-hover)',
               display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
               transition: 'all 0.3s ease'
             }}>
@@ -513,7 +513,7 @@ export default function DashboardPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <div style={{ width: 18, height: 18, background: 'var(--color-acid)', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#030514" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="var(--color-bg-base)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   </div>
                   <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.7)', fontWeight: 'bold', letterSpacing: '0.05em' }}>PULSE CARD</span>
                 </div>
@@ -526,10 +526,10 @@ export default function DashboardPage() {
 
               {/* Service Details */}
               <div style={{ minWidth: 0 }}>
-                <h4 style={{ margin: '0 0 4px', fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 800, color: '#F0F0F0', letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <h4 style={{ margin: '0 0 4px', fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 800, color: 'var(--color-txt-primary)', letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {selectedMonitor ? selectedMonitor.name : 'No services configured'}
                 </h4>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#6D7B9B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {selectedMonitor?.url ? selectedMonitor.url.replace('https://', '').replace('http://', '') : 'No URL'}
                 </div>
               </div>
@@ -537,13 +537,13 @@ export default function DashboardPage() {
               {/* Card footer details */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <span style={{ display: 'block', fontSize: 8, color: '#6D7B9B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>Response Time</span>
+                  <span style={{ display: 'block', fontSize: 8, color: 'var(--color-txt-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>Response Time</span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: '#00F0FF' }}>
                     {selectedMonitor ? ms(selectedMonitor.checks?.[0]?.responseTimeMs) : '—'}
                   </span>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <span style={{ display: 'block', fontSize: 8, color: '#6D7B9B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>SSL Certificate</span>
+                  <span style={{ display: 'block', fontSize: 8, color: 'var(--color-txt-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>SSL Certificate</span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: '#FF007F' }}>
                     {selectedMonitor?.checks?.[0]?.sslDaysLeft != null ? `${selectedMonitor.checks[0].sslDaysLeft}d` : '—'}
                   </span>
@@ -556,7 +556,7 @@ export default function DashboardPage() {
           {/* Ethereal styled Services List */}
           {monitors.length > 1 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#6D7B9B', textTransform: 'uppercase', letterSpacing: '0.08em', paddingLeft: 4 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', paddingLeft: 4 }}>
                 Recent Activities
               </span>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -571,7 +571,7 @@ export default function DashboardPage() {
                         padding: '12px 16px',
                         borderRadius: 16,
                         background: active ? 'rgba(255, 255, 255, 0.04)' : 'transparent',
-                        border: active ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid transparent',
+                        border: active ? '1px solid var(--color-border-main)' : '1px solid transparent',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
@@ -587,16 +587,16 @@ export default function DashboardPage() {
                           <span style={{ width: 6, height: 6, borderRadius: '50%', background: status === 'up' ? '#00F0FF' : '#FF007F' }} />
                         </div>
                         <div style={{ minWidth: 0, flex: 1 }}>
-                          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 13, color: '#F0F0F0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.name}</div>
-                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.url ? m.url.replace('https://', '') : 'GitHub Commits'}</div>
+                          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 13, color: 'var(--color-txt-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.name}</div>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.url ? m.url.replace('https://', '') : 'GitHub Commits'}</div>
                         </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 'bold', color: active ? 'var(--color-acid)' : '#F0F0F0' }}>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 'bold', color: active ? 'var(--color-acid)' : 'var(--color-txt-primary)' }}>
                           {ms(m.checks?.[0]?.responseTimeMs)}
                         </span>
                         <Link href={`/monitors/${m.id}`} style={{ display: 'flex', alignItems: 'center' }}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6D7B9B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: active ? 1 : 0.4 }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-txt-secondary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: active ? 1 : 0.4 }}>
                             <polyline points="9 18 15 12 9 6"/>
                           </svg>
                         </Link>
@@ -607,11 +607,11 @@ export default function DashboardPage() {
               </div>
             </div>
           ) : (
-            <div className="glass-card" style={{ padding: 20, background: 'rgba(255, 255, 255, 0.01)', border: '1px dashed rgba(255, 255, 255, 0.08)', borderRadius: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 12 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#6D7B9B', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            <div className="glass-card" style={{ padding: 20, background: 'rgba(255, 255, 255, 0.01)', border: '1px dashed var(--color-border-main)', borderRadius: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 12 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                 Quick Action
               </span>
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: '#6D7B9B', margin: 0, lineHeight: 1.5 }}>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-txt-secondary)', margin: 0, lineHeight: 1.5 }}>
                 Track more endpoints or web repositories to get a unified overview of all your microservices.
               </p>
               <Link href="/import" style={{ textDecoration: 'none', width: '100%' }}>
@@ -642,20 +642,20 @@ function EmptyState() {
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px' }}>
         // Getting started
       </p>
-      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 800, color: '#F0F0F0', margin: '0 0 8px', textAlign: 'center' }}>
+      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 800, color: 'var(--color-txt-primary)', margin: '0 0 8px', textAlign: 'center' }}>
         {t('dash_empty_title')}
       </h3>
-      <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#6D7B9B', margin: '0 0 40px', maxWidth: 340, textAlign: 'center', lineHeight: 1.6 }}>
+      <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-txt-secondary)', margin: '0 0 40px', maxWidth: 340, textAlign: 'center', lineHeight: 1.6 }}>
         {t('dash_empty_desc')}
       </p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 36, width: '100%', maxWidth: 680 }} className="empty-steps-grid">
         {steps.map((s) => (
           <div key={s.n} className="glass-card" style={{ borderRadius: 24, padding: '20px' }}>
-            <div style={{ width: 28, height: 28, background: s.n === '1' ? 'var(--color-acid)' : 'rgba(255,255,255,0.05)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: s.n === '1' ? '#030514' : '#6D7B9B' }}>{s.n}</span>
+            <div style={{ width: 28, height: 28, background: s.n === '1' ? 'var(--color-acid)' : 'var(--color-border-main)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: s.n === '1' ? 'var(--color-bg-base)' : 'var(--color-txt-secondary)' }}>{s.n}</span>
             </div>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: '#F0F0F0', margin: '0 0 6px' }}>{s.title}</p>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: '#6D7B9B', margin: 0, lineHeight: 1.6 }}>{s.desc}</p>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: 'var(--color-txt-primary)', margin: '0 0 6px' }}>{s.title}</p>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-txt-secondary)', margin: 0, lineHeight: 1.6 }}>{s.desc}</p>
           </div>
         ))}
       </div>

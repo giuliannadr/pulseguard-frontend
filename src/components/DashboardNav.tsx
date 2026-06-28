@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -10,6 +11,25 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useTranslation();
+
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+
+  useEffect(() => {
+    const isDark = document.documentElement.classList.contains('dark');
+    setTheme(isDark ? 'dark' : 'light');
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    if (nextTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('pg-theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('pg-theme', 'light');
+    }
+  };
 
   async function handleSignout() {
     const supabase = createClient();
@@ -73,23 +93,24 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
       style={{
         width: 220,
         height: '100%',
-        borderRight: '1px solid rgba(255,255,255,0.06)',
-        background: '#050505',
+        borderRight: '1px solid var(--color-border-main)',
+        background: 'var(--color-bg-sidebar)',
         display: 'flex',
         flexDirection: 'column',
         flexShrink: 0,
         position: 'relative',
         zIndex: 20,
+        transition: 'background-color 0.25s ease, border-color 0.25s ease',
       }}
     >
       {/* Logo */}
-      <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+      <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid var(--color-border-main)' }}>
         <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
           <div
             style={{
               width: 28,
               height: 28,
-              background: 'var(--color-acid)',
+              background: 'var(--color-brand-primary)',
               borderRadius: 3,
               display: 'flex',
               alignItems: 'center',
@@ -98,7 +119,7 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
             }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#030514" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="var(--color-txt-btn-primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
           <span
@@ -106,7 +127,7 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
               fontFamily: 'var(--font-display)',
               fontWeight: 800,
               fontSize: 15,
-              color: '#F0F0F0',
+              color: 'var(--color-txt-primary)',
               letterSpacing: '-0.01em',
             }}
           >
@@ -121,7 +142,7 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
           style={{
             fontFamily: 'var(--font-mono)',
             fontSize: 9,
-            color: 'rgba(255,255,255,0.2)',
+            color: 'var(--color-txt-muted)',
             letterSpacing: '0.12em',
             textTransform: 'uppercase',
             margin: '0 8px 10px',
@@ -139,12 +160,12 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
               className={`sidebar-link ${active ? 'active-link' : ''}`}
               style={{
                 fontWeight: active ? 600 : 400,
-                color: active ? '#F0F0F0' : '#4A4A4A',
-                background: active ? 'rgba(255,255,255,0.05)' : 'transparent',
-                borderLeft: active ? '2px solid var(--color-acid)' : '2px solid transparent',
+                color: active ? 'var(--color-txt-primary)' : 'var(--color-txt-secondary)',
+                background: active ? 'var(--color-bg-card-hover)' : 'transparent',
+                borderLeft: active ? '2px solid var(--color-brand-primary)' : '2px solid transparent',
               }}
             >
-              <span style={{ color: active ? 'var(--color-acid)' : 'currentColor', flexShrink: 0 }}>{link.icon}</span>
+              <span style={{ color: active ? 'var(--color-brand-primary)' : 'currentColor', flexShrink: 0 }}>{link.icon}</span>
               {link.label}
             </Link>
           );
@@ -152,7 +173,7 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
       </div>
 
       {/* User + signout */}
-      <div style={{ padding: '16px 12px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+      <div style={{ padding: '16px 12px', borderTop: '1px solid var(--color-border-main)' }}>
         <div
           style={{
             display: 'flex',
@@ -160,7 +181,7 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
             gap: 10,
             padding: '10px 12px',
             borderRadius: 3,
-            background: 'rgba(255,255,255,0.03)',
+            background: 'var(--color-bg-card-hover)',
             marginBottom: 8,
           }}
         >
@@ -169,14 +190,14 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
               width: 28,
               height: 28,
               borderRadius: 3,
-              background: 'var(--color-acid)',
+              background: 'var(--color-brand-primary)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontFamily: 'var(--font-mono)',
               fontSize: 11,
               fontWeight: 700,
-              color: '#030514',
+              color: 'var(--color-txt-btn-primary)',
               flexShrink: 0,
             }}
           >
@@ -187,7 +208,7 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
               style={{
                 fontFamily: 'var(--font-mono)',
                 fontSize: 9,
-                color: 'rgba(255,255,255,0.2)',
+                color: 'var(--color-txt-muted)',
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase',
                 marginBottom: 2,
@@ -199,7 +220,7 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
               style={{
                 fontFamily: 'var(--font-mono)',
                 fontSize: 11,
-                color: '#F0F0F0',
+                color: 'var(--color-txt-primary)',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
@@ -209,6 +230,47 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
             </div>
           </div>
         </div>
+
+        {/* Theme Toggle Button */}
+        <button
+          onClick={toggleTheme}
+          style={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '8px 12px',
+            borderRadius: 6,
+            background: 'var(--color-bg-card)',
+            border: '1px solid var(--color-border-main)',
+            color: 'var(--color-txt-secondary)',
+            fontSize: 11,
+            fontFamily: 'var(--font-mono)',
+            cursor: 'pointer',
+            marginBottom: 10,
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = 'var(--color-border-hover)';
+            e.currentTarget.style.color = 'var(--color-txt-primary)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = 'var(--color-border-main)';
+            e.currentTarget.style.color = 'var(--color-txt-secondary)';
+          }}
+        >
+          {theme === 'dark' ? (
+            <>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+              Mode: Dark
+            </>
+          ) : (
+            <>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              Mode: Light
+            </>
+          )}
+        </button>
 
         <button
           onClick={handleSignout}
@@ -221,14 +283,14 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
             borderRadius: 3,
             background: 'transparent',
             border: 'none',
-            color: '#4A4A4A',
+            color: 'var(--color-txt-muted)',
             fontSize: 12,
             fontFamily: 'var(--font-body)',
             cursor: 'pointer',
             transition: 'color 0.15s',
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = '#F0F0F0')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = '#4A4A4A')}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-txt-primary)')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-txt-muted)')}
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>

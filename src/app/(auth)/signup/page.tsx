@@ -36,14 +36,14 @@ export default function SignupPage() {
 
   if (done) {
     return (
-      <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#03050F', padding: 32 }}>
+      <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg-base)', padding: 32 }}>
         <div style={{ textAlign: 'center', background: 'rgba(8, 12, 36, 0.65)', border: '1px solid rgba(0, 240, 255, 0.15)', borderRadius: 24, padding: '52px 48px', maxWidth: 400, width: '100%', animation: 'pg-fade-in 0.35s ease-out both', backdropFilter: 'blur(12px)' }}>
           <div style={{ width: 48, height: 48, background: 'var(--color-acid)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-              <polyline points="20 6 9 17 4 12" stroke="#030514" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <polyline points="20 6 9 17 4 12" stroke="var(--color-bg-base)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 800, color: '#F0F0F0', margin: '0 0 10px', letterSpacing: '-0.02em' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 800, color: 'var(--color-txt-primary)', margin: '0 0 10px', letterSpacing: '-0.02em' }}>
             Check your inbox
           </h2>
           <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--color-text-2)', margin: '0 0 28px', lineHeight: 1.6 }}>
@@ -59,7 +59,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', background: '#03050F', fontFamily: 'var(--font-body)', overflow: 'hidden' }}>
+    <div style={{ minHeight: '100dvh', display: 'flex', background: 'var(--color-bg-base)', fontFamily: 'var(--font-body)', overflow: 'hidden' }}>
       
       {/* Left brand panel */}
       <div
@@ -92,9 +92,9 @@ export default function SignupPage() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, zIndex: 10 }}>
           <div style={{ width: 28, height: 28, background: 'var(--color-acid)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#030514" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="var(--color-bg-base)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: '#F0F0F0' }}>PulseGuard</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: 'var(--color-txt-primary)' }}>PulseGuard</span>
         </div>
 
         {/* Feature list mockup cards */}
@@ -106,7 +106,7 @@ export default function SignupPage() {
           ].map((feat, i) => (
             <div key={i} className="glass-card" style={{ borderRadius: 20, padding: 18, background: 'rgba(8, 12, 36, 0.7)', border: '1px solid rgba(0, 240, 255, 0.15)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: '#F0F0F0' }}>{feat.title}</span>
+                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: 'var(--color-txt-primary)' }}>{feat.title}</span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-acid)', border: '1px solid rgba(0, 240, 255, 0.25)', padding: '2px 6px', borderRadius: 999 }}>{feat.badge}</span>
               </div>
               <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-text-2)', margin: 0 }}>{feat.desc}</p>
@@ -116,7 +116,7 @@ export default function SignupPage() {
 
         <div>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 16 }}>// Join</p>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 40, fontWeight: 800, color: '#F0F0F0', lineHeight: 1.1, letterSpacing: '-0.03em', margin: 0 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 40, fontWeight: 800, color: 'var(--color-txt-primary)', lineHeight: 1.1, letterSpacing: '-0.03em', margin: 0 }}>
             Monitor smarter.<br />Sleep better.
           </h2>
         </div>
@@ -126,14 +126,14 @@ export default function SignupPage() {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 32px', maxWidth: 480, margin: '0 auto', width: '100%' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 48, alignSelf: 'flex-start' }}>
           <div style={{ width: 28, height: 28, background: 'var(--color-acid)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#030514" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="var(--color-bg-base)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: '#F0F0F0' }}>PulseGuard</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: 'var(--color-txt-primary)' }}>PulseGuard</span>
         </div>
 
         <div style={{ width: '100%' }}>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>// New account</p>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, color: '#F0F0F0', margin: '0 0 32px', letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, color: 'var(--color-txt-primary)', margin: '0 0 32px', letterSpacing: '-0.02em' }}>
             Get started free
           </h1>
 
@@ -143,9 +143,9 @@ export default function SignupPage() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
+            <div style={{ flex: 1, height: 1, background: 'var(--color-border-main)' }} />
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-2)', letterSpacing: '0.1em' }}>OR</span>
-            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
+            <div style={{ flex: 1, height: 1, background: 'var(--color-border-main)' }} />
           </div>
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

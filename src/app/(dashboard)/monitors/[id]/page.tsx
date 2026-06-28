@@ -13,14 +13,14 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { UptimeBar } from '@/components/ui/UptimeBar';
 
 function getGradeColor(grade: string) {
-  if (!grade) return '#4A4A4A';
+  if (!grade) return 'var(--color-txt-muted)';
   const g = grade.toUpperCase();
   if (g.startsWith('A')) return '#00E676';
   if (g.startsWith('B')) return 'var(--color-acid)';
   if (g.startsWith('C')) return '#FFB300';
   if (g.startsWith('D')) return '#FF9100';
   if (g.startsWith('F')) return '#FF1744';
-  return '#4A4A4A';
+  return 'var(--color-txt-muted)';
 }
 
 function fmtDate(d: string) {
@@ -33,8 +33,8 @@ function fmtTime(d: string) {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{ background: '#0F0F0F', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 3, padding: '10px 14px' }}>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A', marginBottom: 6 }}>{label}</p>
+    <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 3, padding: '10px 14px' }}>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)', marginBottom: 6 }}>{label}</p>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 600, color: 'var(--color-acid)', margin: 0 }}>{payload[0]?.value}ms</p>
     </div>
   );
@@ -65,9 +65,9 @@ function DeleteConfirm({ onConfirm, onCancel }: { onConfirm: () => void; onCance
       background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
-      <div style={{ background: '#0F0F0F', border: '1px solid rgba(255,23,68,0.3)', borderRadius: 6, padding: 32, maxWidth: 400, width: '90%' }}>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: '#F0F0F0', margin: '0 0 12px' }}>Delete monitor?</h3>
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: '#888', margin: '0 0 24px', lineHeight: 1.6 }}>
+      <div style={{ background: 'var(--color-bg-card)', border: '1px solid rgba(255,23,68,0.3)', borderRadius: 6, padding: 32, maxWidth: 400, width: '90%' }}>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--color-txt-primary)', margin: '0 0 12px' }}>Delete monitor?</h3>
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--color-txt-muted)', margin: '0 0 24px', lineHeight: 1.6 }}>
           This will permanently delete the monitor and all its checks, metrics, and security incidents. This action cannot be undone.
         </p>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
@@ -163,7 +163,7 @@ function EditModal({ monitor, token, onSave, onClose }: {
     }
   }
 
-  const labelStyle: React.CSSProperties = { display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: '#666', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' };
+  const labelStyle: React.CSSProperties = { display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' };
 
   return (
     <div style={{
@@ -172,8 +172,8 @@ function EditModal({ monitor, token, onSave, onClose }: {
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       overflowY: 'auto', padding: '24px 0',
     }}>
-      <div style={{ background: '#0A0A0A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: 32, maxWidth: 540, width: '90%', margin: 'auto' }}>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: '#F0F0F0', margin: '0 0 24px' }}>Edit Monitor</h3>
+      <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: 32, maxWidth: 540, width: '90%', margin: 'auto' }}>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--color-txt-primary)', margin: '0 0 24px' }}>Edit Monitor</h3>
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {[
             { label: 'Name', value: name, set: setName, placeholder: 'My API', type: 'text' },
@@ -199,7 +199,7 @@ function EditModal({ monitor, token, onSave, onClose }: {
           </div>
 
           {/* Maintenance Windows */}
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 16 }}>
+          <div style={{ borderTop: '1px solid var(--color-border-main)', paddingTop: 16 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
               <label style={{ ...labelStyle, marginBottom: 0 }}>Maintenance Windows</label>
               {!addingWindow && (
@@ -218,15 +218,15 @@ function EditModal({ monitor, token, onSave, onClose }: {
             )}
 
             {windows.map((w, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: '#0F0F0F', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 3, marginBottom: 6 }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#AAA' }}>{fmtWindow(w)}</span>
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 3, marginBottom: 6 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-secondary)' }}>{fmtWindow(w)}</span>
                 <button type="button" onClick={() => setWindows(prev => prev.filter((_, idx) => idx !== i))}
                   style={{ background: 'transparent', border: 'none', color: '#FF1744', fontSize: 14, cursor: 'pointer', lineHeight: 1, padding: '0 4px' }}>×</button>
               </div>
             ))}
 
             {addingWindow && (
-              <div style={{ background: '#0F0F0F', border: '1px solid rgba(0,240,255,0.15)', borderRadius: 4, padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ background: 'var(--color-bg-card)', border: '1px solid rgba(0,240,255,0.15)', borderRadius: 4, padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div>
                   <label style={labelStyle}>Days</label>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -235,7 +235,7 @@ function EditModal({ monitor, token, onSave, onClose }: {
                       return (
                         <button key={d} type="button"
                           onClick={() => setNewDays(prev => active ? prev.filter(x => x !== i) : [...prev, i].sort())}
-                          style={{ padding: '4px 10px', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer', border: active ? '1px solid var(--color-acid)' : '1px solid rgba(255,255,255,0.1)', background: active ? 'rgba(0,240,255,0.08)' : 'transparent', color: active ? 'var(--color-acid)' : '#666' }}>
+                          style={{ padding: '4px 10px', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer', border: active ? '1px solid var(--color-acid)' : '1px solid var(--color-border-main)', background: active ? 'rgba(0,240,255,0.08)' : 'transparent', color: active ? 'var(--color-acid)' : 'var(--color-txt-muted)' }}>
                           {d}
                         </button>
                       );
@@ -434,7 +434,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {[80, 120, 280].map((h) => (
-          <div key={h} style={{ height: h, background: '#080808', borderRadius: 3, opacity: 0.5 }} />
+          <div key={h} style={{ height: h, background: 'var(--color-bg-card)', borderRadius: 3, opacity: 0.5 }} />
         ))}
       </div>
     );
@@ -458,7 +458,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
     .map((c) => ({ time: fmtTime(c.checkedAt), ms: c.responseTimeMs ?? 0 }));
 
   const uptimePct = metrics?.uptime;
-  const uptimeColor = uptimePct == null ? '#4A4A4A' : uptimePct >= 99 ? 'var(--color-violet-primary)' : uptimePct >= 95 ? '#FFDF00' : 'var(--color-pink-primary)';
+  const uptimeColor = uptimePct == null ? 'var(--color-txt-muted)' : uptimePct >= 99 ? 'var(--color-violet-primary)' : uptimePct >= 95 ? '#FFDF00' : 'var(--color-pink-primary)';
 
   return (
     <>
@@ -468,8 +468,8 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
         {toast && <Toast msg={toast.msg} type={toast.type} />}
 
       {/* Breadcrumb */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 32, fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>
-        <Link href="/dashboard" style={{ color: '#4A4A4A', textDecoration: 'none' }} onMouseEnter={(e) => (e.currentTarget.style.color = '#F0F0F0')} onMouseLeave={(e) => (e.currentTarget.style.color = '#4A4A4A')}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 32, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>
+        <Link href="/dashboard" style={{ color: 'var(--color-txt-muted)', textDecoration: 'none' }} onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-txt-primary)')} onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-txt-muted)')}>
           Monitors
         </Link>
         <span>/</span>
@@ -480,12 +480,12 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 24, marginBottom: 32, flexWrap: 'wrap' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 8, flexWrap: 'wrap' }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 800, color: '#F0F0F0', margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 800, color: 'var(--color-txt-primary)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
               {monitor.name}
             </h1>
             <StatusBadge status={status} />
             {!monitor.isActive && (
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 2, padding: '2px 8px', letterSpacing: '0.1em' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)', border: '1px solid var(--color-border-main)', borderRadius: 2, padding: '2px 8px', letterSpacing: '0.1em' }}>
                 PAUSED
               </span>
             )}
@@ -500,7 +500,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
               </svg>
             </a>
           ) : (
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>Repo-only monitor — no URL configured</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>Repo-only monitor — no URL configured</span>
           )}
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
@@ -529,8 +529,8 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }} className="metrics-deck">
           {[
             { label: 'Uptime', value: uptimePct != null ? `${uptimePct}%` : '—', color: uptimeColor },
-            { label: 'Avg Response', value: metrics?.avgResponseMs != null ? `${metrics.avgResponseMs}ms` : '—', color: '#F0F0F0' },
-            { label: 'SSL Expires', value: checks[0]?.sslDaysLeft != null ? `${checks[0].sslDaysLeft}d` : '—', color: checks[0]?.sslDaysLeft != null && checks[0].sslDaysLeft < 14 ? 'var(--color-pink-primary)' : '#F0F0F0' },
+            { label: 'Avg Response', value: metrics?.avgResponseMs != null ? `${metrics.avgResponseMs}ms` : '—', color: 'var(--color-txt-primary)' },
+            { label: 'SSL Expires', value: checks[0]?.sslDaysLeft != null ? `${checks[0].sslDaysLeft}d` : '—', color: checks[0]?.sslDaysLeft != null && checks[0].sslDaysLeft < 14 ? 'var(--color-pink-primary)' : 'var(--color-txt-primary)' },
             { label: 'Total Checks', value: metrics?.totalChecks ?? '—', color: 'var(--color-text-2)' },
           ].map((m, i) => (
             <div key={m.label} className="glass-card" style={{ padding: '20px 24px', borderRadius: 20 }}>
@@ -566,9 +566,9 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                   </linearGradient>
                 </defs>
                 <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} strokeDasharray="4 4" />
-                <XAxis dataKey="time" tick={{ fontSize: 10, fill: '#4A4A4A', fontFamily: 'var(--font-mono)' }} tickLine={false} axisLine={false} interval="preserveStartEnd" dy={8} />
-                <YAxis tick={{ fontSize: 10, fill: '#4A4A4A', fontFamily: 'var(--font-mono)' }} tickLine={false} axisLine={false} />
-                <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.06)' }} />
+                <XAxis dataKey="time" tick={{ fontSize: 10, fill: 'var(--color-txt-muted)', fontFamily: 'var(--font-mono)' }} tickLine={false} axisLine={false} interval="preserveStartEnd" dy={8} />
+                <YAxis tick={{ fontSize: 10, fill: 'var(--color-txt-muted)', fontFamily: 'var(--font-mono)' }} tickLine={false} axisLine={false} />
+                <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'var(--color-border-main)' }} />
                 <Area type="monotone" dataKey="ms" name="Response" stroke="var(--color-violet-primary)" strokeWidth={1.5} fill="url(#grad)" dot={false} activeDot={{ r: 4, fill: 'var(--color-violet-primary)', stroke: '#000', strokeWidth: 2 }} />
               </AreaChart>
             </ResponsiveContainer>
@@ -582,7 +582,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
           {/* Security Headers Panel */}
           <div className="glass-card" style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', borderRadius: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>HTTP Security Headers</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>HTTP Security Headers</span>
               {(monitor.securityGrade || checks[0]?.securityGrade) && (
                 <span style={{
                   fontFamily: 'var(--font-mono)',
@@ -613,8 +613,8 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                   return (
                     <div key={hdr.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 8, borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                       <div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#FFF' }}>{hdr.name}</div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4A4A4A', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={hdr.value || undefined}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-btn-primary)' }}>{hdr.name}</div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={hdr.value || undefined}>
                           {hdr.value || 'Not configured'}
                         </div>
                       </div>
@@ -633,7 +633,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
               </div>
             ) : (
               <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 180 }}>
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#4A4A4A', textAlign: 'center', margin: 0 }}>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-txt-muted)', textAlign: 'center', margin: 0 }}>
                   No security headers scanned yet.<br />Click "Check Now" above to run an evaluation.
                 </p>
               </div>
@@ -643,7 +643,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
           {/* Network Latency Breakdown Card */}
           <div className="glass-card" style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', borderRadius: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Network Connection Breakdown</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Network Connection Breakdown</span>
               <button
                 onClick={handleRunNetworkDiagnostic}
                 disabled={diagnosingNet}
@@ -694,24 +694,24 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                         <div key={leg.label}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
                             <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: leg.color }} />
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4A4A4A' }}>{leg.label}</span>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)' }}>{leg.label}</span>
                           </div>
-                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#FFF', fontWeight: 'bold' }}>{leg.val}ms</span>
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-txt-btn-primary)', fontWeight: 'bold' }}>{leg.val}ms</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 10 }}>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A' }}>Total Latency:</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--color-border-main)', paddingTop: 10 }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)' }}>Total Latency:</span>
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 'bold', color: 'var(--color-acid)' }}>{netDiagnosticData.timings.totalMs}ms</span>
                   </div>
 
                   {/* AI Advice */}
                   {netDiagnosticData.advice && (
-                    <div style={{ background: '#0F0F0F', border: '1px solid rgba(0,240,255,0.15)', borderRadius: 3, padding: 10 }}>
+                    <div style={{ background: 'var(--color-bg-card)', border: '1px solid rgba(0,240,255,0.15)', borderRadius: 3, padding: 10 }}>
                       <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--color-acid)', marginBottom: 4, letterSpacing: '0.1em' }}>AI SRE PERFORMANCE ADVICE</span>
-                      <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 11, color: '#AAA', lineHeight: 1.4 }}>{netDiagnosticData.advice}</p>
+                      <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--color-txt-secondary)', lineHeight: 1.4 }}>{netDiagnosticData.advice}</p>
                     </div>
                   )}
                 </div>
@@ -724,7 +724,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
               )
             ) : (
               <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 180, border: '1px dashed rgba(255,255,255,0.03)', borderRadius: 3 }}>
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#4A4A4A', textAlign: 'center', margin: 0 }}>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-txt-muted)', textAlign: 'center', margin: 0 }}>
                   No diagnostic run yet.<br />Click "Run Diagnostic" to scan connections in real time.
                 </p>
               </div>
@@ -735,18 +735,18 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
 
       {/* Security Incidents */}
       {monitor.githubRepoUrl && (
-        <div className="glass-card" style={{ padding: 24, border: incidents.length > 0 ? '1px solid var(--color-pink-primary)' : '1px solid rgba(255,255,255,0.07)', borderRadius: 24, marginBottom: 16 }}>
-          <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: incidents.length > 0 ? 'var(--color-pink-primary)' : '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 'bold' }}>
+        <div className="glass-card" style={{ padding: 24, border: incidents.length > 0 ? '1px solid var(--color-pink-primary)' : '1px solid var(--color-border-main)', borderRadius: 24, marginBottom: 16 }}>
+          <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--color-border-main)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: incidents.length > 0 ? 'var(--color-pink-primary)' : 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 'bold' }}>
               Security Incidents
             </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#4A4A4A' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)' }}>
               {incidents.filter(i => !i.resolved).length} Unresolved
             </span>
           </div>
           {incidents.length === 0 ? (
             <div style={{ padding: '32px 24px', textAlign: 'center' }}>
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, margin: '0 0 16px', color: '#888' }}>No security alerts yet.</p>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, margin: '0 0 16px', color: 'var(--color-txt-muted)' }}>No security alerts yet.</p>
               <button onClick={handleScanRepo} disabled={scanning} style={{ background: 'rgba(0,240,255,0.03)', border: '1px solid rgba(0,240,255,0.2)', color: 'var(--color-acid)', padding: '8px 20px', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
                 {scanning ? 'Scanning...' : 'Scan Recent Commits'}
               </button>
@@ -755,11 +755,11 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
             incidents.map((inc, i) => (
               <div key={inc.id} style={{ padding: '16px 24px', borderBottom: i < incidents.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', opacity: inc.resolved ? 0.5 : 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: inc.resolved ? '#888' : 'var(--color-pink-primary)', fontWeight: 'bold' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: inc.resolved ? 'var(--color-txt-muted)' : 'var(--color-pink-primary)', fontWeight: 'bold' }}>
                     [{inc.severity.toUpperCase()}] {inc.riskType}
                   </span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>{fmtDate(inc.createdAt)}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>{fmtDate(inc.createdAt)}</span>
                     {monitor.githubRepoUrl && !inc.resolved && (
                       <button
                         onClick={() => handleGeneratePatch(inc.id, inc.commitHash, inc.description)}
@@ -790,18 +790,18 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                     {inc.resolved && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#00E676' }}>✓ RESOLVED</span>}
                   </div>
                 </div>
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: inc.resolved ? '#888' : '#F0F0F0', margin: '0 0 12px', lineHeight: 1.5 }}>{inc.description}</p>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: inc.resolved ? 'var(--color-txt-muted)' : 'var(--color-txt-primary)', margin: '0 0 12px', lineHeight: 1.5 }}>{inc.description}</p>
                 <div style={{ background: 'rgba(255,20,147,0.05)', padding: 12, borderRadius: 3, border: '1px solid rgba(255,20,147,0.1)', marginBottom: 12 }}>
                   <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-pink-primary)', marginBottom: 4, textTransform: 'uppercase' }}>Recommendation</span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#D0D0D0' }}>{inc.recommendation}</span>
                 </div>
                 <div style={{ display: 'flex', gap: 16 }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#666' }}>Author: {inc.commitAuthor || 'Unknown'}</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>Commit: {inc.commitHash.substring(0, 7)}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>Author: {inc.commitAuthor || 'Unknown'}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>Commit: {inc.commitHash.substring(0, 7)}</span>
                 </div>
 
                 {patchData[inc.id] && (
-                  <div style={{ marginTop: 14, border: '1px solid rgba(0,240,255,0.3)', borderRadius: 3, background: '#050505', overflow: 'hidden' }}>
+                  <div style={{ marginTop: 14, border: '1px solid rgba(0,240,255,0.3)', borderRadius: 3, background: 'var(--color-bg-sidebar)', overflow: 'hidden' }}>
                     <div style={{ padding: '8px 12px', background: 'rgba(0,240,255,0.05)', borderBottom: '1px solid rgba(0,240,255,0.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', fontWeight: 'bold' }}>AI SUGGESTED SECURITY PATCH (GIT DIFF)</span>
                       <button
@@ -819,9 +819,9 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                         <code>{patchData[inc.id].patch}</code>
                       </pre>
                       {patchData[inc.id].explanation && (
-                        <div style={{ marginTop: 10, borderTop: '1px dashed rgba(255,255,255,0.07)', paddingTop: 10 }}>
-                          <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 9, color: '#888', textTransform: 'uppercase', marginBottom: 4 }}>EXPLANATION</span>
-                          <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 12, color: '#AAA', lineHeight: 1.4 }}>{patchData[inc.id].explanation}</p>
+                        <div style={{ marginTop: 10, borderTop: '1px dashed var(--color-border-main)', paddingTop: 10 }}>
+                          <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', marginBottom: 4 }}>EXPLANATION</span>
+                          <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-txt-secondary)', lineHeight: 1.4 }}>{patchData[inc.id].explanation}</p>
                         </div>
                       )}
                     </div>
@@ -835,13 +835,13 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
 
       {/* Check log */}
       {checks.length > 0 && (
-        <div style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 3, overflow: 'hidden' }}>
-          <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Check Log</span>
+        <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 3, overflow: 'hidden' }}>
+          <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--color-border-main)' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Check Log</span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '100px 70px 90px 70px 1fr auto', padding: '10px 24px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
             {['Status', 'Code', 'Response', 'SSL', 'Time', 'Error'].map(h => (
-              <span key={h} style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#2A2A2A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{h}</span>
+              <span key={h} style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{h}</span>
             ))}
           </div>
           {checks.slice(0, 25).map((check, i) => (
@@ -857,14 +857,14 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
               }}
             >
               <div><StatusBadge status={check.status as any} showPulse={false} /></div>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#4A4A4A' }}>{check.statusCode ?? '—'}</span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: check.responseTimeMs && check.responseTimeMs > 2000 ? '#FFDF00' : '#F0F0F0' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-txt-muted)' }}>{check.statusCode ?? '—'}</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: check.responseTimeMs && check.responseTimeMs > 2000 ? '#FFDF00' : 'var(--color-txt-primary)' }}>
                 {check.responseTimeMs != null ? `${check.responseTimeMs}ms` : '—'}
               </span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#4A4A4A' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-txt-muted)' }}>
                 {check.sslDaysLeft != null ? `${check.sslDaysLeft}d` : '—'}
               </span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#2A2A2A' }}>{fmtDate(check.checkedAt)}</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>{fmtDate(check.checkedAt)}</span>
               <span title={check.errorMessage ?? undefined} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#FF1744', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: check.errorMessage ? 'help' : 'default' }}>
                 {check.errorMessage ?? ''}
               </span>
@@ -876,7 +876,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
       {/* Downtime history */}
       {downtime.length > 0 && (
         <div className="glass-card" style={{ padding: 24, border: '1px solid rgba(255,23,68,0.25)', borderRadius: 24, marginTop: 16 }}>
-          <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--color-border-main)' }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#FF1744', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Downtime History</span>
           </div>
           {downtime.map((w, i) => {
@@ -885,8 +885,8 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
             return (
               <div key={i} style={{ padding: '14px 24px', borderBottom: i < downtime.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#F0F0F0' }}>{fmtDate(w.start)}</span>
-                  {w.end && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A', marginLeft: 8 }}>→ {fmtDate(w.end)}</span>}
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-txt-primary)' }}>{fmtDate(w.start)}</span>
+                  {w.end && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)', marginLeft: 8 }}>→ {fmtDate(w.end)}</span>}
                   {!w.end && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#FF1744', marginLeft: 8, letterSpacing: '0.08em' }}>ONGOING</span>}
                 </div>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 600, color: '#FF1744' }}>{durationStr}</span>
@@ -909,7 +909,7 @@ function InlineResolve({ incidentId, token, onResolved }: { incidentId: string; 
   if (!confirming) {
     return (
       <button onClick={() => setConfirming(true)}
-        style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#F0F0F0', padding: '4px 8px', borderRadius: 3, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
+        style={{ background: 'transparent', border: '1px solid var(--color-border-hover)', color: 'var(--color-txt-primary)', padding: '4px 8px', borderRadius: 3, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
         Resolve
       </button>
     );
@@ -930,7 +930,7 @@ function InlineResolve({ incidentId, token, onResolved }: { incidentId: string; 
         {loading ? '...' : 'Yes'}
       </button>
       <button onClick={() => setConfirming(false)}
-        style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: '#888', padding: '4px 8px', borderRadius: 3, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
+        style={{ background: 'transparent', border: '1px solid var(--color-border-main)', color: 'var(--color-txt-muted)', padding: '4px 8px', borderRadius: 3, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
         No
       </button>
     </div>
@@ -938,7 +938,7 @@ function InlineResolve({ incidentId, token, onResolved }: { incidentId: string; 
 }
 
 function Spinner({ color }: { color: string }) {
-  return <span style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.15)', borderTopColor: color, borderRadius: '50%', animation: 'pg-spin 0.7s linear infinite', display: 'inline-block', marginRight: 6 }} />;
+  return <span style={{ width: 12, height: 12, border: '2px solid var(--color-border-main)', borderTopColor: color, borderRadius: '50%', animation: 'pg-spin 0.7s linear infinite', display: 'inline-block', marginRight: 6 }} />;
 }
 function ShieldIcon() {
   return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>;

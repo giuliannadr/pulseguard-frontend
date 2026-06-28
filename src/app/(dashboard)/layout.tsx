@@ -46,8 +46,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         height: '100dvh',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#060813',
-        color: '#666',
+        background: 'var(--color-bg-base)',
+        color: 'var(--color-txt-muted)',
         fontFamily: 'var(--font-body)',
         fontSize: 14,
       }}>
@@ -66,17 +66,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#030514" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="var(--color-bg-base)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 14, color: '#F0F0F0' }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 14, color: 'var(--color-txt-primary)' }}>
             PulseGuard
           </span>
         </Link>
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           style={{
-            background: 'transparent', border: 'none', color: '#F0F0F0', cursor: 'pointer',
+            background: 'transparent', border: 'none', color: 'var(--color-txt-primary)', cursor: 'pointer',
             padding: 8, display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}
         >

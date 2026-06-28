@@ -52,7 +52,7 @@ function LoginForm() {
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
         // Auth
       </p>
-      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: '#F0F0F0', margin: '0 0 32px', letterSpacing: '-0.02em' }}>
+      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: 'var(--color-txt-primary)', margin: '0 0 32px', letterSpacing: '-0.02em' }}>
         Welcome back
       </h1>
 
@@ -64,9 +64,9 @@ function LoginForm() {
 
       {/* Divider */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-        <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
+        <div style={{ flex: 1, height: 1, background: 'var(--color-border-main)' }} />
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-2)', letterSpacing: '0.1em' }}>OR</span>
-        <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
+        <div style={{ flex: 1, height: 1, background: 'var(--color-border-main)' }} />
       </div>
 
       {/* Form */}
@@ -132,7 +132,7 @@ export default function LoginPage() {
       style={{
         minHeight: '100dvh',
         display: 'flex',
-        background: '#03050F',
+        background: 'var(--color-bg-base)',
         fontFamily: 'var(--font-body)',
         overflow: 'hidden',
       }}
@@ -142,86 +142,80 @@ export default function LoginPage() {
         style={{
           display: 'none',
           flex: 1,
-          background: '#080C24',
-          borderRight: '1px solid rgba(0, 240, 255, 0.1)',
+          background: 'linear-gradient(160deg, #1E1050 0%, #2D1B69 40%, #1a0f42 100%)',
+          borderRight: '1px solid var(--color-border-main)',
           padding: '60px 64px',
           flexDirection: 'column',
           justifyContent: 'space-between',
           position: 'relative',
           overflow: 'hidden',
-          backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0, 240, 255, 0.05) 1.5px, transparent 0)',
-          backgroundSize: '24px 24px'
         }}
         className="auth-left-panel"
       >
-        {/* Glow Effects */}
+        {/* Subtle glow effects */}
         <div style={{
-          position: 'absolute', top: '-10%', left: '-10%', width: '40vw', height: '40vw',
-          background: 'radial-gradient(circle, rgba(0, 240, 255, 0.12) 0%, transparent 70%)',
-          filter: 'blur(80px)', pointerEvents: 'none'
+          position: 'absolute', top: '-20%', right: '-20%', width: '60vw', height: '60vw',
+          background: 'radial-gradient(circle, rgba(245, 158, 11, 0.12) 0%, transparent 65%)',
+          filter: 'blur(60px)', pointerEvents: 'none'
         }} />
         <div style={{
-          position: 'absolute', bottom: '-10%', right: '-10%', width: '40vw', height: '40vw',
-          background: 'radial-gradient(circle, rgba(255, 0, 127, 0.08) 0%, transparent 70%)',
-          filter: 'blur(80px)', pointerEvents: 'none'
+          position: 'absolute', bottom: '-15%', left: '-10%', width: '40vw', height: '40vw',
+          background: 'radial-gradient(circle, rgba(196, 181, 253, 0.08) 0%, transparent 65%)',
+          filter: 'blur(60px)', pointerEvents: 'none'
         }} />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, zIndex: 10 }}>
-          <div style={{ width: 28, height: 28, background: 'var(--color-acid)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#030514" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <div style={{ width: 32, height: 32, background: '#F59E0B', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#1A0F42" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: '#F0F0F0' }}>PulseGuard</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 17, color: '#F9FAFB' }}>PulseGuard</span>
         </div>
 
         {/* Mockup Dashboard Cards */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20, zIndex: 10, margin: '40px 0', maxWidth: 440 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, zIndex: 10, margin: '40px 0', maxWidth: 440 }}>
           
-          {/* Main Balance/Uptime Card */}
-          <div className="glass-card" style={{ borderRadius: 24, padding: 24, background: 'linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(255, 0, 127, 0.15) 100%)', border: '1px solid rgba(0, 240, 255, 0.25)' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Global Performance</span>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 12, marginBottom: 8 }}>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 800, color: '#F0F0F0', margin: 0 }}>99.98%</h3>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#00F0FF', background: 'rgba(0, 240, 255, 0.1)', padding: '2px 8px', borderRadius: 999 }}>+0.02% today</span>
+          {/* Main Uptime Card */}
+          <div style={{ borderRadius: 16, padding: 24, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Global Uptime</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 10, marginBottom: 8 }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 40, fontWeight: 800, color: '#F9FAFB', margin: 0 }}>99.98%</h3>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#10B981', background: 'rgba(16,185,129,0.12)', padding: '2px 10px', borderRadius: 6 }}>All systems go</span>
             </div>
-            <div style={{ display: 'flex', gap: 3, height: 12, marginTop: 16 }}>
-              {[...Array(24)].map((_, i) => (
-                <div key={i} style={{ flex: 1, background: i === 15 ? '#FF007F' : '#00F0FF', opacity: 0.8, borderRadius: 1.5 }} />
+            <div style={{ display: 'flex', gap: 3, height: 10, marginTop: 14 }}>
+              {[...Array(28)].map((_, i) => (
+                <div key={i} style={{ flex: 1, background: i === 18 ? '#EF4444' : '#C4B5FD', opacity: i === 18 ? 1 : 0.65, borderRadius: 2 }} />
               ))}
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            {/* Latency card */}
-            <div className="glass-card" style={{ borderRadius: 20, padding: 20, background: 'rgba(8, 12, 36, 0.7)' }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-2)', textTransform: 'uppercase' }}>Avg Latency</span>
-              <div style={{ fontSize: 24, fontWeight: 700, color: '#F0F0F0', marginTop: 8, fontFamily: 'var(--font-mono)' }}>34.2ms</div>
-              <div style={{ height: 32, display: 'flex', alignItems: 'flex-end', gap: 4, marginTop: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div style={{ borderRadius: 14, padding: 18, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Avg Latency</span>
+              <div style={{ fontSize: 26, fontWeight: 700, color: '#F9FAFB', marginTop: 8, fontFamily: 'var(--font-mono)' }}>34ms</div>
+              <div style={{ height: 28, display: 'flex', alignItems: 'flex-end', gap: 3, marginTop: 10 }}>
                 {[6, 8, 4, 9, 12, 7, 5, 8, 10, 6].map((h, i) => (
-                  <div key={i} style={{ flex: 1, background: 'var(--color-acid)', height: `${(h/12)*100}%`, opacity: 0.6, borderRadius: 2 }} />
+                  <div key={i} style={{ flex: 1, background: '#C4B5FD', height: `${(h/12)*100}%`, opacity: 0.7, borderRadius: 2 }} />
                 ))}
               </div>
             </div>
-
-            {/* Incidents card */}
-            <div className="glass-card" style={{ borderRadius: 20, padding: 20, background: 'rgba(8, 12, 36, 0.7)' }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-2)', textTransform: 'uppercase' }}>Sec Shield</span>
-              <div style={{ fontSize: 20, fontWeight: 700, color: '#00F0FF', marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <div style={{ borderRadius: 14, padding: 18, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Sec Shield</span>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#10B981', marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                 Secured
               </div>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-text-2)', margin: '14px 0 0' }}>0 Active Incidents</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'rgba(255,255,255,0.35)', margin: '12px 0 0' }}>0 Active Incidents</p>
             </div>
           </div>
-
         </div>
 
         <div>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 16 }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#F59E0B', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 14 }}>
             // Precision monitoring
           </p>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 40, fontWeight: 800, color: '#F0F0F0', lineHeight: 1.1, letterSpacing: '-0.03em', margin: 0 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 38, fontWeight: 800, color: '#F9FAFB', lineHeight: 1.15, letterSpacing: '-0.03em', margin: 0 }}>
             Know when<br />things break<br />before users do.
           </h2>
         </div>
@@ -243,15 +237,15 @@ export default function LoginPage() {
       >
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 48, alignSelf: 'flex-start' }}>
-          <div style={{ width: 28, height: 28, background: 'var(--color-acid)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 28, height: 28, background: 'var(--color-brand-primary)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#030514" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="var(--color-txt-btn-primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: '#F0F0F0' }}>PulseGuard</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: 'var(--color-txt-primary)' }}>PulseGuard</span>
         </div>
 
-        <Suspense fallback={<div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-2)' }}>Loading...</div>}>
+        <Suspense fallback={<div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-txt-muted)' }}>Loading...</div>}>
           <LoginForm />
         </Suspense>
       </div>
@@ -285,7 +279,7 @@ function OAuthBtn({ provider, label, loading, onClick }: { provider: string; lab
       onClick={onClick}
       disabled={loading}
       className="btn-glass"
-      style={{ width: '100%', justifyContent: 'center', gap: 10, borderRadius: 999 }}
+      style={{ width: '100%', justifyContent: 'center', gap: 10, borderRadius: 8 }}
     >
       {icon}
       {label}

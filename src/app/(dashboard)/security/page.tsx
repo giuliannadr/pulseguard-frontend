@@ -81,32 +81,32 @@ export default function SecurityPage() {
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-pink-primary)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
             // {t('sec_global')}
           </p>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: '#F0F0F0', margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: 'var(--color-txt-primary)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
             {t('sec_title')}
           </h1>
         </div>
       </div>
 
       {/* ── Stat row ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, marginBottom: 32, border: '1px solid rgba(255,255,255,0.07)', borderRadius: 3, overflow: 'hidden' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, marginBottom: 32, border: '1px solid var(--color-border-main)', borderRadius: 3, overflow: 'hidden' }}>
         {[
-          { label: t('sec_critical'), value: critical, color: critical > 0 ? '#FF1744' : '#F0F0F0' },
-          { label: t('sec_high'),     value: high,     color: high > 0 ? '#FFB300' : '#F0F0F0' },
-          { label: t('sec_medium'),   value: medium,   color: medium > 0 ? '#F0F0F0' : '#4A4A4A' },
+          { label: t('sec_critical'), value: critical, color: critical > 0 ? '#FF1744' : 'var(--color-txt-primary)' },
+          { label: t('sec_high'),     value: high,     color: high > 0 ? '#FFB300' : 'var(--color-txt-primary)' },
+          { label: t('sec_medium'),   value: medium,   color: medium > 0 ? 'var(--color-txt-primary)' : 'var(--color-txt-muted)' },
           { label: t('sec_resolved'), value: resolved, color: '#00E676' },
         ].map((s, i) => (
           <div
             key={s.label}
             style={{
               padding: '20px 24px',
-              background: '#080808',
-              borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+              background: 'var(--color-bg-card)',
+              borderLeft: i > 0 ? '1px solid var(--color-border-main)' : 'none',
             }}
           >
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 28, fontWeight: 600, color: s.color, lineHeight: 1, marginBottom: 6 }}>
               {loading ? '—' : s.value}
             </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#4A4A4A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               {s.label}
             </div>
           </div>
@@ -116,13 +116,13 @@ export default function SecurityPage() {
       {loading ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           {[...Array(3)].map((_, i) => (
-            <div key={i} style={{ height: 72, background: '#080808', borderRadius: 3, opacity: 0.5 }} />
+            <div key={i} style={{ height: 72, background: 'var(--color-bg-card)', borderRadius: 3, opacity: 0.5 }} />
           ))}
         </div>
       ) : incidents.length === 0 ? (
-        <div style={{ border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 3, padding: '80px 40px', textAlign: 'center' }}>
+        <div style={{ border: '1px dashed var(--color-border-main)', borderRadius: 3, padding: '80px 40px', textAlign: 'center' }}>
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: '#00E676', margin: '0 0 8px' }}>{t('sec_all_clear')}</h3>
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#4A4A4A', margin: 0 }}>{t('sec_no_incidents')}</p>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-txt-muted)', margin: 0 }}>{t('sec_no_incidents')}</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -130,8 +130,8 @@ export default function SecurityPage() {
             <div 
               key={inc.id} 
               style={{ 
-                background: '#080808', 
-                border: inc.resolved ? '1px solid rgba(255,255,255,0.05)' : `1px solid ${inc.severity === 'Critical' ? '#FF1744' : inc.severity === 'High' ? '#FFB300' : 'var(--color-pink-primary)'}`, 
+                background: 'var(--color-bg-card)', 
+                border: inc.resolved ? '1px solid var(--color-border-main)' : `1px solid ${inc.severity === 'Critical' ? '#FF1744' : inc.severity === 'High' ? '#FFB300' : 'var(--color-pink-primary)'}`, 
                 borderRadius: 3, 
                 padding: '20px 24px',
                 opacity: inc.resolved ? 0.5 : 1,
@@ -146,17 +146,17 @@ export default function SecurityPage() {
                       fontSize: 11, 
                       fontWeight: 700, 
                       color: '#000', 
-                      background: inc.resolved ? '#4A4A4A' : inc.severity === 'Critical' ? '#FF1744' : inc.severity === 'High' ? '#FFB300' : 'var(--color-pink-primary)', 
+                      background: inc.resolved ? 'var(--color-txt-muted)' : inc.severity === 'Critical' ? '#FF1744' : inc.severity === 'High' ? '#FFB300' : 'var(--color-pink-primary)', 
                       padding: '2px 8px', 
                       borderRadius: 2 
                     }}>
                       {inc.severity.toUpperCase()}
                     </span>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, color: inc.resolved ? '#888' : '#F0F0F0', fontWeight: 'bold' }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, color: inc.resolved ? 'var(--color-txt-muted)' : 'var(--color-txt-primary)', fontWeight: 'bold' }}>
                       {inc.riskType}
                     </span>
                   </div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)', display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span>{t('dash_project')}:</span>
                     <Link href={`/monitors/${inc.monitorId}`} style={{ color: 'var(--color-violet-primary)', textDecoration: 'none' }}>
                       {inc.monitor?.name}
@@ -171,15 +171,15 @@ export default function SecurityPage() {
                     onClick={() => handleResolve(inc.id)}
                     style={{ 
                       background: 'transparent', 
-                      border: '1px solid rgba(255,255,255,0.1)', 
-                      color: '#F0F0F0', 
+                      border: '1px solid var(--color-border-main)', 
+                      color: 'var(--color-txt-primary)', 
                       padding: '6px 12px', 
                       borderRadius: 3, 
                       fontSize: 11, 
                       fontFamily: 'var(--font-mono)', 
                       cursor: 'pointer' 
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-border-main)'}
                     onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                   >
                     ✔ {t('btn_resolve')}
@@ -192,24 +192,24 @@ export default function SecurityPage() {
                 )}
               </div>
               
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: inc.resolved ? '#666' : '#D0D0D0', margin: '0 0 16px 0', lineHeight: 1.5 }}>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: inc.resolved ? 'var(--color-txt-muted)' : '#D0D0D0', margin: '0 0 16px 0', lineHeight: 1.5 }}>
                 {inc.description}
               </p>
               
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: 12, borderRadius: 3, border: '1px solid rgba(255,255,255,0.05)' }}>
-                <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: '#888', marginBottom: 4, textTransform: 'uppercase' }}>
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: 12, borderRadius: 3, border: '1px solid var(--color-border-main)' }}>
+                <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)', marginBottom: 4, textTransform: 'uppercase' }}>
                   {t('sec_recommendation')}
                 </span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: inc.resolved ? '#666' : '#A0A0A0' }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: inc.resolved ? 'var(--color-txt-muted)' : '#A0A0A0' }}>
                   {inc.recommendation}
                 </span>
               </div>
               
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 12 }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: inc.resolved ? '#4A4A4A' : '#8A2BE2' }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: inc.resolved ? 'var(--color-txt-muted)' : '#8A2BE2' }}>
                   👤 {t('sec_author')}: {inc.commitAuthor || 'Unknown'}
                 </span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#4A4A4A' }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>
                   Commit: {inc.commitHash.substring(0, 7)}
                 </span>
               </div>

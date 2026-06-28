@@ -138,16 +138,16 @@ export default function SettingsPage() {
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
           // System Config
         </p>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: '#F0F0F0', margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: 'var(--color-txt-primary)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
           {t('settings_title')}
         </h1>
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#666', marginTop: 8 }}>
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-txt-muted)', marginTop: 8 }}>
           {t('settings_desc')}
         </p>
       </div>
 
       {/* Tabs Selector */}
-      <div style={{ display: 'flex', gap: 8, borderBottom: '1px solid rgba(255,255,255,0.07)', paddingBottom: 16, marginBottom: 32 }}>
+      <div style={{ display: 'flex', gap: 8, borderBottom: '1px solid var(--color-border-main)', paddingBottom: 16, marginBottom: 32 }}>
         {[
           { id: 'pref', name: t('settings_tab_pref') },
           { id: 'integ', name: t('settings_tab_integ') },
@@ -160,7 +160,7 @@ export default function SettingsPage() {
               background: activeTab === t.id ? 'rgba(0,240,255,0.05)' : 'transparent',
               border: activeTab === t.id ? '1px solid rgba(0,240,255,0.3)' : '1px solid transparent',
               borderRadius: 3,
-              color: activeTab === t.id ? 'var(--color-acid)' : '#888',
+              color: activeTab === t.id ? 'var(--color-acid)' : 'var(--color-txt-muted)',
               fontFamily: 'var(--font-mono)',
               fontSize: 12,
               cursor: 'pointer',
@@ -173,7 +173,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Tab Content */}
-      <div style={{ background: '#080808', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 3, padding: 28 }}>
+      <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 3, padding: 28 }}>
         
         {/* Tab 1: Preferences */}
         {activeTab === 'pref' && (
@@ -181,7 +181,7 @@ export default function SettingsPage() {
             
             {/* Language Selector */}
             <div>
-              <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 11, color: '#F0F0F0', fontWeight: 'bold', marginBottom: 6 }}>
+              <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-primary)', fontWeight: 'bold', marginBottom: 6 }}>
                 {t('settings_lang')}
               </label>
               <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: '#555', margin: '0 0 12px 0' }}>
@@ -194,8 +194,8 @@ export default function SettingsPage() {
                   style={{
                     padding: '8px 18px',
                     background: language === 'en' ? 'rgba(0,240,255,0.05)' : 'transparent',
-                    border: language === 'en' ? '1px solid var(--color-acid)' : '1px solid rgba(255,255,255,0.1)',
-                    color: language === 'en' ? 'var(--color-acid)' : '#888',
+                    border: language === 'en' ? '1px solid var(--color-acid)' : '1px solid var(--color-border-main)',
+                    color: language === 'en' ? 'var(--color-acid)' : 'var(--color-txt-muted)',
                     fontFamily: 'var(--font-mono)',
                     fontSize: 12,
                     borderRadius: 3,
@@ -211,8 +211,8 @@ export default function SettingsPage() {
                   style={{
                     padding: '8px 18px',
                     background: language === 'es' ? 'rgba(0,240,255,0.05)' : 'transparent',
-                    border: language === 'es' ? '1px solid var(--color-acid)' : '1px solid rgba(255,255,255,0.1)',
-                    color: language === 'es' ? 'var(--color-acid)' : '#888',
+                    border: language === 'es' ? '1px solid var(--color-acid)' : '1px solid var(--color-border-main)',
+                    color: language === 'es' ? 'var(--color-acid)' : 'var(--color-txt-muted)',
                     fontFamily: 'var(--font-mono)',
                     fontSize: 12,
                     borderRadius: 3,
@@ -227,7 +227,7 @@ export default function SettingsPage() {
 
             {/* Webhook Configuration */}
             <div>
-              <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 11, color: '#F0F0F0', fontWeight: 'bold', marginBottom: 6 }}>
+              <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-primary)', fontWeight: 'bold', marginBottom: 6 }}>
                 {t('settings_alert')}
               </label>
               <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: '#555', margin: '0 0 12px 0' }}>
@@ -241,8 +241,8 @@ export default function SettingsPage() {
                 style={{
                   width: '100%',
                   background: '#000',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  color: '#F0F0F0',
+                  border: '1px solid var(--color-border-main)',
+                  color: 'var(--color-txt-primary)',
                   fontFamily: 'var(--font-mono)',
                   fontSize: 12,
                   padding: '0 12px',
@@ -256,8 +256,8 @@ export default function SettingsPage() {
                 onClick={handleSendTestWebhook}
                 style={{
                   background: 'transparent',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  color: '#F0F0F0',
+                  border: '1px solid var(--color-border-main)',
+                  color: 'var(--color-txt-primary)',
                   padding: '6px 12px',
                   borderRadius: 3,
                   fontSize: 11,
@@ -265,22 +265,22 @@ export default function SettingsPage() {
                   cursor: 'pointer',
                   transition: 'background 0.15s'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-border-main)'}
                 onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
               >
                 Send Test Alert Webhook
               </button>
               {testStatus && (
-                <div style={{ marginTop: 8, fontSize: 11, fontFamily: 'var(--font-mono)', color: '#888' }}>
+                <div style={{ marginTop: 8, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-muted)' }}>
                   {testStatus}
                 </div>
               )}
-              <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--color-border-main)' }}>
                 <button
                   type="button"
                   onClick={handleApplyWebhookToAll}
                   disabled={applyingToAll || !webhookUrl}
-                  style={{ background: 'transparent', border: '1px solid rgba(0,240,255,0.2)', color: webhookUrl ? 'var(--color-acid)' : '#4A4A4A', padding: '6px 12px', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: webhookUrl ? 'pointer' : 'not-allowed' }}
+                  style={{ background: 'transparent', border: '1px solid rgba(0,240,255,0.2)', color: webhookUrl ? 'var(--color-acid)' : 'var(--color-txt-muted)', padding: '6px 12px', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: webhookUrl ? 'pointer' : 'not-allowed' }}
                 >
                   {applyingToAll ? 'Applying...' : 'Apply to all existing monitors'}
                 </button>
@@ -316,10 +316,10 @@ export default function SettingsPage() {
         {activeTab === 'integ' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             <div>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: '#F0F0F0', margin: '0 0 8px' }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--color-txt-primary)', margin: '0 0 8px' }}>
                 {t('settings_gh_status')}
               </h3>
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#888', lineHeight: 1.5, margin: '0 0 16px 0' }}>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-txt-muted)', lineHeight: 1.5, margin: '0 0 16px 0' }}>
                 {githubConnected ? t('settings_gh_connected') : t('settings_gh_not_connected')}
               </p>
               
@@ -336,11 +336,11 @@ export default function SettingsPage() {
             </div>
 
             {userId && (
-              <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 20 }}>
-                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: '#F0F0F0', margin: '0 0 6px' }}>
+              <div style={{ borderTop: '1px solid var(--color-border-main)', paddingTop: 20 }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--color-txt-primary)', margin: '0 0 6px' }}>
                   Public Status Page
                 </h3>
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#888', lineHeight: 1.5, margin: '0 0 14px 0' }}>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-txt-muted)', lineHeight: 1.5, margin: '0 0 14px 0' }}>
                   Share this URL so anyone can see your monitors' live status without logging in.
                 </p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -352,7 +352,7 @@ export default function SettingsPage() {
                       const url = `${window.location.origin}/s/${userId}`;
                       navigator.clipboard.writeText(url).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
                     }}
-                    style={{ background: copied ? 'rgba(0,230,118,0.1)' : 'transparent', border: `1px solid ${copied ? '#00E676' : 'rgba(255,255,255,0.15)'}`, color: copied ? '#00E676' : '#F0F0F0', padding: '8px 14px', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
+                    style={{ background: copied ? 'rgba(0,230,118,0.1)' : 'transparent', border: `1px solid ${copied ? '#00E676' : 'var(--color-border-main)'}`, color: copied ? '#00E676' : 'var(--color-txt-primary)', padding: '8px 14px', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.15s' }}
                   >
                     {copied ? '✓ Copied' : 'Copy URL'}
                   </button>
@@ -360,15 +360,15 @@ export default function SettingsPage() {
               </div>
             )}
 
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 20 }}>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: '#F0F0F0', margin: '0 0 8px' }}>
+            <div style={{ borderTop: '1px solid var(--color-border-main)', paddingTop: 20 }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--color-txt-primary)', margin: '0 0 8px' }}>
                 Supabase Session Profile
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: 10, fontSize: 12, fontFamily: 'var(--font-mono)' }}>
-                <span style={{ color: '#4A4A4A' }}>Email:</span>
-                <span style={{ color: '#F0F0F0' }}>{userEmail || '—'}</span>
+                <span style={{ color: 'var(--color-txt-muted)' }}>Email:</span>
+                <span style={{ color: 'var(--color-txt-primary)' }}>{userEmail || '—'}</span>
                 
-                <span style={{ color: '#4A4A4A' }}>Status:</span>
+                <span style={{ color: 'var(--color-txt-muted)' }}>Status:</span>
                 <span style={{ color: '#00E676' }}>{t('settings_active_session') || 'Active Session'}</span>
               </div>
             </div>

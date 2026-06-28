@@ -24,8 +24,8 @@ export default function LandingPage() {
         minHeight: '100dvh',
         display: 'flex',
         flexDirection: 'column',
-        background: '#030514',
-        color: '#F0F0F0',
+        background: 'var(--color-bg-base)',
+        color: 'var(--color-txt-primary)',
         fontFamily: 'var(--font-body)',
         overflowX: 'hidden',
         position: 'relative',
@@ -74,17 +74,17 @@ export default function LandingPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 26, height: 26, background: 'var(--color-acid)', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#030514" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="var(--color-bg-base)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 15, color: '#F0F0F0', letterSpacing: '-0.01em' }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 15, color: 'var(--color-txt-primary)', letterSpacing: '-0.01em' }}>
             PulseGuard
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Link href="/status" style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#6D7B9B', textDecoration: 'none', padding: '6px 14px', letterSpacing: '0.06em', transition: 'color 0.15s' }}
+          <Link href="/status" style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-secondary)', textDecoration: 'none', padding: '6px 14px', letterSpacing: '0.06em', transition: 'color 0.15s' }}
             onMouseEnter={(e) => (e.currentTarget.style.color = '#00F0FF')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = '#6D7B9B')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-txt-secondary)')}
           >
             Status
           </Link>
@@ -157,7 +157,7 @@ export default function LandingPage() {
               style={{
                 fontFamily: 'var(--font-body)',
                 fontSize: 16,
-                color: '#6D7B9B',
+                color: 'var(--color-txt-secondary)',
                 lineHeight: 1.65,
                 margin: '0 0 40px',
                 maxWidth: 440,
@@ -184,7 +184,7 @@ export default function LandingPage() {
               {[['1min', 'Check interval'], ['SSL', 'Expiry tracking'], ['∞', 'Check history']].map(([v, l]) => (
                 <div key={l}>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: 20, fontWeight: 600, color: 'var(--color-acid)', marginBottom: 4, textShadow: '0 0 10px rgba(0, 240, 255, 0.2)' }}>{v}</div>
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#6D7B9B', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{l}</div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-secondary)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{l}</div>
                 </div>
               ))}
             </div>
@@ -204,7 +204,7 @@ export default function LandingPage() {
           >
             {/* Card header */}
             <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(0, 240, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 10, color: '#6D7B9B', letterSpacing: '0.1em', textTransform: 'uppercase' }}>// Live monitors</span>
+              <span style={{ fontSize: 10, color: 'var(--color-txt-secondary)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>// Live monitors</span>
               <span style={{ fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.05em', textShadow: '0 0 8px rgba(0, 240, 255, 0.3)' }}>● LIVE</span>
             </div>
  
@@ -232,9 +232,9 @@ export default function LandingPage() {
                       flexShrink: 0,
                     }}
                   />
-                  <span style={{ fontSize: 12, color: '#F0F0F0' }}>{item.name}</span>
+                  <span style={{ fontSize: 12, color: 'var(--color-txt-primary)' }}>{item.name}</span>
                 </div>
-                <span style={{ fontSize: 11, color: item.ms ? '#6D7B9B' : '#FF007F', fontWeight: item.ms ? 'normal' : 'bold' }}>
+                <span style={{ fontSize: 11, color: item.ms ? 'var(--color-txt-secondary)' : '#FF007F', fontWeight: item.ms ? 'normal' : 'bold' }}>
                   {item.ms ? `${item.ms}ms` : 'DOWN'}
                 </span>
               </div>
@@ -298,10 +298,10 @@ export default function LandingPage() {
                 className="feature-cell"
               >
                 <div style={{ fontFamily: 'var(--font-mono)', fontSize: 22, color: '#FF007F', marginBottom: 16, textShadow: '0 0 8px rgba(255, 0, 127, 0.4)' }}>{f.icon}</div>
-                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: '#F0F0F0', margin: '0 0 8px', letterSpacing: '-0.01em' }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--color-txt-primary)', margin: '0 0 8px', letterSpacing: '-0.01em' }}>
                   {f.title}
                 </h3>
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: '#6D7B9B', margin: 0, lineHeight: 1.6 }}>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-txt-secondary)', margin: 0, lineHeight: 1.6 }}>
                   {f.desc}
                 </p>
               </div>
@@ -319,7 +319,7 @@ export default function LandingPage() {
               fontFamily: 'var(--font-display)',
               fontSize: 'clamp(36px, 4vw, 52px)',
               fontWeight: 800,
-              color: '#F0F0F0',
+              color: 'var(--color-txt-primary)',
               margin: '0 0 20px',
               letterSpacing: '-0.03em',
               lineHeight: 1.1,
@@ -327,7 +327,7 @@ export default function LandingPage() {
           >
             Your infrastructure,<br />always visible.
           </h2>
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: 15, color: '#6D7B9B', margin: '0 0 36px', lineHeight: 1.65 }}>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: 15, color: 'var(--color-txt-secondary)', margin: '0 0 36px', lineHeight: 1.65 }}>
             Add monitors in 30 seconds. No credit card required.
           </p>
           <Link href="/signup" className="btn-solid-glow" style={{ height: 52, fontSize: 14, padding: '0 36px' }}>
@@ -341,12 +341,12 @@ export default function LandingPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{ width: 18, height: 18, background: 'var(--color-acid)', borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="9" height="9" viewBox="0 0 24 24" fill="none">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#030514" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="var(--color-bg-base)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#6D7B9B', letterSpacing: '0.06em' }}>PulseGuard</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-secondary)', letterSpacing: '0.06em' }}>PulseGuard</span>
         </div>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#6D7B9B', letterSpacing: '0.06em' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-secondary)', letterSpacing: '0.06em' }}>
           Built for AranguriApps Challenge · 2026
         </span>
       </footer>

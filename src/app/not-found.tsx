@@ -10,10 +10,10 @@ export default function NotFound() {
       <p style={{ fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px' }}>
         // 404
       </p>
-      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 72, fontWeight: 800, color: '#F0F0F0', margin: '0 0 12px', letterSpacing: '-0.04em', lineHeight: 1 }}>
+      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 72, fontWeight: 800, color: 'var(--color-txt-primary)', margin: '0 0 12px', letterSpacing: '-0.04em', lineHeight: 1 }}>
         Not Found
       </h1>
-      <p style={{ fontSize: 13, color: '#4A4A4A', margin: '0 0 32px' }}>
+      <p style={{ fontSize: 13, color: 'var(--color-txt-muted)', margin: '0 0 32px' }}>
         This page doesn&apos;t exist or was moved.
       </p>
       <Link href="/dashboard" style={{

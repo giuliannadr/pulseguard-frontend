@@ -11,7 +11,7 @@ const colors: Record<string, string> = {
   up:       '#00E676',
   down:     '#FF1744',
   degraded: '#FFB300',
-  empty:    'rgba(255,255,255,0.05)',
+  empty:    'var(--color-border-main)',
 };
 
 export function UptimeBar({ checks, segments = 60 }: Props) {

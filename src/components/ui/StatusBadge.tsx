@@ -6,7 +6,7 @@ const cfg: Record<MonitorStatus, { label: string; dot: string; text: string; bg:
   up:       { label: 'UP',       dot: '#00E676', text: '#00E676', bg: 'rgba(0,230,118,0.08)',  border: 'rgba(0,230,118,0.2)' },
   down:     { label: 'DOWN',     dot: '#FF1744', text: '#FF1744', bg: 'rgba(255,23,68,0.08)',   border: 'rgba(255,23,68,0.2)' },
   degraded: { label: 'DEGRADED', dot: '#FFB300', text: '#FFB300', bg: 'rgba(255,179,0,0.08)',   border: 'rgba(255,179,0,0.2)' },
-  unknown:  { label: 'UNKNOWN',  dot: '#4A4A4A', text: '#4A4A4A', bg: 'rgba(255,255,255,0.03)', border: 'rgba(255,255,255,0.07)' },
+  unknown:  { label: 'UNKNOWN',  dot: 'var(--color-txt-muted)', text: 'var(--color-txt-muted)', bg: 'rgba(255,255,255,0.03)', border: 'var(--color-border-main)' },
 };
 
 interface Props {
