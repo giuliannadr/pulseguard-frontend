@@ -622,7 +622,7 @@ export default function DashboardPage() {
                     color: 'var(--color-brand-primary)',
                   },
                   {
-                    label: t('dash_ssl_label'),
+                    label: t('dash_ssl'),
                     value: selectedMonitor.checks?.[0]?.sslDaysLeft != null ? `${selectedMonitor.checks[0].sslDaysLeft}d` : '—',
                     color: 'var(--color-accent-amber)',
                   },
