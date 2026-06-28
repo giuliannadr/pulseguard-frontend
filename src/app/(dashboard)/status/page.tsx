@@ -42,8 +42,8 @@ export default function StatusPage() {
     <div style={{ width: '100%', maxWidth: 800, margin: '0 auto', animation: 'pg-fade-in 0.35s ease-out both' }}>
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: 48 }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
-          // Infrastructure
+        <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 8px', fontFamily: 'var(--font-body)' }}>
+          Infrastructure
         </p>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 800, color: 'var(--color-txt-primary)', margin: '0 0 8px', letterSpacing: '-0.02em' }}>
           System Status
@@ -63,9 +63,11 @@ export default function StatusPage() {
         <>
           {/* Overall status banner */}
           <div style={{
-            background: allOperational ? 'rgba(0,230,118,0.04)' : hasIssues ? 'rgba(255,23,68,0.04)' : 'var(--color-bg-card)',
-            border: `1px solid ${allOperational ? 'rgba(0,230,118,0.2)' : hasIssues ? 'rgba(255,23,68,0.2)' : 'var(--color-border-main)'}`,
-            borderRadius: 3, padding: '24px 28px', marginBottom: 24,
+            background: allOperational ? 'rgba(22,163,74,0.06)' : hasIssues ? 'rgba(220,38,38,0.06)' : 'rgba(255,255,255,0.72)',
+            backdropFilter: 'blur(16px)',
+            border: `1px solid ${allOperational ? 'rgba(22,163,74,0.25)' : hasIssues ? 'rgba(220,38,38,0.25)' : 'rgba(255,255,255,0.85)'}`,
+            borderRadius: 20, padding: '24px 28px', marginBottom: 24,
+            boxShadow: '0 4px 24px rgba(124,58,237,0.06)',
             display: 'flex', alignItems: 'center', gap: 20,
           }}>
             <div style={{
@@ -100,8 +102,8 @@ export default function StatusPage() {
 
           {/* Monitor list */}
           {monitors.length > 0 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 1, border: '1px solid var(--color-border-main)', borderRadius: 3, overflow: 'hidden' }}>
-              <div style={{ padding: '10px 24px', background: 'var(--color-bg-sidebar)', borderBottom: '1px solid var(--color-border-main)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 0, background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 4px 24px rgba(124,58,237,0.06)' }}>
+              <div style={{ padding: '14px 24px', background: 'rgba(249,250,251,0.6)', borderBottom: '1px solid rgba(229,231,235,0.6)' }}>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                   Services — {monitors.length} monitored
                 </span>

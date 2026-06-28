@@ -135,8 +135,8 @@ export default function SettingsPage() {
       
       {/* Header */}
       <div style={{ marginBottom: 32 }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
-          // System Config
+        <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 8px', fontFamily: 'var(--font-body)' }}>
+          System Config
         </p>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: 'var(--color-txt-primary)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
           {t('settings_title')}
@@ -173,7 +173,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Tab Content */}
-      <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 3, padding: 28 }}>
+      <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 24, padding: 28, boxShadow: '0 4px 24px rgba(124,58,237,0.07)' }}>
         
         {/* Tab 1: Preferences */}
         {activeTab === 'pref' && (

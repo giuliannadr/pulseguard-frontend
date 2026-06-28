@@ -217,6 +217,7 @@ export default function DashboardPage() {
         {/* ── Top Header ── */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 40, gap: 24, flexWrap: 'wrap' }}>
           <div>
+            <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 6px', fontFamily: 'var(--font-body)' }}>Overview</p>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 800, color: 'var(--color-txt-primary)', margin: 0, letterSpacing: '-0.02em' }}>
               My Dashboard
             </h1>
@@ -333,7 +334,7 @@ export default function DashboardPage() {
           <div className="db-row-2">
             
             {/* Latency Flow Bar Chart */}
-            <div className="glass-card" style={{ padding: 24, background: 'rgba(255, 255, 255, 0.02)', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            <div className="glass-card" style={{ padding: 24, background: 'rgba(255, 255, 255, 0.72)', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: 'var(--color-txt-primary)', margin: 0 }}>
                   {selectedMonitor ? `${selectedMonitor.name} Latency` : 'Latency Flow'}
@@ -363,7 +364,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Status Split Doughnut */}
-            <div className="glass-card" style={{ padding: 24, background: 'rgba(255, 255, 255, 0.02)', display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 0 }}>
+            <div className="glass-card" style={{ padding: 24, background: 'rgba(255, 255, 255, 0.72)', display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 0 }}>
               <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: 'var(--color-txt-primary)', margin: '0 0 10px', alignSelf: 'flex-start' }}>
                 {selectedMonitor ? `${selectedMonitor.name} Stats` : 'Status Split'}
               </h3>
@@ -406,7 +407,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Performance timeline deck */}
-          <div className="glass-card" style={{ padding: 24, background: 'rgba(255, 255, 255, 0.02)', minWidth: 0 }}>
+          <div className="glass-card" style={{ padding: 24, background: 'rgba(255, 255, 255, 0.72)', minWidth: 0 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-secondary)', textTransform: 'uppercase' }}>Recent Incidents Log</span>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-secondary)' }}>System logs active</span>

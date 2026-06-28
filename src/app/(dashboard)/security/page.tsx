@@ -78,8 +78,8 @@ export default function SecurityPage() {
       {/* ── Header ── */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 40 }}>
         <div>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-pink-primary)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
-            // {t('sec_global')}
+          <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 8px', fontFamily: 'var(--font-body)' }}>
+            {t('sec_global')}
           </p>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: 'var(--color-txt-primary)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
             {t('sec_title')}
@@ -88,25 +88,28 @@ export default function SecurityPage() {
       </div>
 
       {/* ── Stat row ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, marginBottom: 32, border: '1px solid var(--color-border-main)', borderRadius: 3, overflow: 'hidden' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 32 }}>
         {[
-          { label: t('sec_critical'), value: critical, color: critical > 0 ? '#DC2626' : 'var(--color-txt-primary)' },
-          { label: t('sec_high'),     value: high,     color: high > 0 ? '#D97706' : 'var(--color-txt-primary)' },
-          { label: t('sec_medium'),   value: medium,   color: medium > 0 ? 'var(--color-txt-primary)' : 'var(--color-txt-muted)' },
-          { label: t('sec_resolved'), value: resolved, color: '#16A34A' },
-        ].map((s, i) => (
+          { label: t('sec_critical'), value: critical, color: critical > 0 ? '#DC2626' : 'var(--color-txt-primary)', bg: critical > 0 ? 'rgba(220,38,38,0.06)' : 'rgba(255,255,255,0.72)' },
+          { label: t('sec_high'),     value: high,     color: high > 0 ? '#D97706' : 'var(--color-txt-primary)', bg: high > 0 ? 'rgba(217,119,6,0.06)' : 'rgba(255,255,255,0.72)' },
+          { label: t('sec_medium'),   value: medium,   color: medium > 0 ? 'var(--color-txt-primary)' : 'var(--color-txt-muted)', bg: 'rgba(255,255,255,0.72)' },
+          { label: t('sec_resolved'), value: resolved, color: '#16A34A', bg: resolved > 0 ? 'rgba(22,163,74,0.06)' : 'rgba(255,255,255,0.72)' },
+        ].map((s) => (
           <div
             key={s.label}
             style={{
-              padding: '20px 24px',
-              background: 'var(--color-bg-card)',
-              borderLeft: i > 0 ? '1px solid var(--color-border-main)' : 'none',
+              padding: '24px',
+              background: s.bg,
+              backdropFilter: 'blur(16px)',
+              border: '1px solid rgba(255,255,255,0.8)',
+              borderRadius: 20,
+              boxShadow: '0 4px 24px rgba(124,58,237,0.06)',
             }}
           >
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 28, fontWeight: 600, color: s.color, lineHeight: 1, marginBottom: 6 }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 800, color: s.color, lineHeight: 1, marginBottom: 8, letterSpacing: '-0.02em' }}>
               {loading ? '—' : s.value}
             </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-txt-muted)', fontWeight: 500 }}>
               {s.label}
             </div>
           </div>
@@ -116,26 +119,28 @@ export default function SecurityPage() {
       {loading ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           {[...Array(3)].map((_, i) => (
-            <div key={i} style={{ height: 72, background: 'var(--color-bg-card)', borderRadius: 3, opacity: 0.5 }} />
+            <div key={i} style={{ height: 72, background: 'var(--color-bg-card)', borderRadius: 16,opacity: 0.5 }} />
           ))}
         </div>
       ) : incidents.length === 0 ? (
-        <div style={{ border: '1px dashed var(--color-border-main)', borderRadius: 3, padding: '80px 40px', textAlign: 'center' }}>
+        <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.8)', borderRadius: 24, padding: '80px 40px', textAlign: 'center', boxShadow: '0 4px 24px rgba(124,58,237,0.06)' }}>
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: '#16A34A', margin: '0 0 8px' }}>{t('sec_all_clear')}</h3>
           <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-txt-muted)', margin: 0 }}>{t('sec_no_incidents')}</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {incidents.map((inc) => (
-            <div 
-              key={inc.id} 
-              style={{ 
-                background: 'var(--color-bg-card)', 
-                border: inc.resolved ? '1px solid var(--color-border-main)' : `1px solid ${inc.severity === 'Critical' ? '#DC2626' : inc.severity === 'High' ? '#FFB300' : 'var(--color-pink-primary)'}`, 
-                borderRadius: 3, 
+            <div
+              key={inc.id}
+              style={{
+                background: 'rgba(255,255,255,0.72)',
+                backdropFilter: 'blur(16px)',
+                border: inc.resolved ? '1px solid rgba(255,255,255,0.6)' : `1px solid ${inc.severity === 'Critical' ? 'rgba(220,38,38,0.3)' : inc.severity === 'High' ? 'rgba(217,119,6,0.3)' : 'rgba(124,58,237,0.3)'}`,
+                borderRadius: 20,
                 padding: '20px 24px',
-                opacity: inc.resolved ? 0.5 : 1,
+                opacity: inc.resolved ? 0.55 : 1,
                 transition: 'opacity 0.2s',
+                boxShadow: '0 4px 24px rgba(124,58,237,0.06)',
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
@@ -174,7 +179,7 @@ export default function SecurityPage() {
                       border: '1px solid var(--color-border-main)', 
                       color: 'var(--color-txt-primary)', 
                       padding: '6px 12px', 
-                      borderRadius: 3, 
+                      borderRadius: 16,
                       fontSize: 11, 
                       fontFamily: 'var(--font-mono)', 
                       cursor: 'pointer' 

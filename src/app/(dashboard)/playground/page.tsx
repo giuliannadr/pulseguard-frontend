@@ -389,8 +389,8 @@ export default function PlaygroundPage() {
       
       {/* ── Title Header ── */}
       <div style={{ marginBottom: 32 }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
-          // {t('play_sub')}
+        <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 8px', fontFamily: 'var(--font-body)' }}>
+          {t('play_sub')}
         </p>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: 'var(--color-txt-primary)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
           {t('play_title')}
@@ -435,7 +435,7 @@ export default function PlaygroundPage() {
         {activeTab === 'api' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 32 }} className="playground-grid">
             {/* Form */}
-            <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 3, padding: 24 }}>
+            <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, padding: 24, boxShadow: '0 4px 24px rgba(124,58,237,0.07)' }}>
               <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--color-txt-primary)', margin: '0 0 16px' }}>Test API Endpoint</h3>
                
                <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -617,7 +617,7 @@ export default function PlaygroundPage() {
                   </div>
 
                   {/* Network stats */}
-                  <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 3, padding: 20 }}>
+                  <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, padding: 20, boxShadow: '0 4px 24px rgba(124,58,237,0.07)' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, textAlign: 'center', marginBottom: 20 }}>
                       <div style={{ borderRight: '1px solid var(--color-border-main)' }}>
                         <div style={{ fontSize: 18, fontFamily: 'var(--font-mono)', color: apiResult.status >= 200 && apiResult.status < 300 ? '#00E676' : '#FF1744', fontWeight: 'bold' }}>
@@ -643,7 +643,7 @@ export default function PlaygroundPage() {
                       <summary style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-primary)', cursor: 'pointer', outline: 'none', padding: '6px 0' }}>
                         Response Headers ({Object.keys(apiResult.responseHeaders).length})
                       </summary>
-                      <pre style={{ margin: '8px 0 0', padding: 12, background: 'var(--color-bg-base)', border: '1px solid var(--color-border-main)', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-secondary)', overflowX: 'auto' }}>
+                      <pre style={{ margin: '8px 0 0', padding: 12, background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 10, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-secondary)', overflowX: 'auto' }}>
                         {JSON.stringify(apiResult.responseHeaders, null, 2)}
                       </pre>
                     </details>
@@ -652,14 +652,14 @@ export default function PlaygroundPage() {
                       <summary style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-primary)', cursor: 'pointer', outline: 'none', padding: '6px 0' }}>
                         Response Body Snippet
                       </summary>
-                      <pre style={{ margin: '8px 0 0', padding: 12, background: 'var(--color-bg-base)', border: '1px solid var(--color-border-main)', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-secondary)', overflowX: 'auto', maxHeight: 200, overflowY: 'auto' }}>
+                      <pre style={{ margin: '8px 0 0', padding: 12, background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 10, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-secondary)', overflowX: 'auto', maxHeight: 200, overflowY: 'auto' }}>
                         {typeof apiResult.responseBody === 'object' ? JSON.stringify(apiResult.responseBody, null, 2) : String(apiResult.responseBody)}
                       </pre>
                     </details>
                   </div>
                 </>
               ) : (
-                <div style={{ flex: 1, border: '1px dashed var(--color-border-main)', borderRadius: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, textAlign: 'center', color: 'var(--color-txt-muted)' }}>
+                <div style={{ flex: 1, background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(12px)', border: '1px dashed rgba(196,181,253,0.4)', borderRadius: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, textAlign: 'center', color: 'var(--color-txt-muted)' }}>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginBottom: 12 }}>
                     <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
                   </svg>
@@ -674,7 +674,7 @@ export default function PlaygroundPage() {
         {activeTab === 'code' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 32 }} className="playground-grid">
             {/* Editor */}
-            <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 3, padding: 24 }}>
+            <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, padding: 24, boxShadow: '0 4px 24px rgba(124,58,237,0.07)' }}>
               <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--color-txt-primary)', margin: '0 0 16px' }}>Audit Code Snippet</h3>
 
                <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -970,7 +970,7 @@ export default function PlaygroundPage() {
                   </div>
                 </div>
               ) : (
-                <div style={{ border: '1px dashed var(--color-border-main)', borderRadius: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, textAlign: 'center', color: 'var(--color-txt-muted)', height: '100%' }}>
+                <div style={{ background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(12px)', border: '1px dashed rgba(196,181,253,0.4)', borderRadius: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, textAlign: 'center', color: 'var(--color-txt-muted)', height: '100%' }}>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginBottom: 12 }}>
                     <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1M18 8h4M18 12h4"/>
                   </svg>
@@ -985,7 +985,7 @@ export default function PlaygroundPage() {
         {activeTab === 'dns' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 32 }} className="playground-grid">
             {/* Input form */}
-            <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 3, padding: 24 }}>
+            <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, padding: 24, boxShadow: '0 4px 24px rgba(124,58,237,0.07)' }}>
               <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--color-txt-primary)', margin: '0 0 16px' }}>SSL & DNS Health Inspector</h3>
                
                <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -1055,7 +1055,7 @@ export default function PlaygroundPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                   
                   {/* Score & AI recommendation */}
-                  <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 3, padding: 24 }}>
+                  <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, padding: 24, boxShadow: '0 4px 24px rgba(124,58,237,0.07)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                       <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--color-txt-primary)', margin: 0 }}>Network Posture Audit</h4>
                       <div style={{
@@ -1103,7 +1103,7 @@ export default function PlaygroundPage() {
                   </div>
 
                   {/* Raw properties */}
-                  <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 3, padding: 20 }}>
+                  <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, padding: 20, boxShadow: '0 4px 24px rgba(124,58,237,0.07)' }}>
                     <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--color-txt-primary)', margin: '0 0 12px' }}>DNS & TLS Details</h4>
                     
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12, fontFamily: 'var(--font-mono)' }}>
@@ -1139,7 +1139,7 @@ export default function PlaygroundPage() {
                   </div>
 
                   {/* Connection Latency Diagnostics Card */}
-                  <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 3, padding: 20 }}>
+                  <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, padding: 20, boxShadow: '0 4px 24px rgba(124,58,237,0.07)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                       <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--color-txt-primary)', margin: 0 }}>Connection Timing Breakdown</h4>
                       {!latencyResult && !latencyRunning && (
@@ -1231,7 +1231,7 @@ export default function PlaygroundPage() {
 
                 </div>
               ) : (
-                <div style={{ border: '1px dashed var(--color-border-main)', borderRadius: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, textAlign: 'center', color: 'var(--color-txt-muted)', height: '100%' }}>
+                <div style={{ background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(12px)', border: '1px dashed rgba(196,181,253,0.4)', borderRadius: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, textAlign: 'center', color: 'var(--color-txt-muted)', height: '100%' }}>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginBottom: 12 }}>
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM12 8v4M12 16h.01"/>
                   </svg>
@@ -1246,7 +1246,7 @@ export default function PlaygroundPage() {
         {activeTab === 'hacking' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 32 }} className="playground-grid">
             {/* Controls */}
-            <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 3, padding: 24 }}>
+            <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, padding: 24, boxShadow: '0 4px 24px rgba(124,58,237,0.07)' }}>
               <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--color-txt-primary)', margin: '0 0 20px' }}>Hacking & Safety Simulator</h3>
 
               {/* Target Selector */}
@@ -1390,7 +1390,7 @@ export default function PlaygroundPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               
               {/* Terminal Logs */}
-              <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-main)', borderRadius: 3, padding: 16, height: 180, display: 'flex', flexDirection: 'column', gap: 6, overflowY: 'auto' }}>
+              <div style={{ background: '#0F0A1E', border: '1px solid rgba(196,181,253,0.2)', borderRadius: 16, padding: 16, height: 180, display: 'flex', flexDirection: 'column', gap: 6, overflowY: 'auto' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--color-border-main)', paddingBottom: 6, marginBottom: 4 }}>
                   <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-muted)', textTransform: 'uppercase' }}>Simulation Console Logs</span>
                   <span style={{ width: 6, height: 6, borderRadius: '50%', background: hackRunning ? '#FF1744' : '#00E676', display: 'inline-block', animation: hackRunning ? 'pg-pulse 1s infinite' : 'none' }}></span>
