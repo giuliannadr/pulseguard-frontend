@@ -67,73 +67,86 @@ export default function SignupPage() {
         style={{
           display: 'none',
           flex: 1,
-          background: '#080C24',
-          borderRight: '1px solid rgba(0, 240, 255, 0.1)',
-          padding: '60px 64px',
+          background: 'linear-gradient(160deg,#0F0A1E 0%,#1A0F42 50%,#1e3a8a 100%)',
+          padding: '52px 56px',
           flexDirection: 'column',
           justifyContent: 'space-between',
           position: 'relative',
           overflow: 'hidden',
-          backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0, 240, 255, 0.05) 1.5px, transparent 0)',
-          backgroundSize: '24px 24px'
         }}
       >
-        {/* Glow Effects */}
-        <div style={{
-          position: 'absolute', top: '-10%', left: '-10%', width: '40vw', height: '40vw',
-          background: 'radial-gradient(circle, rgba(0, 240, 255, 0.12) 0%, transparent 70%)',
-          filter: 'blur(80px)', pointerEvents: 'none'
-        }} />
-        <div style={{
-          position: 'absolute', bottom: '-10%', right: '-10%', width: '40vw', height: '40vw',
-          background: 'radial-gradient(circle, rgba(255, 0, 127, 0.08) 0%, transparent 70%)',
-          filter: 'blur(80px)', pointerEvents: 'none'
-        }} />
+        {/* Blobs */}
+        {[
+          { left: '-15%', top: '-20%', w: '60%', h: '60%', c: '#7C3AED' },
+          { left: '50%',  top: '40%',  w: '55%', h: '55%', c: '#2563EB' },
+          { left: '10%',  top: '55%',  w: '45%', h: '45%', c: '#0891B2' },
+        ].map((b, i) => (
+          <div key={i} style={{ position: 'absolute', left: b.left, top: b.top, width: b.w, height: b.h, background: b.c, opacity: 0.28, borderRadius: '50%', filter: 'blur(80px)', pointerEvents: 'none' }} />
+        ))}
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, zIndex: 10 }}>
-          <div style={{ width: 28, height: 28, background: 'var(--color-acid)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="var(--color-bg-base)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        {/* Dot grid */}
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px)', backgroundSize: '48px 48px' }} />
+
+        {/* Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, position: 'relative', zIndex: 10 }}>
+          <div style={{ width: 30, height: 30, background: 'linear-gradient(135deg,#7C3AED,#2563EB)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: 'var(--color-txt-primary)' }}>PulseGuard</span>
+          <span style={{ fontWeight: 800, fontSize: 16, color: 'white' }}>PulseGuard</span>
         </div>
 
-        {/* Feature list mockup cards */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, zIndex: 10, margin: '40px 0', maxWidth: 440 }}>
-          {[
-            { title: 'Real-time uptime checks', desc: 'Monitor your websites and APIs every 60 seconds.', badge: '1 min' },
-            { title: 'SSL certificate warnings', desc: 'Get notified before your certificates expire.', badge: 'SSL' },
-            { title: 'Response latency analytics', desc: 'Gorgeous visual charts detail response history.', badge: 'Charts' },
-          ].map((feat, i) => (
-            <div key={i} className="glass-card" style={{ borderRadius: 20, padding: 18, background: 'rgba(8, 12, 36, 0.7)', border: '1px solid rgba(0, 240, 255, 0.15)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: 'var(--color-txt-primary)' }}>{feat.title}</span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-acid)', border: '1px solid rgba(0, 240, 255, 0.25)', padding: '2px 6px', borderRadius: 999 }}>{feat.badge}</span>
+        {/* Center content */}
+        <div style={{ position: 'relative', zIndex: 10 }}>
+          <h2 style={{ fontSize: 42, fontWeight: 900, color: 'white', lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 16px' }}>
+            Monitor smarter.<br />
+            <span style={{ background: 'linear-gradient(135deg,#C4B5FD,#93C5FD,#67E8F9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              Sleep better.
+            </span>
+          </h2>
+          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', lineHeight: 1.65, margin: '0 0 36px', maxWidth: 360 }}>
+            Get instant alerts when your APIs go down, SSL certs expire, or response times spike.
+          </p>
+
+          {/* Feature pills */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {[
+              { icon: '⟳', label: 'Every-minute uptime checks' },
+              { icon: '🔒', label: 'SSL expiry monitoring' },
+              { icon: '⚡', label: 'Instant email alerts' },
+              { icon: '🌐', label: 'Public status page' },
+            ].map(f => (
+              <div key={f.label} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 14, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)' }}>
+                <span style={{ fontSize: 18 }}>{f.icon}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>{f.label}</span>
+                <div style={{ marginLeft: 'auto', width: 6, height: 6, borderRadius: '50%', background: '#34D399', boxShadow: '0 0 6px #34D399' }} />
               </div>
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-text-2)', margin: 0 }}>{feat.desc}</p>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom trust */}
+        <div style={{ position: 'relative', zIndex: 10, display: 'flex', gap: 20 }}>
+          {[['Free', 'to start'], ['60s', 'intervals'], ['SSL', 'tracking']].map(([v, l]) => (
+            <div key={v}>
+              <p style={{ margin: 0, fontSize: 18, fontWeight: 900, color: 'white' }}>{v}</p>
+              <p style={{ margin: '2px 0 0', fontSize: 11, color: 'rgba(255,255,255,0.35)', fontWeight: 500 }}>{l}</p>
             </div>
           ))}
-        </div>
-
-        <div>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 16 }}>// Join</p>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 40, fontWeight: 800, color: 'var(--color-txt-primary)', lineHeight: 1.1, letterSpacing: '-0.03em', margin: 0 }}>
-            Monitor smarter.<br />Sleep better.
-          </h2>
         </div>
       </div>
 
       {/* Right form panel */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 32px', maxWidth: 480, margin: '0 auto', width: '100%' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 32px', maxWidth: 480, margin: '0 auto', width: '100%', background: 'white' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 48, alignSelf: 'flex-start' }}>
-          <div style={{ width: 28, height: 28, background: 'var(--color-acid)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="var(--color-bg-base)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          <div style={{ width: 30, height: 30, background: 'linear-gradient(135deg,#7C3AED,#2563EB)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: 'var(--color-txt-primary)' }}>PulseGuard</span>
+          <span style={{ fontWeight: 800, fontSize: 16, color: '#1F2937' }}>PulseGuard</span>
         </div>
 
         <div style={{ width: '100%' }}>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>// New account</p>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, color: 'var(--color-txt-primary)', margin: '0 0 32px', letterSpacing: '-0.02em' }}>
+          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7C3AED', margin: '0 0 8px' }}>New account</p>
+          <h1 style={{ fontSize: 28, fontWeight: 900, color: '#1F2937', margin: '0 0 32px', letterSpacing: '-0.02em' }}>
             Get started free
           </h1>
 
@@ -143,33 +156,39 @@ export default function SignupPage() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-            <div style={{ flex: 1, height: 1, background: 'var(--color-border-main)' }} />
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-2)', letterSpacing: '0.1em' }}>OR</span>
-            <div style={{ flex: 1, height: 1, background: 'var(--color-border-main)' }} />
+            <div style={{ flex: 1, height: 1, background: '#E5E7EB' }} />
+            <span style={{ fontSize: 11, color: '#9CA3AF', letterSpacing: '0.08em', fontWeight: 500 }}>OR</span>
+            <div style={{ flex: 1, height: 1, background: '#E5E7EB' }} />
           </div>
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-              <label style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-text-2)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Email</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Email</label>
               <input className="input-strict" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ borderRadius: 12 }} />
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-              <label style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-text-2)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Password</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Password</label>
               <input className="input-strict" type="password" placeholder="Min. 8 characters" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} style={{ borderRadius: 12 }} />
             </div>
             {error && (
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-pink-primary)', background: 'rgba(255,0,127,0.08)', border: '1px solid rgba(255,0,127,0.2)', borderRadius: 12, padding: '10px 14px' }}>
+              <div style={{ fontSize: 12, color: '#DC2626', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 12, padding: '10px 14px' }}>
                 {error}
               </div>
             )}
-            <button type="submit" disabled={loading} className="btn-solid-glow" style={{ marginTop: 4, width: '100%', borderRadius: 999 }}>
-              {loading ? 'Creating...' : 'Create Account'}
+            <button type="submit" disabled={loading} style={{
+              marginTop: 4, width: '100%', padding: '14px', borderRadius: 14,
+              background: 'linear-gradient(135deg,#7C3AED,#2563EB)', color: 'white',
+              fontWeight: 700, fontSize: 14, border: 'none', cursor: 'pointer',
+              boxShadow: '0 4px 16px rgba(124,58,237,0.3)', transition: 'opacity 0.2s',
+              opacity: loading ? 0.7 : 1,
+            }}>
+              {loading ? 'Creating account...' : 'Create Account'}
             </button>
           </form>
 
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-text-2)', textAlign: 'center', marginTop: 28 }}>
+          <p style={{ fontSize: 13, color: '#9CA3AF', textAlign: 'center', marginTop: 24 }}>
             Already have an account?{' '}
-            <Link href="/login" style={{ color: 'var(--color-acid)', textDecoration: 'none', fontWeight: 600 }}>Sign in</Link>
+            <Link href="/login" style={{ color: '#7C3AED', textDecoration: 'none', fontWeight: 700 }}>Sign in</Link>
           </p>
         </div>
       </div>
@@ -194,7 +213,7 @@ function OAuthBtn({ provider, label, loading, onClick }: { provider: string; lab
   );
 
   return (
-    <button type="button" onClick={onClick} disabled={loading} className="btn-glass" style={{ width: '100%', justifyContent: 'center', gap: 10, borderRadius: 999 }}>
+    <button type="button" onClick={onClick} disabled={loading} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '12px', borderRadius: 12, background: 'white', border: '1px solid #E5E7EB', cursor: 'pointer', fontSize: 13, fontWeight: 600, color: '#374151', transition: 'all 0.15s', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
       {icon}
       {label}
     </button>
