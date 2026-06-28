@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/client';
 import { api, githubToken as ghTokenHelper, type Monitor, type Check, type Metrics, type SecurityIncident } from '@/lib/api';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { UptimeBar } from '@/components/ui/UptimeBar';
+import { useTranslation } from '@/lib/i18n';
 
 function getGradeColor(grade: string) {
   if (!grade) return 'var(--color-txt-muted)';
@@ -59,6 +60,7 @@ function Toast({ msg, type }: { msg: string; type: 'success' | 'error' }) {
 
 // Inline delete confirmation
 function DeleteConfirm({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void }) {
+  const { t } = useTranslation();
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 100,
@@ -66,13 +68,13 @@ function DeleteConfirm({ onConfirm, onCancel }: { onConfirm: () => void; onCance
       display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
       <div style={{ background: 'var(--color-bg-card)', border: '1px solid rgba(255,23,68,0.3)', borderRadius: 6, padding: 32, maxWidth: 400, width: '90%' }}>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--color-txt-primary)', margin: '0 0 12px' }}>Delete monitor?</h3>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--color-txt-primary)', margin: '0 0 12px' }}>{t('mon_delete_title')}</h3>
         <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--color-txt-muted)', margin: '0 0 24px', lineHeight: 1.6 }}>
-          This will permanently delete the monitor and all its checks, metrics, and security incidents. This action cannot be undone.
+          {t('mon_delete_desc')}
         </p>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-          <button onClick={onCancel} className="btn-strict-secondary" style={{ fontSize: 13 }}>Cancel</button>
-          <button onClick={onConfirm} className="btn-strict-danger" style={{ fontSize: 13 }}>Delete</button>
+          <button onClick={onCancel} className="btn-strict-secondary" style={{ fontSize: 13 }}>{t('btn_cancel')}</button>
+          <button onClick={onConfirm} className="btn-strict-danger" style={{ fontSize: 13 }}>{t('btn_delete')}</button>
         </div>
       </div>
     </div>

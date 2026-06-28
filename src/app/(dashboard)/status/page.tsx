@@ -5,8 +5,10 @@ import { createClient } from '@/lib/supabase/client';
 import { api, type Monitor } from '@/lib/api';
 import { UptimeBar } from '@/components/ui/UptimeBar';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import { useTranslation } from '@/lib/i18n';
 
 export default function StatusPage() {
+  const { t } = useTranslation();
   const [monitors, setMonitors] = useState<Monitor[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -43,13 +45,13 @@ export default function StatusPage() {
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: 48 }}>
         <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 8px', fontFamily: 'var(--font-body)' }}>
-          Infrastructure
+          {t('stat_sub')}
         </p>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 800, color: 'var(--color-txt-primary)', margin: '0 0 8px', letterSpacing: '-0.02em' }}>
-          System Status
+          {t('stat_title')}
         </h1>
         <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--color-txt-muted)', margin: 0 }}>
-          Current status of all tracked infrastructure
+          {t('stat_desc')}
         </p>
       </div>
 
@@ -89,13 +91,13 @@ export default function StatusPage() {
             <div>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 800, color: 'var(--color-txt-primary)', margin: '0 0 4px' }}>
                 {monitors.length === 0
-                  ? 'No monitors configured'
+                  ? t('stat_no_monitors')
                   : allOperational
-                  ? 'All Systems Operational'
-                  : 'Some Systems are Experiencing Issues'}
+                  ? t('stat_all_operational')
+                  : t('stat_has_issues')}
               </h2>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)', margin: 0 }}>
-                Last updated: {new Date().toLocaleString()}
+                {t('stat_last_updated')}: {new Date().toLocaleString()}
               </p>
             </div>
           </div>
@@ -105,7 +107,7 @@ export default function StatusPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 0, background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 4px 24px rgba(124,58,237,0.06)' }}>
               <div style={{ padding: '14px 24px', background: 'rgba(249,250,251,0.6)', borderBottom: '1px solid rgba(229,231,235,0.6)' }}>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                  Services — {monitors.length} monitored
+                  {monitors.length} {t('stat_services_count')}
                 </span>
               </div>
               {monitors.map((monitor, idx) => {

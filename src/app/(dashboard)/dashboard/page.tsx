@@ -52,8 +52,8 @@ const CustomTooltip = ({ active, payload }: any) => {
         fontSize: '11px',
         boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
       }}>
-        <div style={{ fontWeight: 'bold', color: 'var(--color-txt-muted)', marginBottom: 4 }}>Check Time: {payload[0].payload.name}</div>
-        <div style={{ color: 'var(--color-brand-primary)', fontWeight: 600 }}>Latency: {payload[0].value}ms</div>
+        <div style={{ fontWeight: 'bold', color: 'var(--color-txt-muted)', marginBottom: 4 }}>{payload[0].payload.name}</div>
+        <div style={{ color: 'var(--color-brand-primary)', fontWeight: 600 }}>{payload[0].value}ms</div>
       </div>
     );
   }
@@ -74,7 +74,7 @@ const CustomPieTooltip = ({ active, payload }: any) => {
         boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
       }}>
         <div style={{ fontWeight: 'bold', color: payload[0].payload.color || 'var(--color-brand-primary)', marginBottom: 2 }}>{payload[0].name}</div>
-        <div style={{ color: 'var(--color-txt-primary)' }}>Checks count: {payload[0].value}</div>
+        <div style={{ color: 'var(--color-txt-primary)' }}>{payload[0].value}</div>
       </div>
     );
   }
@@ -180,14 +180,14 @@ export default function DashboardPage() {
   const checksDegraded = selectedMonitor?.checks?.filter(c => c.status === 'degraded').length ?? 0;
 
   const pieChartData = [
-    { name: 'Operational', value: checksUp, color: 'var(--color-status-up)' },
-    { name: 'Down', value: checksDown, color: 'var(--color-status-down)' },
-    { name: 'Degraded', value: checksDegraded, color: 'var(--color-status-degraded)' }
+    { name: t('dash_operational'), value: checksUp, color: 'var(--color-status-up)' },
+    { name: t('dash_down'), value: checksDown, color: 'var(--color-status-down)' },
+    { name: t('dash_degraded'), value: checksDegraded, color: 'var(--color-status-degraded)' }
   ].filter(d => d.value > 0);
 
   // Default placeholder if empty
   if (pieChartData.length === 0 && !loading) {
-    pieChartData.push({ name: 'No checks', value: 1, color: 'var(--color-border-main)' });
+    pieChartData.push({ name: '—', value: 1, color: 'var(--color-border-main)' });
   }
 
   // Calculate selected monitor metrics
@@ -217,9 +217,9 @@ export default function DashboardPage() {
         {/* ── Top Header ── */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 40, gap: 24, flexWrap: 'wrap' }}>
           <div>
-            <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 6px', fontFamily: 'var(--font-body)' }}>Overview</p>
+            <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 6px', fontFamily: 'var(--font-body)' }}>{t('dash_overview')}</p>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 800, color: 'var(--color-txt-primary)', margin: 0, letterSpacing: '-0.02em' }}>
-              My Dashboard
+              {t('dash_my_dashboard')}
             </h1>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -240,7 +240,7 @@ export default function DashboardPage() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 40, gap: 24, flexWrap: 'wrap' }}>
         <div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 800, color: 'var(--color-txt-primary)', margin: 0, letterSpacing: '-0.02em' }}>
-            My Dashboard
+            {t('dash_my_dashboard')}
           </h1>
         </div>
         {/* Top icons bar */}
@@ -279,21 +279,21 @@ export default function DashboardPage() {
               boxShadow: '0 4px 20px rgba(0, 0, 0, 0.03)'
             }}>
               <div>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-brand-primary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>System Health</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-brand-primary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t('dash_system_health')}</span>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 14 }}>
                   <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '48px', fontWeight: 800, color: 'var(--color-txt-primary)', margin: 0, letterSpacing: '-0.03em', lineHeight: 1 }}>{uptimeRatio}%</h3>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-brand-primary)' }}>{upCount} / {monitors.length} Active</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-brand-primary)' }}>{upCount} / {monitors.length} {t('dash_active')}</span>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
                 <Link href="/import" style={{ textDecoration: 'none' }}>
                   <button className="btn-solid-glow" style={{ height: 36, fontSize: 11, padding: '0 20px', borderRadius: 8 }}>
-                    Add Monitor
+                    {t('dash_add_monitor')}
                   </button>
                 </Link>
                 <Link href="/playground" style={{ textDecoration: 'none' }}>
                   <button className="btn-glass" style={{ height: 36, fontSize: 11, padding: '0 20px', borderRadius: 8 }}>
-                    Security Console
+                    {t('dash_security_console')}
                   </button>
                 </Link>
               </div>
@@ -305,11 +305,11 @@ export default function DashboardPage() {
               {/* Active Checks */}
               <div className="glass-card" style={{ flex: 1, padding: '18px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'var(--color-bg-card)', borderRadius: 12 }}>
                 <div>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-secondary)', textTransform: 'uppercase' }}>Active Monitors</span>
-                  <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--color-brand-primary)', marginTop: 6 }}>{monitors.length} Services</div>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-secondary)', textTransform: 'uppercase' }}>{t('dash_active_monitors')}</span>
+                  <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--color-brand-primary)', marginTop: 6 }}>{monitors.length} {t('dash_services')}</div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)' }}>All systems checked</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)' }}>{t('dash_all_checked')}</span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-brand-primary)', background: 'var(--color-brand-light)', padding: '2px 6px', borderRadius: 4 }}>+12%</span>
                 </div>
               </div>
@@ -317,12 +317,12 @@ export default function DashboardPage() {
               {/* Avg Latency */}
               <div className="glass-card" style={{ flex: 1, padding: '18px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'var(--color-bg-card)', borderRadius: 12 }}>
                 <div>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-secondary)', textTransform: 'uppercase' }}>System Latency</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-secondary)', textTransform: 'uppercase' }}>{t('dash_system_latency')}</span>
                   <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--color-accent-amber)', marginTop: 6 }}>{avgLatency} ms</div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)' }}>Checks latency average</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-accent-amber)', background: 'var(--color-accent-amber-light)', padding: '2px 6px', borderRadius: 4 }}>STABLE</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)' }}>{t('dash_latency_avg')}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-accent-amber)', background: 'var(--color-accent-amber-light)', padding: '2px 6px', borderRadius: 4 }}>{t('dash_stable')}</span>
                 </div>
               </div>
 
@@ -337,9 +337,9 @@ export default function DashboardPage() {
             <div className="glass-card" style={{ padding: 24, background: 'rgba(255, 255, 255, 0.72)', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: 'var(--color-txt-primary)', margin: 0 }}>
-                  {selectedMonitor ? `${selectedMonitor.name} Latency` : 'Latency Flow'}
+                  {selectedMonitor ? `${selectedMonitor.name} — ${t('dash_latency_label')}` : t('dash_latency_flow')}
                 </h3>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--color-txt-secondary)', textTransform: 'uppercase' }}>Recent Checks</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--color-txt-secondary)', textTransform: 'uppercase' }}>{t('dash_recent_checks')}</span>
               </div>
               <div style={{ height: 160, width: '100%', position: 'relative' }}>
                 {barChartData.length > 0 ? (
@@ -357,7 +357,7 @@ export default function DashboardPage() {
                   </ResponsiveContainer>
                 ) : (
                   <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: 'var(--color-txt-secondary)', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
-                    No check metrics.
+                    {t('dash_no_metrics')}
                   </div>
                 )}
               </div>
@@ -366,7 +366,7 @@ export default function DashboardPage() {
             {/* Status Split Doughnut */}
             <div className="glass-card" style={{ padding: 24, background: 'rgba(255, 255, 255, 0.72)', display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 0 }}>
               <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: 'var(--color-txt-primary)', margin: '0 0 10px', alignSelf: 'flex-start' }}>
-                {selectedMonitor ? `${selectedMonitor.name} Stats` : 'Status Split'}
+                {selectedMonitor ? `${selectedMonitor.name} — ${t('dash_stats')}` : t('dash_status_split')}
               </h3>
               <div style={{ height: 120, width: '100%', position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
                 <ResponsiveContainer width="100%" height="100%">
@@ -391,7 +391,7 @@ export default function DashboardPage() {
                   <span style={{ fontSize: 18, fontWeight: 800, fontFamily: 'var(--font-display)', color: 'var(--color-txt-primary)', lineHeight: 1 }}>
                     {selectedMonitor ? selectedUptimeRatio : 100}%
                   </span>
-                  <span style={{ fontSize: 8, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-secondary)', textTransform: 'uppercase', marginTop: 2 }}>Uptime</span>
+                  <span style={{ fontSize: 8, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-secondary)', textTransform: 'uppercase', marginTop: 2 }}>{t('dash_uptime')}</span>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 10, flexWrap: 'wrap' }}>
@@ -409,8 +409,8 @@ export default function DashboardPage() {
           {/* Performance timeline deck */}
           <div className="glass-card" style={{ padding: 24, background: 'rgba(255, 255, 255, 0.72)', minWidth: 0 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-secondary)', textTransform: 'uppercase' }}>Recent Incidents Log</span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-secondary)' }}>System logs active</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-secondary)', textTransform: 'uppercase' }}>{t('dash_incidents_log')}</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-secondary)' }}>{t('dash_logs_active')}</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {incidents.length > 0 ? (
@@ -421,7 +421,7 @@ export default function DashboardPage() {
                       <span style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 700, color: 'var(--color-txt-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{inc.monitorName}</span>
                     </div>
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-status-down)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '50%', paddingLeft: 8 }}>
-                      {inc.errorMessage || 'Status Check Failed'}
+                      {inc.errorMessage || t('dash_check_failed')}
                     </span>
                   </div>
                 ))
@@ -433,10 +433,10 @@ export default function DashboardPage() {
                     </svg>
                   </div>
                   <span style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 700, color: 'var(--color-txt-primary)' }}>
-                    All Systems Operational
+                    {t('dash_all_operational')}
                   </span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-secondary)', textAlign: 'center' }}>
-                    No incident reports in the last checks history.
+                    {t('dash_no_incidents')}
                   </span>
                 </div>
               )}
@@ -451,12 +451,12 @@ export default function DashboardPage() {
           {/* My Services header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--color-txt-primary)', margin: 0 }}>
-              My Services
+              {t('dash_my_services')}
             </h3>
             <Link href="/import" style={{ textDecoration: 'none' }}>
               <button className="btn-solid-glow" style={{ height: 32, fontSize: 11, padding: '0 14px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Add Monitor
+                {t('dash_add_monitor')}
               </button>
             </Link>
           </div>
@@ -472,7 +472,7 @@ export default function DashboardPage() {
               borderBottom: '1px solid var(--color-border-main)',
               background: 'var(--color-bg-card-hover)',
             }}>
-              {['Service', 'Status', 'Uptime', 'Latency', ''].map((h) => (
+              {[t('dash_col_service'), t('dash_col_status'), t('dash_col_uptime'), t('dash_col_latency'), ''].map((h) => (
                 <span key={h} style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{h}</span>
               ))}
             </div>
@@ -480,7 +480,7 @@ export default function DashboardPage() {
             {/* Table rows */}
             {monitors.length === 0 ? (
               <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--color-txt-muted)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
-                No monitors configured yet.
+                {t('dash_no_monitors_yet')}
               </div>
             ) : (
               monitors.map((m, index) => {
@@ -606,7 +606,7 @@ export default function DashboardPage() {
             <div className="glass-card" style={{ padding: 18, borderRadius: 12 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
                 <div style={{ minWidth: 0, flex: 1, paddingRight: 12 }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-brand-primary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Selected Monitor</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-brand-primary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t('dash_selected_monitor')}</span>
                   <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, color: 'var(--color-txt-primary)', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {selectedMonitor.name}
                   </div>
@@ -617,17 +617,17 @@ export default function DashboardPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
                 {[
                   {
-                    label: 'Response',
+                    label: t('dash_response'),
                     value: selectedMonitor.checks?.[0]?.responseTimeMs != null ? `${selectedMonitor.checks[0].responseTimeMs}ms` : '—',
                     color: 'var(--color-brand-primary)',
                   },
                   {
-                    label: 'SSL',
+                    label: t('dash_ssl_label'),
                     value: selectedMonitor.checks?.[0]?.sslDaysLeft != null ? `${selectedMonitor.checks[0].sslDaysLeft}d` : '—',
                     color: 'var(--color-accent-amber)',
                   },
                   {
-                    label: 'Status Code',
+                    label: t('dash_status_code'),
                     value: selectedMonitor.checks?.[0]?.statusCode != null ? `${selectedMonitor.checks[0].statusCode}` : '—',
                     color: 'var(--color-txt-primary)',
                   },
@@ -641,7 +641,7 @@ export default function DashboardPage() {
 
               <Link href={`/monitors/${selectedMonitor.id}`} style={{ textDecoration: 'none', display: 'block', marginTop: 12 }}>
                 <button className="btn-glass" style={{ width: '100%', height: 34, fontSize: 11, borderRadius: 8, justifyContent: 'center' }}>
-                  View Full Details →
+                  {t('dash_view_details')}
                 </button>
               </Link>
             </div>
@@ -658,14 +658,14 @@ export default function DashboardPage() {
 function EmptyState() {
   const { t } = useTranslation();
   const steps = [
-    { n: '1', title: 'Add a monitor', desc: 'Paste any URL or connect a GitHub repo. Takes 30 seconds.', cta: true },
-    { n: '2', title: 'Set up alerts', desc: 'Add a Discord/Slack webhook or email in Settings → Preferences.' },
-    { n: '3', title: 'Go to sleep', desc: 'PulseGuard checks every minute and alerts you when something breaks.' },
+    { n: '1', title: t('dash_step1_title'), desc: t('dash_step1_desc'), cta: true },
+    { n: '2', title: t('dash_step2_title'), desc: t('dash_step2_desc') },
+    { n: '3', title: t('dash_step3_title'), desc: t('dash_step3_desc') },
   ];
   return (
     <div style={{ border: '1px dashed var(--color-border-hover)', borderRadius: 28, padding: '56px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0, background: 'var(--color-bg-card)' }}>
       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-brand-primary)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px' }}>
-        Getting started
+        {t('dash_getting_started')}
       </p>
       <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 800, color: 'var(--color-txt-primary)', margin: '0 0 8px', textAlign: 'center' }}>
         {t('dash_empty_title')}

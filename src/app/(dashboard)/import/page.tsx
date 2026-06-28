@@ -5,45 +5,33 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { api, githubToken as ghTokenHelper } from '@/lib/api';
 import Link from 'next/link';
+import { useTranslation } from '@/lib/i18n';
 
 type MonitorMode = 'full' | 'url-only' | 'repo-only';
 
-const MODES: { id: MonitorMode; label: string; description: string; icon: React.ReactNode }[] = [
-  {
-    id: 'full',
-    label: 'Full Project',
-    description: 'URL uptime monitoring + GitHub security scanning. For any deployed project you own.',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'url-only',
-    label: 'URL Monitor',
-    description: 'Uptime, SSL & response time only. No repo needed. Works for any website.',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
-        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'repo-only',
-    label: 'Repo Scanner',
-    description: 'Security scanning only, no URL required. For backends, libraries, or services not yet deployed.',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-      </svg>
-    ),
-  },
-];
-
 export default function ImportPage() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const MODES: { id: MonitorMode; label: string; description: string; icon: React.ReactNode }[] = [
+    {
+      id: 'full',
+      label: t('import_mode_full'),
+      description: t('import_mode_full_desc'),
+      icon: (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>),
+    },
+    {
+      id: 'url-only',
+      label: t('import_mode_url'),
+      description: t('import_mode_url_desc'),
+      icon: (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>),
+    },
+    {
+      id: 'repo-only',
+      label: t('import_mode_repo'),
+      description: t('import_mode_repo_desc'),
+      icon: (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>),
+    },
+  ];
   const [mode, setMode] = useState<MonitorMode>('full');
   const [token, setToken] = useState<string | null>(null);
   const [githubToken, setGithubToken] = useState<string | null>(null);
