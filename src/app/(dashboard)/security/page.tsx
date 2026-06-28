@@ -6,13 +6,32 @@ import { api, type SecurityIncident } from '@/lib/api';
 import Link from 'next/link';
 import { useTranslation } from '@/lib/i18n';
 
-// Use same fmtDate function
 function fmtDate(d: string) {
   return new Date(d).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
+const SEVERITY_ES: Record<string, string> = {
+  Critical: 'Crítico',
+  High: 'Alto',
+  Medium: 'Medio',
+  Low: 'Bajo',
+  None: 'Ninguno',
+};
+
+const RISK_TYPE_ES: Record<string, string> = {
+  None: 'Sin riesgo detectado',
+};
+
+function translateSeverity(s: string, lang: string) {
+  return lang === 'es' ? (SEVERITY_ES[s] ?? s) : s;
+}
+
+function translateRiskType(r: string, lang: string) {
+  return lang === 'es' ? (RISK_TYPE_ES[r] ?? r) : r;
+}
+
 export default function SecurityPage() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [incidents, setIncidents] = useState<(SecurityIncident & { monitor: { name: string, url: string } })[]>([]);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
@@ -155,10 +174,10 @@ export default function SecurityPage() {
                       padding: '2px 8px', 
                       borderRadius: 2 
                     }}>
-                      {inc.severity.toUpperCase()}
+                      {translateSeverity(inc.severity, language).toUpperCase()}
                     </span>
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, color: inc.resolved ? 'var(--color-txt-muted)' : 'var(--color-txt-primary)', fontWeight: 'bold' }}>
-                      {inc.riskType}
+                      {translateRiskType(inc.riskType, language)}
                     </span>
                   </div>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)', display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -215,7 +234,7 @@ export default function SecurityPage() {
                   👤 {t('sec_author')}: {inc.commitAuthor || 'Unknown'}
                 </span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>
-                  Commit: {inc.commitHash.substring(0, 7)}
+                  {language === 'es' ? 'Commit' : 'Commit'}: {inc.commitHash?.substring(0, 7) ?? '—'}
                 </span>
               </div>
             </div>
