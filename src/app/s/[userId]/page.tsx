@@ -16,7 +16,7 @@ type PublicMonitor = {
 };
 
 function StatusDot({ status }: { status: string }) {
-  const color = status === 'up' ? '#00E676' : status === 'down' ? '#FF1744' : status === 'degraded' ? '#FFB300' : 'var(--color-txt-muted)';
+  const color = status === 'up' ? '#16A34A' : status === 'down' ? '#DC2626' : status === 'degraded' ? '#D97706' : 'var(--color-txt-muted)';
   return (
     <span style={{
       display: 'inline-block', width: 8, height: 8, borderRadius: '50%',
@@ -45,14 +45,14 @@ export default function PublicStatusPage({ params }: { params: Promise<{ userId:
   return (
     <div style={{ minHeight: '100dvh', background: 'var(--color-bg-base)', color: 'var(--color-txt-primary)' }}>
       {/* Nav */}
-      <div style={{ borderBottom: '1px solid rgba(0,240,255,0.15)', padding: '16px 32px', display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(3, 5, 20, 0.75)', backdropFilter: 'blur(12px)' }}>
-        <div style={{ width: 24, height: 24, background: 'var(--color-acid)', borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ borderBottom: '1px solid var(--color-border-main)', padding: '16px 32px', display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(12px)' }}>
+        <div style={{ width: 24, height: 24, background: 'linear-gradient(135deg,#7C3AED,#2563EB)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-            <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="var(--color-bg-base)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 14, color: 'var(--color-txt-primary)' }}>PulseGuard</span>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-secondary)', marginLeft: 8 }}>// Status Page</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)', marginLeft: 8 }}>Status Page</span>
       </div>
 
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px' }}>
@@ -66,7 +66,7 @@ export default function PublicStatusPage({ params }: { params: Promise<{ userId:
           }}>
             <div style={{
               width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
-              background: allUp ? '#00E676' : hasDown ? '#FF1744' : '#FFB300',
+              background: allUp ? '#16A34A' : hasDown ? '#DC2626' : '#FFB300',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               {allUp
@@ -121,7 +121,7 @@ export default function PublicStatusPage({ params }: { params: Promise<{ userId:
                   <div style={{ display: 'flex', gap: 24, textAlign: 'right' }}>
                     {m.uptime != null && (
                       <div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 16, fontWeight: 600, color: m.uptime >= 99 ? '#00E676' : m.uptime >= 95 ? '#FFB300' : '#FF1744' }}>{m.uptime}%</div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 16, fontWeight: 600, color: m.uptime >= 99 ? '#16A34A' : m.uptime >= 95 ? '#FFB300' : '#DC2626' }}>{m.uptime}%</div>
                         <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>uptime</div>
                       </div>
                     )}

@@ -90,10 +90,10 @@ export default function SecurityPage() {
       {/* ── Stat row ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, marginBottom: 32, border: '1px solid var(--color-border-main)', borderRadius: 3, overflow: 'hidden' }}>
         {[
-          { label: t('sec_critical'), value: critical, color: critical > 0 ? '#FF1744' : 'var(--color-txt-primary)' },
-          { label: t('sec_high'),     value: high,     color: high > 0 ? '#FFB300' : 'var(--color-txt-primary)' },
+          { label: t('sec_critical'), value: critical, color: critical > 0 ? '#DC2626' : 'var(--color-txt-primary)' },
+          { label: t('sec_high'),     value: high,     color: high > 0 ? '#D97706' : 'var(--color-txt-primary)' },
           { label: t('sec_medium'),   value: medium,   color: medium > 0 ? 'var(--color-txt-primary)' : 'var(--color-txt-muted)' },
-          { label: t('sec_resolved'), value: resolved, color: '#00E676' },
+          { label: t('sec_resolved'), value: resolved, color: '#16A34A' },
         ].map((s, i) => (
           <div
             key={s.label}
@@ -121,7 +121,7 @@ export default function SecurityPage() {
         </div>
       ) : incidents.length === 0 ? (
         <div style={{ border: '1px dashed var(--color-border-main)', borderRadius: 3, padding: '80px 40px', textAlign: 'center' }}>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: '#00E676', margin: '0 0 8px' }}>{t('sec_all_clear')}</h3>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: '#16A34A', margin: '0 0 8px' }}>{t('sec_all_clear')}</h3>
           <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-txt-muted)', margin: 0 }}>{t('sec_no_incidents')}</p>
         </div>
       ) : (
@@ -131,7 +131,7 @@ export default function SecurityPage() {
               key={inc.id} 
               style={{ 
                 background: 'var(--color-bg-card)', 
-                border: inc.resolved ? '1px solid var(--color-border-main)' : `1px solid ${inc.severity === 'Critical' ? '#FF1744' : inc.severity === 'High' ? '#FFB300' : 'var(--color-pink-primary)'}`, 
+                border: inc.resolved ? '1px solid var(--color-border-main)' : `1px solid ${inc.severity === 'Critical' ? '#DC2626' : inc.severity === 'High' ? '#FFB300' : 'var(--color-pink-primary)'}`, 
                 borderRadius: 3, 
                 padding: '20px 24px',
                 opacity: inc.resolved ? 0.5 : 1,
@@ -145,8 +145,8 @@ export default function SecurityPage() {
                       fontFamily: 'var(--font-mono)', 
                       fontSize: 11, 
                       fontWeight: 700, 
-                      color: '#000', 
-                      background: inc.resolved ? 'var(--color-txt-muted)' : inc.severity === 'Critical' ? '#FF1744' : inc.severity === 'High' ? '#FFB300' : 'var(--color-pink-primary)', 
+                      color: 'white',
+                      background: inc.resolved ? 'var(--color-txt-muted)' : inc.severity === 'Critical' ? '#DC2626' : inc.severity === 'High' ? '#D97706' : 'var(--color-brand-primary)', 
                       padding: '2px 8px', 
                       borderRadius: 2 
                     }}>
@@ -186,27 +186,27 @@ export default function SecurityPage() {
                   </button>
                 )}
                 {inc.resolved && (
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#00E676' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#16A34A' }}>
                     ✓ {t('sec_resolved_badge')}
                   </span>
                 )}
               </div>
               
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: inc.resolved ? 'var(--color-txt-muted)' : '#D0D0D0', margin: '0 0 16px 0', lineHeight: 1.5 }}>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: inc.resolved ? 'var(--color-txt-muted)' : 'var(--color-txt-secondary)', margin: '0 0 16px 0', lineHeight: 1.5 }}>
                 {inc.description}
               </p>
               
-              <div style={{ background: 'rgba(255,255,255,0.02)', padding: 12, borderRadius: 3, border: '1px solid var(--color-border-main)' }}>
+              <div style={{ background: 'var(--color-bg-card-hover)', padding: 12, borderRadius: 8, border: '1px solid var(--color-border-main)' }}>
                 <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)', marginBottom: 4, textTransform: 'uppercase' }}>
                   {t('sec_recommendation')}
                 </span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: inc.resolved ? 'var(--color-txt-muted)' : '#A0A0A0' }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: inc.resolved ? 'var(--color-txt-muted)' : 'var(--color-txt-secondary)' }}>
                   {inc.recommendation}
                 </span>
               </div>
               
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 12 }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: inc.resolved ? 'var(--color-txt-muted)' : '#8A2BE2' }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: inc.resolved ? 'var(--color-txt-muted)' : 'var(--color-brand-primary)' }}>
                   👤 {t('sec_author')}: {inc.commitAuthor || 'Unknown'}
                 </span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>

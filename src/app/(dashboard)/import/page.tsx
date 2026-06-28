@@ -159,7 +159,7 @@ export default function ImportPage() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 32, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>
         <Link href="/dashboard" style={{ color: 'var(--color-txt-muted)', textDecoration: 'none' }}>Dashboard</Link>
         <span>/</span>
-        <span style={{ color: 'var(--color-acid)' }}>Add Monitor</span>
+        <span style={{ color: 'var(--color-brand-primary)' }}>Add Monitor</span>
       </div>
 
       <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: 'var(--color-txt-primary)', margin: '0 0 8px', letterSpacing: '-0.02em' }}>
@@ -177,8 +177,8 @@ export default function ImportPage() {
             type="button"
             onClick={() => setMode(m.id)}
             style={{
-              background: mode === m.id ? 'rgba(0,240,255,0.06)' : 'var(--color-bg-card)',
-              border: `1px solid ${mode === m.id ? 'var(--color-acid)' : 'var(--color-border-main)'}`,
+              background: mode === m.id ? 'var(--color-brand-light)' : 'var(--color-bg-card)',
+              border: `1px solid ${mode === m.id ? 'var(--color-brand-mid)' : 'var(--color-border-main)'}`,
               borderRadius: 6,
               padding: '16px',
               cursor: 'pointer',
@@ -186,8 +186,8 @@ export default function ImportPage() {
               transition: 'border-color 0.15s',
             }}
           >
-            <div style={{ color: mode === m.id ? 'var(--color-acid)' : 'var(--color-txt-muted)', marginBottom: 10 }}>{m.icon}</div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700, color: mode === m.id ? 'var(--color-txt-primary)' : 'var(--color-txt-muted)', marginBottom: 6 }}>
+            <div style={{ color: mode === m.id ? 'var(--color-brand-primary)' : 'var(--color-txt-muted)', marginBottom: 10 }}>{m.icon}</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700, color: mode === m.id ? 'var(--color-brand-primary)' : 'var(--color-txt-muted)', marginBottom: 6 }}>
               {m.label}
             </div>
             <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: '#555', lineHeight: 1.5 }}>
@@ -301,7 +301,7 @@ export default function ImportPage() {
                         justifyContent: 'space-between',
                         padding: '12px 24px',
                         borderBottom: idx < repos.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
-                        background: isSelected ? 'rgba(0,240,255,0.03)' : 'transparent',
+                        background: isSelected ? 'var(--color-brand-light)' : 'transparent',
                       }}
                     >
                       <div>
@@ -316,9 +316,9 @@ export default function ImportPage() {
                         type="button"
                         onClick={() => setSelectedRepo(isSelected ? null : repo)}
                         style={{
-                          background: isSelected ? 'transparent' : 'var(--color-txt-btn-primary)',
-                          color: isSelected ? 'var(--color-txt-muted)' : '#000',
-                          border: isSelected ? '1px solid #333' : 'none',
+                          background: isSelected ? 'transparent' : 'linear-gradient(135deg,#7C3AED,#2563EB)',
+                          color: isSelected ? 'var(--color-txt-muted)' : 'white',
+                          border: isSelected ? '1px solid var(--color-border-main)' : 'none',
                           borderRadius: 4,
                           padding: '5px 14px',
                           fontFamily: 'var(--font-mono)',
@@ -339,12 +339,12 @@ export default function ImportPage() {
 
         {/* Split-project tip */}
         {mode === 'full' && (
-          <div style={{ display: 'flex', gap: 12, background: 'rgba(0,240,255,0.04)', border: '1px solid rgba(0,240,255,0.12)', borderRadius: 6, padding: '14px 16px' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-acid)" strokeWidth="2" style={{ flexShrink: 0, marginTop: 1 }}>
+          <div style={{ display: 'flex', gap: 12, background: 'var(--color-brand-light)', border: '1px solid var(--color-brand-mid)', borderRadius: 10, padding: '14px 16px' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand-primary)" strokeWidth="2" style={{ flexShrink: 0, marginTop: 1 }}>
               <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
             <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-txt-muted)', margin: 0, lineHeight: 1.6 }}>
-              <strong style={{ color: 'var(--color-acid)' }}>Split project (front + back)?</strong> Create one monitor for your frontend and a second one for your backend. Each gets its own URL check and repo scanner.
+              <strong style={{ color: 'var(--color-brand-primary)' }}>Split project (front + back)?</strong> Create one monitor for your frontend and a second one for your backend. Each gets its own URL check and repo scanner.
             </p>
           </div>
         )}

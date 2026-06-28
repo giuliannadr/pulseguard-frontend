@@ -43,18 +43,17 @@ const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     return (
       <div style={{
-        background: 'rgba(11, 19, 58, 0.96)',
-        border: '1px solid rgba(0, 240, 255, 0.3)',
+        background: 'var(--color-bg-sidebar)',
+        border: '1px solid var(--color-border-main)',
         borderRadius: '12px',
         padding: '10px 14px',
         color: 'var(--color-txt-primary)',
         fontFamily: 'var(--font-mono)',
         fontSize: '11px',
-        boxShadow: '0 8px 30px rgba(0,0,0,0.6)',
-        backdropFilter: 'blur(12px)'
+        boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
       }}>
-        <div style={{ fontWeight: 'bold', color: '#8F9BB3', marginBottom: 4 }}>Check Time: {payload[0].payload.name}</div>
-        <div style={{ color: 'var(--color-acid)', fontWeight: 600 }}>Latency: {payload[0].value}ms</div>
+        <div style={{ fontWeight: 'bold', color: 'var(--color-txt-muted)', marginBottom: 4 }}>Check Time: {payload[0].payload.name}</div>
+        <div style={{ color: 'var(--color-brand-primary)', fontWeight: 600 }}>Latency: {payload[0].value}ms</div>
       </div>
     );
   }
@@ -65,17 +64,16 @@ const CustomPieTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     return (
       <div style={{
-        background: 'rgba(11, 19, 58, 0.96)',
-        border: '1px solid rgba(0, 240, 255, 0.3)',
+        background: 'var(--color-bg-sidebar)',
+        border: '1px solid var(--color-border-main)',
         borderRadius: '12px',
         padding: '10px 14px',
         color: 'var(--color-txt-primary)',
         fontFamily: 'var(--font-mono)',
         fontSize: '11px',
-        boxShadow: '0 8px 30px rgba(0,0,0,0.6)',
-        backdropFilter: 'blur(12px)'
+        boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
       }}>
-        <div style={{ fontWeight: 'bold', color: payload[0].payload.color || 'var(--color-acid)', marginBottom: 2 }}>{payload[0].name}</div>
+        <div style={{ fontWeight: 'bold', color: payload[0].payload.color || 'var(--color-brand-primary)', marginBottom: 2 }}>{payload[0].name}</div>
         <div style={{ color: 'var(--color-txt-primary)' }}>Checks count: {payload[0].value}</div>
       </div>
     );
@@ -203,15 +201,14 @@ export default function DashboardPage() {
     : 100;
 
   const customTooltipStyle = {
-    background: 'rgba(11, 19, 58, 0.95)',
-    border: '1px solid rgba(0, 240, 255, 0.25)',
+    background: 'var(--color-bg-sidebar)',
+    border: '1px solid var(--color-border-main)',
     borderRadius: '16px',
     padding: '12px 16px',
     color: 'var(--color-txt-primary)',
     fontFamily: 'var(--font-mono)',
     fontSize: '12px',
-    boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
-    backdropFilter: 'blur(12px)'
+    boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
   };
 
   if (!loading && monitors.length === 0) {
@@ -422,15 +419,15 @@ export default function DashboardPage() {
                       <StatusBadge status={inc.status} showPulse={false} />
                       <span style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 700, color: 'var(--color-txt-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{inc.monitorName}</span>
                     </div>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#FF007F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '50%', paddingLeft: 8 }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-status-down)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '50%', paddingLeft: 8 }}>
                       {inc.errorMessage || 'Status Check Failed'}
                     </span>
                   </div>
                 ))
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', background: 'rgba(0, 240, 255, 0.01)', borderRadius: 16, border: '1px dashed rgba(0, 240, 255, 0.15)', gap: 8 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(0, 240, 255, 0.08)', border: '1px solid rgba(0, 240, 255, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-acid)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', background: 'var(--color-bg-card-hover)', borderRadius: 16, border: '1px dashed var(--color-border-hover)', gap: 8 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--color-brand-light)', border: '1px solid var(--color-brand-mid)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand-primary)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
                   </div>
@@ -665,9 +662,9 @@ function EmptyState() {
     { n: '3', title: 'Go to sleep', desc: 'PulseGuard checks every minute and alerts you when something breaks.' },
   ];
   return (
-    <div style={{ border: '1px dashed rgba(0, 240, 255, 0.2)', borderRadius: 28, padding: '56px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0, background: 'rgba(8, 12, 36, 0.4)', backdropFilter: 'blur(12px)' }}>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px' }}>
-        // Getting started
+    <div style={{ border: '1px dashed var(--color-border-hover)', borderRadius: 28, padding: '56px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0, background: 'var(--color-bg-card)' }}>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-brand-primary)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px' }}>
+        Getting started
       </p>
       <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 800, color: 'var(--color-txt-primary)', margin: '0 0 8px', textAlign: 'center' }}>
         {t('dash_empty_title')}
@@ -678,8 +675,8 @@ function EmptyState() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 36, width: '100%', maxWidth: 680 }} className="empty-steps-grid">
         {steps.map((s) => (
           <div key={s.n} className="glass-card" style={{ borderRadius: 24, padding: '20px' }}>
-            <div style={{ width: 28, height: 28, background: s.n === '1' ? 'var(--color-acid)' : 'var(--color-border-main)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: s.n === '1' ? 'var(--color-bg-base)' : 'var(--color-txt-secondary)' }}>{s.n}</span>
+            <div style={{ width: 28, height: 28, background: s.n === '1' ? 'linear-gradient(135deg,#7C3AED,#2563EB)' : 'var(--color-bg-card-hover)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: s.n === '1' ? 'white' : 'var(--color-txt-secondary)' }}>{s.n}</span>
             </div>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: 'var(--color-txt-primary)', margin: '0 0 6px' }}>{s.title}</p>
             <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-txt-secondary)', margin: 0, lineHeight: 1.6 }}>{s.desc}</p>

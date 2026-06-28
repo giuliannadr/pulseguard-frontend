@@ -38,7 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             __html: `
               (function() {
                 try {
-                  const theme = localStorage.getItem('pg-theme') || 'dark';
+                  const theme = localStorage.getItem('pg-theme') || 'light';
                   if (theme === 'dark') {
                     document.documentElement.classList.add('dark');
                   } else {

@@ -62,11 +62,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="mobile-top-bar">
         <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
           <div style={{
-            width: 24, height: 24, background: 'var(--color-acid)', borderRadius: 3,
+            width: 24, height: 24, background: 'linear-gradient(135deg,#7C3AED,#2563EB)', borderRadius: 6,
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="var(--color-bg-base)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
           <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 14, color: 'var(--color-txt-primary)' }}>

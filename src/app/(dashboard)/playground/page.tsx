@@ -413,10 +413,10 @@ export default function PlaygroundPage() {
             onClick={() => setActiveTab(t.id as Tab)}
             style={{
               padding: '8px 16px',
-              background: activeTab === t.id ? 'rgba(0,240,255,0.05)' : 'transparent',
-              border: activeTab === t.id ? '1px solid rgba(0,240,255,0.3)' : '1px solid transparent',
-              borderRadius: 3,
-              color: activeTab === t.id ? 'var(--color-acid)' : 'var(--color-txt-muted)',
+              background: activeTab === t.id ? 'var(--color-brand-light)' : 'transparent',
+              border: activeTab === t.id ? '1px solid var(--color-brand-mid)' : '1px solid transparent',
+              borderRadius: 8,
+              color: activeTab === t.id ? 'var(--color-brand-primary)' : 'var(--color-txt-muted)',
               fontFamily: 'var(--font-mono)',
               fontSize: 12,
               cursor: 'pointer',
@@ -446,7 +446,7 @@ export default function PlaygroundPage() {
                      setApiMethod('GET');
                      setApiHeaders('{\n  "Accept": "application/json"\n}');
                    }}
-                   style={{ background: '#000', border: '1px solid var(--color-border-main)', borderRadius: 2, padding: '4px 8px', color: 'var(--color-acid)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
+                   style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '4px 8px', color: 'var(--color-brand-primary)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
                  >
                    GET Public IP
                  </button>
@@ -457,7 +457,7 @@ export default function PlaygroundPage() {
                      setApiHeaders('{\n  "Content-Type": "application/json"\n}');
                      setApiBody('{\n  "username": "admin",\n  "action": "test"\n}');
                    }}
-                   style={{ background: '#000', border: '1px solid var(--color-border-main)', borderRadius: 2, padding: '4px 8px', color: 'var(--color-acid)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
+                   style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '4px 8px', color: 'var(--color-brand-primary)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
                  >
                    POST Echo HTTPBin
                  </button>
@@ -467,7 +467,7 @@ export default function PlaygroundPage() {
                      setApiMethod('GET');
                      setApiHeaders('{\n  "User-Agent": "PulseGuard"\n}');
                    }}
-                   style={{ background: '#000', border: '1px solid var(--color-border-main)', borderRadius: 2, padding: '4px 8px', color: 'var(--color-acid)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
+                   style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '4px 8px', color: 'var(--color-brand-primary)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
                  >
                    GET GitHub User
                  </button>
@@ -478,7 +478,7 @@ export default function PlaygroundPage() {
                   value={apiMethod}
                   onChange={(e) => setApiMethod(e.target.value)}
                   style={{
-                    background: '#000',
+                    background: 'var(--color-bg-base)',
                     border: '1px solid var(--color-border-main)',
                     color: 'var(--color-txt-primary)',
                     fontFamily: 'var(--font-mono)',
@@ -500,7 +500,7 @@ export default function PlaygroundPage() {
                   placeholder="https://api.yourdomain.com/endpoint"
                   style={{
                     flex: 1,
-                    background: '#000',
+                    background: 'var(--color-bg-base)',
                     border: '1px solid var(--color-border-main)',
                     color: 'var(--color-txt-primary)',
                     fontFamily: 'var(--font-mono)',
@@ -522,7 +522,7 @@ export default function PlaygroundPage() {
                   rows={4}
                   style={{
                     width: '100%',
-                    background: '#000',
+                    background: 'var(--color-bg-base)',
                     border: '1px solid var(--color-border-main)',
                     color: 'var(--color-txt-primary)',
                     fontFamily: 'var(--font-mono)',
@@ -545,7 +545,7 @@ export default function PlaygroundPage() {
                     rows={4}
                     style={{
                       width: '100%',
-                      background: '#000',
+                      background: 'var(--color-bg-base)',
                       border: '1px solid var(--color-border-main)',
                       color: 'var(--color-txt-primary)',
                       fontFamily: 'var(--font-mono)',
@@ -598,7 +598,7 @@ export default function PlaygroundPage() {
                     <div style={{ marginBottom: 16 }}>
                       <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', margin: '0 0 6px' }}>Vulnerabilities & Findings</p>
                       {apiResult.audit.findings && apiResult.audit.findings.length > 0 ? (
-                        <ul style={{ margin: 0, paddingLeft: 18, color: '#D4D4D4', fontSize: 13, fontFamily: 'var(--font-body)', lineHeight: 1.5 }}>
+                        <ul style={{ margin: 0, paddingLeft: 18, color: 'var(--color-txt-secondary)', fontSize: 13, fontFamily: 'var(--font-body)', lineHeight: 1.5 }}>
                           {apiResult.audit.findings.map((f: string, i: number) => (
                             <li key={i} style={{ marginBottom: 6 }}>{f}</li>
                           ))}
@@ -643,7 +643,7 @@ export default function PlaygroundPage() {
                       <summary style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-primary)', cursor: 'pointer', outline: 'none', padding: '6px 0' }}>
                         Response Headers ({Object.keys(apiResult.responseHeaders).length})
                       </summary>
-                      <pre style={{ margin: '8px 0 0', padding: 12, background: '#000', border: '1px solid var(--color-border-main)', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', color: '#D4D4D4', overflowX: 'auto' }}>
+                      <pre style={{ margin: '8px 0 0', padding: 12, background: 'var(--color-bg-base)', border: '1px solid var(--color-border-main)', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-secondary)', overflowX: 'auto' }}>
                         {JSON.stringify(apiResult.responseHeaders, null, 2)}
                       </pre>
                     </details>
@@ -652,7 +652,7 @@ export default function PlaygroundPage() {
                       <summary style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-primary)', cursor: 'pointer', outline: 'none', padding: '6px 0' }}>
                         Response Body Snippet
                       </summary>
-                      <pre style={{ margin: '8px 0 0', padding: 12, background: '#000', border: '1px solid var(--color-border-main)', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', color: '#D4D4D4', overflowX: 'auto', maxHeight: 200, overflowY: 'auto' }}>
+                      <pre style={{ margin: '8px 0 0', padding: 12, background: 'var(--color-bg-base)', border: '1px solid var(--color-border-main)', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-secondary)', overflowX: 'auto', maxHeight: 200, overflowY: 'auto' }}>
                         {typeof apiResult.responseBody === 'object' ? JSON.stringify(apiResult.responseBody, null, 2) : String(apiResult.responseBody)}
                       </pre>
                     </details>
@@ -684,7 +684,7 @@ export default function PlaygroundPage() {
                      setCodeLanguage('dockerfile');
                      setCodeSnippet('FROM ubuntu:latest\nRUN apt-get update && apt-get install -y curl\n# BAD PRACTICE: running container as root user\nUSER root\nCMD ["bash"]');
                    }}
-                   style={{ background: '#000', border: '1px solid var(--color-border-main)', borderRadius: 2, padding: '4px 8px', color: 'var(--color-acid)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
+                   style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '4px 8px', color: 'var(--color-brand-primary)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
                  >
                    Insecure Dockerfile
                  </button>
@@ -693,7 +693,7 @@ export default function PlaygroundPage() {
                      setCodeLanguage('javascript');
                      setCodeSnippet('const express = require("express");\nconst app = express();\nconst pg = require("pg");\nconst client = new pg.Client();\n\napp.get("/users", (req, res) => {\n  // VULNERABLE: Direct SQL injection concatenation\n  const sql = "SELECT * FROM users WHERE name = \'" + req.query.name + "\'";\n  client.query(sql, (err, result) => {\n    res.json(result.rows);\n  });\n});');
                    }}
-                   style={{ background: '#000', border: '1px solid var(--color-border-main)', borderRadius: 2, padding: '4px 8px', color: 'var(--color-acid)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
+                   style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '4px 8px', color: 'var(--color-brand-primary)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
                  >
                    SQL Injection Code
                  </button>
@@ -702,7 +702,7 @@ export default function PlaygroundPage() {
                      setCodeLanguage('dependencies');
                      setCodeSnippet('{\n  "name": "vulnerable-app",\n  "dependencies": {\n    "express": "^4.16.0",\n    "lodash": "4.17.4",\n    "mongoose": "5.7.5"\n  }\n}');
                    }}
-                   style={{ background: '#000', border: '1px solid var(--color-border-main)', borderRadius: 2, padding: '4px 8px', color: 'var(--color-acid)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
+                   style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '4px 8px', color: 'var(--color-brand-primary)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
                  >
                    Vulnerable Dependencies
                  </button>
@@ -765,7 +765,7 @@ export default function PlaygroundPage() {
                       onChange={(e) => setSelectedRepoId(e.target.value)}
                       style={{
                         width: '100%',
-                        background: '#000',
+                        background: 'var(--color-bg-base)',
                         border: '1px solid var(--color-border-main)',
                         color: 'var(--color-txt-primary)',
                         fontFamily: 'var(--font-mono)',
@@ -794,7 +794,7 @@ export default function PlaygroundPage() {
                       disabled={loadingCommits || commitsList.length === 0}
                       style={{
                         width: '100%',
-                        background: '#000',
+                        background: 'var(--color-bg-base)',
                         border: '1px solid var(--color-border-main)',
                         color: 'var(--color-txt-primary)',
                         fontFamily: 'var(--font-mono)',
@@ -828,7 +828,7 @@ export default function PlaygroundPage() {
                     onChange={(e) => setCodeLanguage(e.target.value)}
                     style={{
                       width: '100%',
-                      background: '#000',
+                      background: 'var(--color-bg-base)',
                       border: '1px solid var(--color-border-main)',
                       color: 'var(--color-txt-primary)',
                       fontFamily: 'var(--font-mono)',
@@ -852,7 +852,7 @@ export default function PlaygroundPage() {
                   {codeSourceMode === 'repo' ? 'Commit Diff (Loaded automatically)' : 'Paste Code'}
                 </label>
                 {fetchingDiff ? (
-                  <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000', border: '1px solid var(--color-border-main)', borderRadius: 3, color: 'var(--color-txt-muted)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+                  <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg-base)', border: '1px solid var(--color-border-main)', borderRadius: 3, color: 'var(--color-txt-muted)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
                     Fetching commit diff from GitHub...
                   </div>
                 ) : (
@@ -862,7 +862,7 @@ export default function PlaygroundPage() {
                     rows={10}
                     style={{
                       width: '100%',
-                      background: '#000',
+                      background: 'var(--color-bg-base)',
                       border: '1px solid var(--color-border-main)',
                       color: 'var(--color-txt-primary)',
                       fontFamily: 'var(--font-mono)',
@@ -913,7 +913,7 @@ export default function PlaygroundPage() {
                   <div style={{ marginBottom: 20 }}>
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', margin: '0 0 8px' }}>Security Findings</p>
                     {codeResult.findings && codeResult.findings.length > 0 ? (
-                      <ul style={{ margin: 0, paddingLeft: 18, color: '#D4D4D4', fontSize: 13, fontFamily: 'var(--font-body)', lineHeight: 1.5 }}>
+                      <ul style={{ margin: 0, paddingLeft: 18, color: 'var(--color-txt-secondary)', fontSize: 13, fontFamily: 'var(--font-body)', lineHeight: 1.5 }}>
                         {codeResult.findings.map((f: string, i: number) => (
                           <li key={i} style={{ marginBottom: 8 }}>{f}</li>
                         ))}
@@ -925,7 +925,7 @@ export default function PlaygroundPage() {
 
                   <div style={{ marginBottom: 20 }}>
                     <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', margin: '0 0 8px' }}>Actionable Recommendations</p>
-                    <pre style={{ margin: 0, padding: 12, background: '#000', border: '1px solid var(--color-border-main)', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-muted)', whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>
+                    <pre style={{ margin: 0, padding: 12, background: 'var(--color-bg-base)', border: '1px solid var(--color-border-main)', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-muted)', whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>
                       {codeResult.recommendations}
                     </pre>
                   </div>
@@ -992,19 +992,19 @@ export default function PlaygroundPage() {
                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', marginRight: 4 }}>Load Preset:</span>
                  <button
                    onClick={() => setDomainInput('github.com')}
-                   style={{ background: '#000', border: '1px solid var(--color-border-main)', borderRadius: 2, padding: '4px 8px', color: 'var(--color-acid)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
+                   style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '4px 8px', color: 'var(--color-brand-primary)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
                  >
                    github.com
                  </button>
                  <button
                    onClick={() => setDomainInput('google.com')}
-                   style={{ background: '#000', border: '1px solid var(--color-border-main)', borderRadius: 2, padding: '4px 8px', color: 'var(--color-acid)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
+                   style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '4px 8px', color: 'var(--color-brand-primary)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
                  >
                    google.com
                  </button>
                  <button
                    onClick={() => setDomainInput('vercel.com')}
-                   style={{ background: '#000', border: '1px solid var(--color-border-main)', borderRadius: 2, padding: '4px 8px', color: 'var(--color-acid)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
+                   style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '4px 8px', color: 'var(--color-brand-primary)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
                  >
                    vercel.com
                  </button>
@@ -1021,7 +1021,7 @@ export default function PlaygroundPage() {
                   placeholder="domain.com"
                   style={{
                     width: '100%',
-                    background: '#000',
+                    background: 'var(--color-bg-base)',
                     border: '1px solid var(--color-border-main)',
                     color: 'var(--color-txt-primary)',
                     fontFamily: 'var(--font-mono)',
@@ -1079,7 +1079,7 @@ export default function PlaygroundPage() {
                     <div style={{ marginBottom: 12 }}>
                       <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-muted)', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>SSL Findings</span>
                       {dnsResult.audit.sslFindings && dnsResult.audit.sslFindings.length > 0 ? (
-                        <ul style={{ margin: 0, paddingLeft: 16, color: '#D4D4D4', fontSize: 12, lineHeight: 1.4 }}>
+                        <ul style={{ margin: 0, paddingLeft: 16, color: 'var(--color-txt-secondary)', fontSize: 12, lineHeight: 1.4 }}>
                           {dnsResult.audit.sslFindings.map((f: string, i: number) => <li key={i}>{f}</li>)}
                         </ul>
                       ) : <span style={{ color: '#00E676', fontSize: 12 }}>SSL certificate setup looks healthy.</span>}
@@ -1088,7 +1088,7 @@ export default function PlaygroundPage() {
                     <div style={{ marginBottom: 16 }}>
                       <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-muted)', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>DNS Safety Findings</span>
                       {dnsResult.audit.dnsFindings && dnsResult.audit.dnsFindings.length > 0 ? (
-                        <ul style={{ margin: 0, paddingLeft: 16, color: '#D4D4D4', fontSize: 12, lineHeight: 1.4 }}>
+                        <ul style={{ margin: 0, paddingLeft: 16, color: 'var(--color-txt-secondary)', fontSize: 12, lineHeight: 1.4 }}>
                           {dnsResult.audit.dnsFindings.map((f: string, i: number) => <li key={i}>{f}</li>)}
                         </ul>
                       ) : <span style={{ color: '#00E676', fontSize: 12 }}>Email anti-spoofing and security records present.</span>}
@@ -1302,7 +1302,7 @@ export default function PlaygroundPage() {
                     placeholder="https://api.domain.com/auth"
                     style={{
                       width: '100%',
-                      background: '#000',
+                      background: 'var(--color-bg-base)',
                       border: '1px solid var(--color-border-main)',
                       color: 'var(--color-txt-primary)',
                       fontFamily: 'var(--font-mono)',
@@ -1318,7 +1318,7 @@ export default function PlaygroundPage() {
                     onChange={(e) => setSelectedMonitorId(e.target.value)}
                     style={{
                       width: '100%',
-                      background: '#000',
+                      background: 'var(--color-bg-base)',
                       border: '1px solid var(--color-border-main)',
                       color: 'var(--color-txt-primary)',
                       fontFamily: 'var(--font-mono)',
@@ -1351,7 +1351,7 @@ export default function PlaygroundPage() {
                   onChange={(e) => setAttackVector(e.target.value)}
                   style={{
                     width: '100%',
-                    background: '#000',
+                    background: 'var(--color-bg-base)',
                     border: '1px solid var(--color-border-main)',
                     color: 'var(--color-txt-primary)',
                     fontFamily: 'var(--font-mono)',
@@ -1378,9 +1378,9 @@ export default function PlaygroundPage() {
                 onClick={handleRunHacking}
                 disabled={hackRunning}
                 className="btn-strict-primary"
-                style={{ width: '100%', height: 42, fontSize: 13, background: '#FF1744', border: '1px solid #FF1744', color: '#000', fontWeight: 'bold' }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = '#FF5252'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = '#FF1744'; }}
+                style={{ width: '100%', height: 42, fontSize: 13, background: 'linear-gradient(135deg,#DC2626,#7C3AED)', border: 'none', color: 'white', fontWeight: 'bold' }}
+                onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.9'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
               >
                 {hackRunning ? 'Simulating Attack Vector...' : '⚡ Launch Simulation'}
               </button>
@@ -1390,7 +1390,7 @@ export default function PlaygroundPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               
               {/* Terminal Logs */}
-              <div style={{ background: '#000', border: '1px solid var(--color-border-main)', borderRadius: 3, padding: 16, height: 180, display: 'flex', flexDirection: 'column', gap: 6, overflowY: 'auto' }}>
+              <div style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-main)', borderRadius: 3, padding: 16, height: 180, display: 'flex', flexDirection: 'column', gap: 6, overflowY: 'auto' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--color-border-main)', paddingBottom: 6, marginBottom: 4 }}>
                   <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-muted)', textTransform: 'uppercase' }}>Simulation Console Logs</span>
                   <span style={{ width: 6, height: 6, borderRadius: '50%', background: hackRunning ? '#FF1744' : '#00E676', display: 'inline-block', animation: hackRunning ? 'pg-pulse 1s infinite' : 'none' }}></span>
@@ -1399,7 +1399,7 @@ export default function PlaygroundPage() {
                   <p style={{ color: 'var(--color-txt-muted)', fontFamily: 'var(--font-mono)', fontSize: 11, margin: 0 }}>Console idle. Launch an attack vector to begin probing.</p>
                 ) : (
                   hackLogs.map((log, idx) => (
-                    <div key={idx} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: log.includes('[ERROR]') ? '#FF1744' : '#D4D4D4', lineHeight: 1.4 }}>
+                    <div key={idx} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: log.includes('[ERROR]') ? '#FF1744' : 'var(--color-txt-secondary)', lineHeight: 1.4 }}>
                       {log}
                     </div>
                   ))

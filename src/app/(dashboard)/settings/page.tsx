@@ -157,10 +157,10 @@ export default function SettingsPage() {
             onClick={() => setActiveTab(t.id as Tab)}
             style={{
               padding: '8px 16px',
-              background: activeTab === t.id ? 'rgba(0,240,255,0.05)' : 'transparent',
-              border: activeTab === t.id ? '1px solid rgba(0,240,255,0.3)' : '1px solid transparent',
-              borderRadius: 3,
-              color: activeTab === t.id ? 'var(--color-acid)' : 'var(--color-txt-muted)',
+              background: activeTab === t.id ? 'var(--color-brand-light)' : 'transparent',
+              border: activeTab === t.id ? '1px solid var(--color-brand-mid)' : '1px solid transparent',
+              borderRadius: 8,
+              color: activeTab === t.id ? 'var(--color-brand-primary)' : 'var(--color-txt-muted)',
               fontFamily: 'var(--font-mono)',
               fontSize: 12,
               cursor: 'pointer',
@@ -193,9 +193,9 @@ export default function SettingsPage() {
                   onClick={() => setLanguage('en')}
                   style={{
                     padding: '8px 18px',
-                    background: language === 'en' ? 'rgba(0,240,255,0.05)' : 'transparent',
-                    border: language === 'en' ? '1px solid var(--color-acid)' : '1px solid var(--color-border-main)',
-                    color: language === 'en' ? 'var(--color-acid)' : 'var(--color-txt-muted)',
+                    background: language === 'en' ? 'var(--color-brand-light)' : 'transparent',
+                    border: language === 'en' ? '1px solid var(--color-brand-mid)' : '1px solid var(--color-border-main)',
+                    color: language === 'en' ? 'var(--color-brand-primary)' : 'var(--color-txt-muted)',
                     fontFamily: 'var(--font-mono)',
                     fontSize: 12,
                     borderRadius: 3,
@@ -210,9 +210,9 @@ export default function SettingsPage() {
                   onClick={() => setLanguage('es')}
                   style={{
                     padding: '8px 18px',
-                    background: language === 'es' ? 'rgba(0,240,255,0.05)' : 'transparent',
-                    border: language === 'es' ? '1px solid var(--color-acid)' : '1px solid var(--color-border-main)',
-                    color: language === 'es' ? 'var(--color-acid)' : 'var(--color-txt-muted)',
+                    background: language === 'es' ? 'var(--color-brand-light)' : 'transparent',
+                    border: language === 'es' ? '1px solid var(--color-brand-mid)' : '1px solid var(--color-border-main)',
+                    color: language === 'es' ? 'var(--color-brand-primary)' : 'var(--color-txt-muted)',
                     fontFamily: 'var(--font-mono)',
                     fontSize: 12,
                     borderRadius: 3,
@@ -240,7 +240,7 @@ export default function SettingsPage() {
                 placeholder="https://discord.com/api/webhooks/..."
                 style={{
                   width: '100%',
-                  background: '#000',
+                  background: 'var(--color-bg-base)',
                   border: '1px solid var(--color-border-main)',
                   color: 'var(--color-txt-primary)',
                   fontFamily: 'var(--font-mono)',
@@ -280,7 +280,7 @@ export default function SettingsPage() {
                   type="button"
                   onClick={handleApplyWebhookToAll}
                   disabled={applyingToAll || !webhookUrl}
-                  style={{ background: 'transparent', border: '1px solid rgba(0,240,255,0.2)', color: webhookUrl ? 'var(--color-acid)' : 'var(--color-txt-muted)', padding: '6px 12px', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: webhookUrl ? 'pointer' : 'not-allowed' }}
+                  style={{ background: 'transparent', border: '1px solid var(--color-border-main)', color: webhookUrl ? 'var(--color-brand-primary)' : 'var(--color-txt-muted)', padding: '6px 12px', borderRadius: 8, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: webhookUrl ? 'pointer' : 'not-allowed' }}
                 >
                   {applyingToAll ? 'Applying...' : 'Apply to all existing monitors'}
                 </button>
@@ -344,7 +344,7 @@ export default function SettingsPage() {
                   Share this URL so anyone can see your monitors' live status without logging in.
                 </p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <code style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-acid)', background: 'rgba(0,240,255,0.05)', border: '1px solid rgba(0,240,255,0.15)', padding: '8px 14px', borderRadius: 3, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <code style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-brand-primary)', background: 'var(--color-brand-light)', border: '1px solid var(--color-brand-mid)', padding: '8px 14px', borderRadius: 8, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {typeof window !== 'undefined' ? `${window.location.origin}/s/${userId}` : `/s/${userId}`}
                   </code>
                   <button

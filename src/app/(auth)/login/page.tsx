@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 
-// Separated into its own component so useSearchParams() is inside <Suspense>
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -49,78 +48,53 @@ function LoginForm() {
 
   return (
     <div style={{ width: '100%' }}>
-      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-acid)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
-        // Auth
-      </p>
-      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: 'var(--color-txt-primary)', margin: '0 0 32px', letterSpacing: '-0.02em' }}>
+      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7C3AED', margin: '0 0 8px' }}>
         Welcome back
+      </p>
+      <h1 style={{ fontSize: 28, fontWeight: 900, color: '#1F2937', margin: '0 0 32px', letterSpacing: '-0.02em' }}>
+        Sign in to PulseGuard
       </h1>
 
-      {/* OAuth */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
         <OAuthBtn provider="github" label="Continue with GitHub" loading={oauthLoading === 'github'} onClick={() => handleOAuth('github')} />
         <OAuthBtn provider="google" label="Continue with Google" loading={oauthLoading === 'google'} onClick={() => handleOAuth('google')} />
       </div>
 
-      {/* Divider */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-        <div style={{ flex: 1, height: 1, background: 'var(--color-border-main)' }} />
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-2)', letterSpacing: '0.1em' }}>OR</span>
-        <div style={{ flex: 1, height: 1, background: 'var(--color-border-main)' }} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+        <div style={{ flex: 1, height: 1, background: '#E5E7EB' }} />
+        <span style={{ fontSize: 11, color: '#9CA3AF', letterSpacing: '0.08em', fontWeight: 500 }}>OR</span>
+        <div style={{ flex: 1, height: 1, background: '#E5E7EB' }} />
       </div>
 
-      {/* Form */}
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-          <label style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-text-2)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-            Email
-          </label>
-          <input
-            className="input-strict"
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ borderRadius: 12 }}
-          />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <label style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Email</label>
+          <input className="input-strict" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ borderRadius: 12 }} />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-          <label style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-text-2)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-            Password
-          </label>
-          <input
-            className="input-strict"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ borderRadius: 12 }}
-          />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <label style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Password</label>
+          <input className="input-strict" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ borderRadius: 12 }} />
         </div>
 
         {error && (
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-pink-primary)', background: 'rgba(255,0,127,0.08)', border: '1px solid rgba(255,0,127,0.2)', borderRadius: 12, padding: '10px 14px' }}>
+          <div style={{ fontSize: 12, color: '#DC2626', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 12, padding: '10px 14px' }}>
             {error}
           </div>
         )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="btn-solid-glow"
-          style={{ marginTop: 4, width: '100%', borderRadius: 999 }}
-        >
+        <button type="submit" disabled={loading} style={{
+          marginTop: 4, width: '100%', padding: '14px', borderRadius: 14,
+          background: 'linear-gradient(135deg,#7C3AED,#2563EB)', color: 'white',
+          fontWeight: 700, fontSize: 14, border: 'none', cursor: 'pointer',
+          boxShadow: '0 4px 16px rgba(124,58,237,0.3)', opacity: loading ? 0.7 : 1, transition: 'opacity 0.2s',
+        }}>
           {loading ? 'Signing in...' : 'Sign In'}
         </button>
       </form>
 
-      <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-text-2)', textAlign: 'center', marginTop: 28 }}>
+      <p style={{ fontSize: 13, color: '#9CA3AF', textAlign: 'center', marginTop: 24 }}>
         No account?{' '}
-        <Link href="/signup" style={{ color: 'var(--color-acid)', textDecoration: 'none', fontWeight: 600 }}>
-          Create one
-        </Link>
+        <Link href="/signup" style={{ color: '#7C3AED', textDecoration: 'none', fontWeight: 700 }}>Create one free</Link>
       </p>
     </div>
   );
@@ -128,133 +102,95 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div
-      style={{
-        minHeight: '100dvh',
-        display: 'flex',
-        background: 'var(--color-bg-base)',
-        fontFamily: 'var(--font-body)',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Left panel — brand mockup */}
-      <div
-        style={{
-          display: 'none',
-          flex: 1,
-          background: 'linear-gradient(160deg, #1E1050 0%, #2D1B69 40%, #1a0f42 100%)',
-          borderRight: '1px solid var(--color-border-main)',
-          padding: '60px 64px',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-        className="auth-left-panel"
-      >
-        {/* Subtle glow effects */}
-        <div style={{
-          position: 'absolute', top: '-20%', right: '-20%', width: '60vw', height: '60vw',
-          background: 'radial-gradient(circle, rgba(245, 158, 11, 0.12) 0%, transparent 65%)',
-          filter: 'blur(60px)', pointerEvents: 'none'
-        }} />
-        <div style={{
-          position: 'absolute', bottom: '-15%', left: '-10%', width: '40vw', height: '40vw',
-          background: 'radial-gradient(circle, rgba(196, 181, 253, 0.08) 0%, transparent 65%)',
-          filter: 'blur(60px)', pointerEvents: 'none'
-        }} />
+    <div style={{ minHeight: '100dvh', display: 'flex', background: 'white', fontFamily: 'Inter, system-ui, sans-serif', overflow: 'hidden' }}>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, zIndex: 10 }}>
-          <div style={{ width: 32, height: 32, background: '#F59E0B', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#1A0F42" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+      {/* Left panel */}
+      <div className="auth-left-panel" style={{
+        display: 'none', flex: 1,
+        background: 'linear-gradient(160deg,#0F0A1E 0%,#1A0F42 50%,#1e3a8a 100%)',
+        padding: '52px 56px', flexDirection: 'column', justifyContent: 'space-between',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        {/* Blobs */}
+        {[
+          { left: '-15%', top: '-20%', w: '60%', h: '60%', c: '#7C3AED' },
+          { left: '50%',  top: '40%',  w: '55%', h: '55%', c: '#2563EB' },
+          { left: '10%',  top: '55%',  w: '45%', h: '45%', c: '#0891B2' },
+        ].map((b, i) => (
+          <div key={i} style={{ position: 'absolute', left: b.left, top: b.top, width: b.w, height: b.h, background: b.c, opacity: 0.28, borderRadius: '50%', filter: 'blur(80px)', pointerEvents: 'none' }} />
+        ))}
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px)', backgroundSize: '48px 48px' }} />
+
+        {/* Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, position: 'relative', zIndex: 10 }}>
+          <div style={{ width: 30, height: 30, background: 'linear-gradient(135deg,#7C3AED,#2563EB)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 17, color: '#F9FAFB' }}>PulseGuard</span>
+          <span style={{ fontWeight: 800, fontSize: 16, color: 'white' }}>PulseGuard</span>
         </div>
 
-        {/* Mockup Dashboard Cards */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, zIndex: 10, margin: '40px 0', maxWidth: 440 }}>
-          
-          {/* Main Uptime Card */}
-          <div style={{ borderRadius: 16, padding: 24, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Global Uptime</span>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 10, marginBottom: 8 }}>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 40, fontWeight: 800, color: '#F9FAFB', margin: 0 }}>99.98%</h3>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#10B981', background: 'rgba(16,185,129,0.12)', padding: '2px 10px', borderRadius: 6 }}>All systems go</span>
+        {/* Dashboard mockup card */}
+        <div style={{ position: 'relative', zIndex: 10 }}>
+          <h2 style={{ fontSize: 40, fontWeight: 900, color: 'white', lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 20px' }}>
+            Know before<br />
+            <span style={{ background: 'linear-gradient(135deg,#C4B5FD,#93C5FD,#67E8F9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              your users do.
+            </span>
+          </h2>
+
+          {/* Mini stats card */}
+          <div style={{ borderRadius: 20, padding: 20, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(12px)', marginBottom: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em' }}>GLOBAL UPTIME</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#34D399', background: 'rgba(52,211,153,0.12)', padding: '2px 10px', borderRadius: 6 }}>All systems go</span>
             </div>
-            <div style={{ display: 'flex', gap: 3, height: 10, marginTop: 14 }}>
-              {[...Array(28)].map((_, i) => (
-                <div key={i} style={{ flex: 1, background: i === 18 ? '#EF4444' : '#C4B5FD', opacity: i === 18 ? 1 : 0.65, borderRadius: 2 }} />
+            <p style={{ margin: 0, fontSize: 44, fontWeight: 900, color: 'white', lineHeight: 1, letterSpacing: '-0.02em' }}>99.98%</p>
+            <div style={{ display: 'flex', gap: 3, height: 8, marginTop: 14 }}>
+              {Array.from({ length: 30 }).map((_, i) => (
+                <div key={i} style={{ flex: 1, background: i === 18 ? '#EF4444' : '#C4B5FD', opacity: i === 18 ? 1 : 0.5, borderRadius: 2 }} />
               ))}
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-            <div style={{ borderRadius: 14, padding: 18, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Avg Latency</span>
-              <div style={{ fontSize: 26, fontWeight: 700, color: '#F9FAFB', marginTop: 8, fontFamily: 'var(--font-mono)' }}>34ms</div>
-              <div style={{ height: 28, display: 'flex', alignItems: 'flex-end', gap: 3, marginTop: 10 }}>
-                {[6, 8, 4, 9, 12, 7, 5, 8, 10, 6].map((h, i) => (
-                  <div key={i} style={{ flex: 1, background: '#C4B5FD', height: `${(h/12)*100}%`, opacity: 0.7, borderRadius: 2 }} />
-                ))}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            {[
+              { label: 'Avg Latency', val: '34ms', color: '#C4B5FD' },
+              { label: 'Monitors',   val: '12',   color: '#67E8F9' },
+            ].map(s => (
+              <div key={s.label} style={{ borderRadius: 14, padding: 16, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.4)', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{s.label}</p>
+                <p style={{ margin: '6px 0 0', fontSize: 28, fontWeight: 900, color: s.color }}>{s.val}</p>
               </div>
-            </div>
-            <div style={{ borderRadius: 14, padding: 18, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Sec Shield</span>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#10B981', marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                Secured
-              </div>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'rgba(255,255,255,0.35)', margin: '12px 0 0' }}>0 Active Incidents</p>
-            </div>
+            ))}
           </div>
         </div>
 
-        <div>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#F59E0B', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 14 }}>
-            // Precision monitoring
-          </p>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 38, fontWeight: 800, color: '#F9FAFB', lineHeight: 1.15, letterSpacing: '-0.03em', margin: 0 }}>
-            Know when<br />things break<br />before users do.
-          </h2>
+        {/* Bottom */}
+        <div style={{ position: 'relative', zIndex: 10, display: 'flex', gap: 20 }}>
+          {[['Free', 'to start'], ['60s', 'intervals'], ['SSL', 'tracking']].map(([v, l]) => (
+            <div key={v}>
+              <p style={{ margin: 0, fontSize: 18, fontWeight: 900, color: 'white' }}>{v}</p>
+              <p style={{ margin: '2px 0 0', fontSize: 11, color: 'rgba(255,255,255,0.35)', fontWeight: 500 }}>{l}</p>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Right panel — form */}
-      <div
-        style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '48px 32px',
-          maxWidth: 480,
-          margin: '0 auto',
-          width: '100%',
-        }}
-      >
-        {/* Logo */}
+      {/* Right form panel */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 32px', maxWidth: 480, margin: '0 auto', width: '100%', background: 'white' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 48, alignSelf: 'flex-start' }}>
-          <div style={{ width: 28, height: 28, background: 'var(--color-brand-primary)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="var(--color-txt-btn-primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+          <div style={{ width: 30, height: 30, background: 'linear-gradient(135deg,#7C3AED,#2563EB)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: 'var(--color-txt-primary)' }}>PulseGuard</span>
+          <span style={{ fontWeight: 800, fontSize: 16, color: '#1F2937' }}>PulseGuard</span>
         </div>
 
-        <Suspense fallback={<div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-txt-muted)' }}>Loading...</div>}>
+        <Suspense fallback={<div style={{ fontSize: 12, color: '#9CA3AF' }}>Loading...</div>}>
           <LoginForm />
         </Suspense>
       </div>
 
-      <style>{`
-        @media (min-width: 900px) {
-          .auth-left-panel { display: flex !important; }
-        }
-      `}</style>
+      <style>{`@media (min-width: 900px) { .auth-left-panel { display: flex !important; } }`}</style>
     </div>
   );
 }
@@ -274,13 +210,7 @@ function OAuthBtn({ provider, label, loading, onClick }: { provider: string; lab
   );
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={loading}
-      className="btn-glass"
-      style={{ width: '100%', justifyContent: 'center', gap: 10, borderRadius: 8 }}
-    >
+    <button type="button" onClick={onClick} disabled={loading} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '12px', borderRadius: 12, background: 'white', border: '1px solid #E5E7EB', cursor: 'pointer', fontSize: 13, fontWeight: 600, color: '#374151', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', transition: 'all 0.15s' }}>
       {icon}
       {label}
     </button>

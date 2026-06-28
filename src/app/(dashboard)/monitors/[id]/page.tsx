@@ -15,11 +15,11 @@ import { UptimeBar } from '@/components/ui/UptimeBar';
 function getGradeColor(grade: string) {
   if (!grade) return 'var(--color-txt-muted)';
   const g = grade.toUpperCase();
-  if (g.startsWith('A')) return '#00E676';
+  if (g.startsWith('A')) return '#16A34A';
   if (g.startsWith('B')) return 'var(--color-acid)';
   if (g.startsWith('C')) return '#FFB300';
   if (g.startsWith('D')) return '#FF9100';
-  if (g.startsWith('F')) return '#FF1744';
+  if (g.startsWith('F')) return '#DC2626';
   return 'var(--color-txt-muted)';
 }
 
@@ -46,10 +46,10 @@ function Toast({ msg, type }: { msg: string; type: 'success' | 'error' }) {
     <div style={{
       position: 'fixed', bottom: 24, right: 24, zIndex: 999,
       background: type === 'success' ? 'rgba(0,230,118,0.1)' : 'rgba(255,23,68,0.1)',
-      border: `1px solid ${type === 'success' ? '#00E676' : '#FF1744'}`,
+      border: `1px solid ${type === 'success' ? '#16A34A' : '#DC2626'}`,
       borderRadius: 4, padding: '12px 20px',
       fontFamily: 'var(--font-mono)', fontSize: 13,
-      color: type === 'success' ? '#00E676' : '#FF1744',
+      color: type === 'success' ? '#16A34A' : '#DC2626',
       animation: 'pg-fade-in 0.2s ease-out both',
     }}>
       {msg}
@@ -221,7 +221,7 @@ function EditModal({ monitor, token, onSave, onClose }: {
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 3, marginBottom: 6 }}>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-secondary)' }}>{fmtWindow(w)}</span>
                 <button type="button" onClick={() => setWindows(prev => prev.filter((_, idx) => idx !== i))}
-                  style={{ background: 'transparent', border: 'none', color: '#FF1744', fontSize: 14, cursor: 'pointer', lineHeight: 1, padding: '0 4px' }}>×</button>
+                  style={{ background: 'transparent', border: 'none', color: '#DC2626', fontSize: 14, cursor: 'pointer', lineHeight: 1, padding: '0 4px' }}>×</button>
               </div>
             ))}
 
@@ -260,7 +260,7 @@ function EditModal({ monitor, token, onSave, onClose }: {
             )}
           </div>
 
-          {err && <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#FF1744', margin: 0 }}>{err}</p>}
+          {err && <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#DC2626', margin: 0 }}>{err}</p>}
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
             <button type="button" onClick={onClose} className="btn-strict-secondary" style={{ fontSize: 13 }}>Cancel</button>
             <button type="submit" disabled={saving} className="btn-strict-primary" style={{ fontSize: 13 }}>
@@ -443,7 +443,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
   if (error) {
     return (
       <div style={{ textAlign: 'center', padding: '80px 40px' }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: '#FF1744', marginBottom: 16 }}>{error}</p>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: '#DC2626', marginBottom: 16 }}>{error}</p>
         <Link href="/dashboard" style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-acid)' }}>← Back to dashboard</Link>
       </div>
     );
@@ -622,7 +622,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                         fontFamily: 'var(--font-mono)',
                         fontSize: 9,
                         fontWeight: 'bold',
-                        color: present ? '#00E676' : '#FF1744',
+                        color: present ? '#16A34A' : '#DC2626',
                         letterSpacing: '0.05em'
                       }}>
                         {present ? '[ SECURE ]' : '[ MISSING ]'}
@@ -662,7 +662,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                   <div>
                     <div style={{ display: 'flex', height: 8, borderRadius: 2, overflow: 'hidden', background: '#222', marginBottom: 12 }}>
                       {[
-                        { name: 'DNS', val: netDiagnosticData.timings.dnsLookupMs, color: '#00E676' },
+                        { name: 'DNS', val: netDiagnosticData.timings.dnsLookupMs, color: '#16A34A' },
                         { name: 'TCP', val: netDiagnosticData.timings.tcpConnectMs, color: 'var(--color-acid)' },
                         { name: 'TLS', val: netDiagnosticData.timings.tlsHandshakeMs, color: '#00B0FF' },
                         { name: 'TTFB', val: Math.max(0, netDiagnosticData.timings.ttfbMs - (netDiagnosticData.timings.dnsLookupMs + netDiagnosticData.timings.tcpConnectMs + netDiagnosticData.timings.tlsHandshakeMs)), color: '#FF007F' }
@@ -686,7 +686,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                     {/* Timeline legend */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
                       {[
-                        { label: 'DNS Lookup', val: netDiagnosticData.timings.dnsLookupMs, color: '#00E676' },
+                        { label: 'DNS Lookup', val: netDiagnosticData.timings.dnsLookupMs, color: '#16A34A' },
                         { label: 'TCP Conn', val: netDiagnosticData.timings.tcpConnectMs, color: 'var(--color-acid)' },
                         { label: 'TLS Handshake', val: netDiagnosticData.timings.tlsHandshakeMs, color: '#00B0FF' },
                         { label: 'TTFB', val: netDiagnosticData.timings.ttfbMs, color: '#FF007F' }
@@ -717,7 +717,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                 </div>
               ) : (
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 180 }}>
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#FF1744', textAlign: 'center', margin: 0 }}>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#DC2626', textAlign: 'center', margin: 0 }}>
                     Failed to run diagnostics:<br />{netDiagnosticData.error || 'Unknown network error'}
                   </p>
                 </div>
@@ -787,7 +787,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                         setIncidents(prev => prev.map(item => item.id === inc.id ? { ...item, resolved: true } : item));
                       }} />
                     )}
-                    {inc.resolved && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#00E676' }}>✓ RESOLVED</span>}
+                    {inc.resolved && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#16A34A' }}>✓ RESOLVED</span>}
                   </div>
                 </div>
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: inc.resolved ? 'var(--color-txt-muted)' : 'var(--color-txt-primary)', margin: '0 0 12px', lineHeight: 1.5 }}>{inc.description}</p>
@@ -865,7 +865,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                 {check.sslDaysLeft != null ? `${check.sslDaysLeft}d` : '—'}
               </span>
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>{fmtDate(check.checkedAt)}</span>
-              <span title={check.errorMessage ?? undefined} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#FF1744', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: check.errorMessage ? 'help' : 'default' }}>
+              <span title={check.errorMessage ?? undefined} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#DC2626', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: check.errorMessage ? 'help' : 'default' }}>
                 {check.errorMessage ?? ''}
               </span>
             </div>
@@ -877,7 +877,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
       {downtime.length > 0 && (
         <div className="glass-card" style={{ padding: 24, border: '1px solid rgba(255,23,68,0.25)', borderRadius: 24, marginTop: 16 }}>
           <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--color-border-main)' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#FF1744', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Downtime History</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#DC2626', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Downtime History</span>
           </div>
           {downtime.map((w, i) => {
             const durationSec = Math.round(w.durationMs / 1000);
@@ -887,9 +887,9 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                 <div>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-txt-primary)' }}>{fmtDate(w.start)}</span>
                   {w.end && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)', marginLeft: 8 }}>→ {fmtDate(w.end)}</span>}
-                  {!w.end && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#FF1744', marginLeft: 8, letterSpacing: '0.08em' }}>ONGOING</span>}
+                  {!w.end && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#DC2626', marginLeft: 8, letterSpacing: '0.08em' }}>ONGOING</span>}
                 </div>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 600, color: '#FF1744' }}>{durationStr}</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 600, color: '#DC2626' }}>{durationStr}</span>
               </div>
             );
           })}
@@ -926,7 +926,7 @@ function InlineResolve({ incidentId, token, onResolved }: { incidentId: string; 
           catch { setConfirming(false); }
           finally { setLoading(false); }
         }}
-        style={{ background: 'rgba(0,230,118,0.1)', border: '1px solid #00E676', color: '#00E676', padding: '4px 8px', borderRadius: 3, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
+        style={{ background: 'rgba(0,230,118,0.1)', border: '1px solid #16A34A', color: '#16A34A', padding: '4px 8px', borderRadius: 3, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
         {loading ? '...' : 'Yes'}
       </button>
       <button onClick={() => setConfirming(false)}
