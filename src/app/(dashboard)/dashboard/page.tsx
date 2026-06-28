@@ -214,9 +214,6 @@ export default function DashboardPage() {
     backdropFilter: 'blur(12px)'
   };
 
-  // Determine actual stacked cards structure
-  const cardCount = Math.min(3, monitors.length);
-
   if (!loading && monitors.length === 0) {
     return (
       <div style={{ width: '100%', animation: 'pg-fade-in 0.35s ease-out both' }}>
@@ -451,172 +448,202 @@ export default function DashboardPage() {
         </div>
 
         {/* ── RIGHT COLUMN ── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 28, minWidth: 0 }}>
-          
-          {/* Stacked cards header */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
+
+          {/* My Services header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 800, color: 'var(--color-txt-primary)', margin: 0 }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--color-txt-primary)', margin: 0 }}>
               My Services
             </h3>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-acid)' }}>
-              {monitors.length} Active
-            </span>
+            <Link href="/import" style={{ textDecoration: 'none' }}>
+              <button className="btn-solid-glow" style={{ height: 32, fontSize: 11, padding: '0 14px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Monitor
+              </button>
+            </Link>
           </div>
 
-          {/* Conditional Stacked credit cards visualization */}
-          <div style={{ position: 'relative', height: cardCount === 1 ? 180 : cardCount === 2 ? 195 : 210, marginBottom: 12 }}>
-            
-            {/* Back Card 3 (Renders only if at least 3 monitors exist) */}
-            {cardCount >= 3 && (
-              <div style={{
-                position: 'absolute', top: 0, left: 16, right: 16, height: 180,
-                background: 'linear-gradient(135deg, #FF007F 0%, #7000FF 100%)',
-                borderRadius: 24, opacity: 0.25, transform: 'scale(0.9)',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-                transition: 'all 0.3s ease'
-              }} />
-            )}
-            
-            {/* Middle Card 2 (Renders only if at least 2 monitors exist) */}
-            {cardCount >= 2 && (
-              <div style={{
-                position: 'absolute', 
-                top: cardCount === 2 ? 0 : 10, 
-                left: cardCount === 2 ? 12 : 8, 
-                right: cardCount === 2 ? 12 : 8, 
-                height: 180,
-                background: 'linear-gradient(135deg, #00F0FF 0%, #0072FF 100%)',
-                borderRadius: 24, 
-                opacity: cardCount === 2 ? 0.35 : 0.4, 
-                transform: cardCount === 2 ? 'scale(0.93)' : 'scale(0.95)',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-                transition: 'all 0.3s ease'
-              }} />
-            )}
-            
-            {/* Front Card 1 (Frosted Glass Card - Renders always) */}
-            <div className="glass-card" style={{
-              position: 'absolute', 
-              top: cardCount === 1 ? 0 : cardCount === 2 ? 15 : 20, 
-              left: 0, 
-              right: 0, 
-              height: 180,
-              borderRadius: 24, padding: 24,
-              background: 'rgba(255, 255, 255, 0.04)',
-              backdropFilter: 'blur(30px) saturate(180%)',
-              border: '1px solid var(--color-border-main)',
-              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 0 var(--color-border-hover)',
-              display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-              transition: 'all 0.3s ease'
+          {/* Services Table Card */}
+          <div className="glass-card" style={{ padding: 0, overflow: 'hidden', borderRadius: 12 }}>
+            {/* Table header */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 72px 80px 64px 32px',
+              gap: 0,
+              padding: '10px 16px',
+              borderBottom: '1px solid var(--color-border-main)',
+              background: 'var(--color-bg-card-hover)',
             }}>
-              {/* Logo & Status */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{ width: 18, height: 18, background: 'var(--color-acid)', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="var(--color-bg-base)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  </div>
-                  <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'rgba(255,255,255,0.7)', fontWeight: 'bold', letterSpacing: '0.05em' }}>PULSE CARD</span>
-                </div>
-                <div style={{ padding: '2px 8px', borderRadius: 999, background: selectedMonitor && getLastStatus(selectedMonitor) === 'up' ? 'rgba(0, 240, 255, 0.1)' : 'rgba(255, 0, 127, 0.1)', border: selectedMonitor && getLastStatus(selectedMonitor) === 'up' ? '1px solid rgba(0, 240, 255, 0.3)' : '1px solid rgba(255, 0, 127, 0.3)' }}>
-                  <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: selectedMonitor && getLastStatus(selectedMonitor) === 'up' ? '#00F0FF' : '#FF007F', fontWeight: 'bold' }}>
-                    ● {selectedMonitor ? getLastStatus(selectedMonitor).toUpperCase() : 'EMPTY'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Service Details */}
-              <div style={{ minWidth: 0 }}>
-                <h4 style={{ margin: '0 0 4px', fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 800, color: 'var(--color-txt-primary)', letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {selectedMonitor ? selectedMonitor.name : 'No services configured'}
-                </h4>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {selectedMonitor?.url ? selectedMonitor.url.replace('https://', '').replace('http://', '') : 'No URL'}
-                </div>
-              </div>
-
-              {/* Card footer details */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <span style={{ display: 'block', fontSize: 8, color: 'var(--color-txt-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>Response Time</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: '#00F0FF' }}>
-                    {selectedMonitor ? ms(selectedMonitor.checks?.[0]?.responseTimeMs) : '—'}
-                  </span>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <span style={{ display: 'block', fontSize: 8, color: 'var(--color-txt-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>SSL Certificate</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: '#FF007F' }}>
-                    {selectedMonitor?.checks?.[0]?.sslDaysLeft != null ? `${selectedMonitor.checks[0].sslDaysLeft}d` : '—'}
-                  </span>
-                </div>
-              </div>
-
+              {['Service', 'Status', 'Uptime', 'Latency', ''].map((h) => (
+                <span key={h} style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{h}</span>
+              ))}
             </div>
-          </div>
 
-          {/* Ethereal styled Services List */}
-          {monitors.length > 1 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', paddingLeft: 4 }}>
-                Recent Activities
-              </span>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {monitors.map((m, index) => {
-                  const active = index === selectedIndex;
-                  const status = getLastStatus(m);
-                  return (
-                    <div
-                      key={m.id}
-                      onClick={() => setSelectedIndex(index)}
-                      style={{
-                        padding: '12px 16px',
-                        borderRadius: 16,
-                        background: active ? 'rgba(255, 255, 255, 0.04)' : 'transparent',
-                        border: active ? '1px solid var(--color-border-main)' : '1px solid transparent',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                        minWidth: 0
-                      }}
-                      onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.015)'; }}
-                      onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent'; }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
-                        <div style={{ width: 24, height: 24, borderRadius: '50%', background: status === 'up' ? 'rgba(0, 240, 255, 0.08)' : 'rgba(255, 0, 127, 0.08)', border: status === 'up' ? '1px solid rgba(0, 240, 255, 0.2)' : '1px solid rgba(255, 0, 127, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: status === 'up' ? '#00F0FF' : '#FF007F' }} />
-                        </div>
-                        <div style={{ minWidth: 0, flex: 1 }}>
-                          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 13, color: 'var(--color-txt-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.name}</div>
-                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.url ? m.url.replace('https://', '') : 'GitHub Commits'}</div>
-                        </div>
+            {/* Table rows */}
+            {monitors.length === 0 ? (
+              <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--color-txt-muted)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+                No monitors configured yet.
+              </div>
+            ) : (
+              monitors.map((m, index) => {
+                const status = getLastStatus(m);
+                const totalChecks = m.checks?.length ?? 0;
+                const upChecks = m.checks?.filter(c => c.status === 'up').length ?? 0;
+                const uptimePct = totalChecks > 0 ? Math.round((upChecks / totalChecks) * 100) : 100;
+                const latestMs = m.checks?.[0]?.responseTimeMs;
+                const statusColor = status === 'up' ? 'var(--color-status-up)' : status === 'down' ? 'var(--color-status-down)' : 'var(--color-status-degraded)';
+                const isSelected = index === selectedIndex;
+
+                return (
+                  <div
+                    key={m.id}
+                    onClick={() => setSelectedIndex(index)}
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 72px 80px 64px 32px',
+                      gap: 0,
+                      padding: '13px 16px',
+                      borderBottom: index < monitors.length - 1 ? '1px solid var(--color-border-main)' : 'none',
+                      background: isSelected ? 'var(--color-bg-card-hover)' : 'transparent',
+                      cursor: 'pointer',
+                      transition: 'background 0.15s ease',
+                      alignItems: 'center',
+                    }}
+                    onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--color-bg-card-hover)'; }}
+                    onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
+                  >
+                    {/* Name + URL */}
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{
+                        fontFamily: 'var(--font-display)',
+                        fontWeight: 600,
+                        fontSize: 13,
+                        color: 'var(--color-txt-primary)',
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+                      }}>
+                        {m.name}
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 'bold', color: active ? 'var(--color-acid)' : 'var(--color-txt-primary)' }}>
-                          {ms(m.checks?.[0]?.responseTimeMs)}
-                        </span>
-                        <Link href={`/monitors/${m.id}`} style={{ display: 'flex', alignItems: 'center' }}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-txt-secondary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: active ? 1 : 0.4 }}>
-                            <polyline points="9 18 15 12 9 6"/>
-                          </svg>
-                        </Link>
+                      {m.url && (
+                        <div style={{
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: 10,
+                          color: 'var(--color-txt-muted)',
+                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                          marginTop: 2
+                        }}>
+                          {m.url.replace('https://', '').replace('http://', '')}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Status badge */}
+                    <div>
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 5,
+                        padding: '3px 8px',
+                        borderRadius: 6,
+                        background: status === 'up'
+                          ? 'rgba(22, 101, 52, 0.1)'
+                          : status === 'down'
+                          ? 'rgba(185, 28, 28, 0.1)'
+                          : 'rgba(146, 64, 14, 0.1)',
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: 9,
+                        fontWeight: 700,
+                        color: statusColor,
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                      }}>
+                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: statusColor, flexShrink: 0 }} />
+                        {status}
+                      </span>
+                    </div>
+
+                    {/* Uptime */}
+                    <div>
+                      <div style={{
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: uptimePct >= 99 ? 'var(--color-status-up)' : uptimePct >= 95 ? 'var(--color-status-degraded)' : 'var(--color-status-down)',
+                      }}>
+                        {uptimePct}%
+                      </div>
+                      {/* Mini uptime bar */}
+                      <div style={{ height: 3, background: 'var(--color-border-main)', borderRadius: 2, marginTop: 4, width: 56, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${uptimePct}%`, background: uptimePct >= 99 ? 'var(--color-status-up)' : uptimePct >= 95 ? 'var(--color-status-degraded)' : 'var(--color-status-down)', borderRadius: 2, transition: 'width 0.5s ease' }} />
                       </div>
                     </div>
-                  );
-                })}
+
+                    {/* Latency */}
+                    <div style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: latestMs == null ? 'var(--color-txt-muted)' : latestMs > 2000 ? 'var(--color-status-down)' : latestMs > 1000 ? 'var(--color-status-degraded)' : 'var(--color-txt-primary)',
+                    }}>
+                      {latestMs != null ? `${latestMs}ms` : '—'}
+                    </div>
+
+                    {/* Arrow link */}
+                    <Link
+                      href={`/monitors/${m.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-txt-muted)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9 18 15 12 9 6"/>
+                      </svg>
+                    </Link>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* Selected monitor detail card */}
+          {selectedMonitor && (
+            <div className="glass-card" style={{ padding: 18, borderRadius: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
+                <div style={{ minWidth: 0, flex: 1, paddingRight: 12 }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-brand-primary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Selected Monitor</span>
+                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, color: 'var(--color-txt-primary)', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {selectedMonitor.name}
+                  </div>
+                </div>
+                <StatusBadge status={getLastStatus(selectedMonitor)} showPulse />
               </div>
-            </div>
-          ) : (
-            <div className="glass-card" style={{ padding: 20, background: 'rgba(255, 255, 255, 0.01)', border: '1px dashed var(--color-border-main)', borderRadius: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 12 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                Quick Action
-              </span>
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-txt-secondary)', margin: 0, lineHeight: 1.5 }}>
-                Track more endpoints or web repositories to get a unified overview of all your microservices.
-              </p>
-              <Link href="/import" style={{ textDecoration: 'none', width: '100%' }}>
-                <button className="btn-glass" style={{ width: '100%', height: 36, fontSize: 11, borderRadius: 999 }}>
-                  + Add Another Service
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+                {[
+                  {
+                    label: 'Response',
+                    value: selectedMonitor.checks?.[0]?.responseTimeMs != null ? `${selectedMonitor.checks[0].responseTimeMs}ms` : '—',
+                    color: 'var(--color-brand-primary)',
+                  },
+                  {
+                    label: 'SSL',
+                    value: selectedMonitor.checks?.[0]?.sslDaysLeft != null ? `${selectedMonitor.checks[0].sslDaysLeft}d` : '—',
+                    color: 'var(--color-accent-amber)',
+                  },
+                  {
+                    label: 'Status Code',
+                    value: selectedMonitor.checks?.[0]?.statusCode != null ? `${selectedMonitor.checks[0].statusCode}` : '—',
+                    color: 'var(--color-txt-primary)',
+                  },
+                ].map(({ label, value, color }) => (
+                  <div key={label} style={{ background: 'var(--color-bg-card-hover)', borderRadius: 8, padding: '10px 12px', border: '1px solid var(--color-border-main)' }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>{label}</div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 15, fontWeight: 700, color }}>{value}</div>
+                  </div>
+                ))}
+              </div>
+
+              <Link href={`/monitors/${selectedMonitor.id}`} style={{ textDecoration: 'none', display: 'block', marginTop: 12 }}>
+                <button className="btn-glass" style={{ width: '100%', height: 34, fontSize: 11, borderRadius: 8, justifyContent: 'center' }}>
+                  View Full Details →
                 </button>
               </Link>
             </div>
