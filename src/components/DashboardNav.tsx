@@ -6,16 +6,29 @@ import { usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
+import { api } from '@/lib/api';
 
 export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: string | null; onCloseMobile?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useTranslation();
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [alertCount, setAlertCount] = useState(0);
 
   useEffect(() => {
     const isDark = document.documentElement.classList.contains('dark');
     setTheme(isDark ? 'dark' : 'light');
+  }, []);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.access_token) return;
+      api.securityIncidents.listAll(session.access_token).then((data) => {
+        const count = data.filter((i: any) => !i.resolved && i.severity !== 'None').length;
+        setAlertCount(count);
+      }).catch(() => {});
+    });
   }, []);
 
   const toggleTheme = () => {
@@ -36,6 +49,7 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
     {
       href: '/dashboard',
       label: t('nav_projects'),
+      badge: 0,
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="2" y="3" width="20" height="14" rx="1"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
@@ -45,6 +59,7 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
     {
       href: '/security',
       label: t('nav_security'),
+      badge: alertCount,
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -54,6 +69,7 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
     {
       href: '/playground',
       label: t('nav_playground'),
+      badge: 0,
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
@@ -63,6 +79,7 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
     {
       href: '/status',
       label: t('nav_status'),
+      badge: 0,
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
@@ -72,6 +89,7 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
     {
       href: '/settings',
       label: t('nav_settings'),
+      badge: 0,
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="3"/>
@@ -135,6 +153,15 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
             >
               <span style={{ color: active ? '#7C3AED' : 'var(--color-txt-muted)', flexShrink: 0 }}>{link.icon}</span>
               {link.label}
+              {link.badge > 0 && (
+                <span style={{
+                  marginLeft: 'auto', background: '#DC2626', color: 'white',
+                  borderRadius: 10, fontSize: 9, fontWeight: 700, fontFamily: 'var(--font-mono)',
+                  padding: '1px 5px', minWidth: 16, textAlign: 'center', lineHeight: '14px',
+                }}>
+                  {link.badge > 99 ? '99+' : link.badge}
+                </span>
+              )}
             </Link>
           );
         })}

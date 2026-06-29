@@ -532,10 +532,10 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
       {monitor.url && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }} className="metrics-deck">
           {[
-            { label: 'Uptime', value: uptimePct != null ? `${uptimePct}%` : '—', color: uptimeColor },
-            { label: 'Avg Response', value: metrics?.avgResponseMs != null ? `${metrics.avgResponseMs}ms` : '—', color: 'var(--color-txt-primary)' },
-            { label: 'SSL Expires', value: checks[0]?.sslDaysLeft != null ? `${checks[0].sslDaysLeft}d` : '—', color: checks[0]?.sslDaysLeft != null && checks[0].sslDaysLeft < 14 ? 'var(--color-pink-primary)' : 'var(--color-txt-primary)' },
-            { label: 'Total Checks', value: metrics?.totalChecks ?? '—', color: 'var(--color-text-2)' },
+            { label: t('mon_metric_uptime'), value: uptimePct != null ? `${uptimePct}%` : '—', color: uptimeColor },
+            { label: t('mon_metric_response'), value: metrics?.avgResponseMs != null ? `${metrics.avgResponseMs}ms` : '—', color: 'var(--color-txt-primary)' },
+            { label: t('mon_metric_ssl'), value: checks[0]?.sslDaysLeft != null ? `${checks[0].sslDaysLeft}d` : '—', color: checks[0]?.sslDaysLeft != null && checks[0].sslDaysLeft < 14 ? 'var(--color-pink-primary)' : 'var(--color-txt-primary)' },
+            { label: t('mon_metric_total'), value: metrics?.totalChecks ?? '—', color: 'var(--color-text-2)' },
           ].map((m, i) => (
             <div key={m.label} className="glass-card" style={{ padding: '20px 24px', borderRadius: 20 }}>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 28, fontWeight: 600, color: m.color, lineHeight: 1, marginBottom: 6 }}>{m.value}</div>
@@ -549,8 +549,8 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
       {checks.length > 0 && monitor.url && (
         <div className="glass-card" style={{ padding: '20px 24px', marginBottom: 16, borderRadius: 24 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-2)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Last {Math.min(checks.length, 90)} checks</span>
-            {uptimePct != null && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600, color: uptimeColor }}>{uptimePct}% uptime</span>}
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-2)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{t('mon_last_checks')} {Math.min(checks.length, 90)} {t('mon_checks_unit')}</span>
+            {uptimePct != null && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600, color: uptimeColor }}>{uptimePct}% {t('mon_uptime_label')}</span>}
           </div>
           <UptimeBar checks={checks} segments={90} />
         </div>
@@ -559,7 +559,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
       {/* Chart */}
       {chartData.length > 1 && (
         <div className="glass-card" style={{ padding: '20px 24px', marginBottom: 16, borderRadius: 24 }}>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-2)', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 20px' }}>Response time (ms)</p>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-2)', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 20px' }}>{t('mon_chart_response')}</p>
           <div style={{ height: 200, width: '100%' }}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData} margin={{ top: 4, right: 0, left: -24, bottom: 0 }}>
@@ -586,7 +586,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
           {/* Security Headers Panel */}
           <div className="glass-card" style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', borderRadius: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>HTTP Security Headers</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{t('mon_sec_headers')}</span>
               {(monitor.securityGrade || checks[0]?.securityGrade) && (
                 <span style={{
                   fontFamily: 'var(--font-mono)',
@@ -598,7 +598,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                   padding: '2px 8px',
                   borderRadius: 2
                 }}>
-                  Grade {monitor.securityGrade || checks[0]?.securityGrade}
+                  {t('mon_sec_grade')} {monitor.securityGrade || checks[0]?.securityGrade}
                 </span>
               )}
             </div>
@@ -619,7 +619,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                       <div>
                         <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-btn-primary)' }}>{hdr.name}</div>
                         <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={hdr.value || undefined}>
-                          {hdr.value || 'Not configured'}
+                          {hdr.value || t('mon_sec_not_configured')}
                         </div>
                       </div>
                       <span style={{
@@ -629,7 +629,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                         color: present ? '#16A34A' : '#DC2626',
                         letterSpacing: '0.05em'
                       }}>
-                        {present ? '[ SECURE ]' : '[ MISSING ]'}
+                        {present ? t('mon_sec_secure') : t('mon_sec_missing')}
                       </span>
                     </div>
                   );
@@ -638,7 +638,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
             ) : (
               <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 180 }}>
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-txt-muted)', textAlign: 'center', margin: 0 }}>
-                  No security headers scanned yet.<br />Click "Check Now" above to run an evaluation.
+                  {t('mon_sec_no_scan')}
                 </p>
               </div>
             )}
@@ -647,7 +647,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
           {/* Network Latency Breakdown Card */}
           <div className="glass-card" style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', borderRadius: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Network Connection Breakdown</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{t('mon_net_title')}</span>
               <button
                 onClick={handleRunNetworkDiagnostic}
                 disabled={diagnosingNet}
@@ -655,7 +655,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                 style={{ height: 26, fontSize: 10, padding: '0 10px', display: 'flex', alignItems: 'center', gap: 4 }}
               >
                 {diagnosingNet ? <Spinner color="var(--color-violet-primary)" /> : null}
-                Run Diagnostic
+                {t('mon_net_run')}
               </button>
             </div>
 
@@ -707,7 +707,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--color-border-main)', paddingTop: 10 }}>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)' }}>Total Latency:</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)' }}>{t('mon_net_total')}</span>
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 'bold', color: 'var(--color-acid)' }}>{netDiagnosticData.timings.totalMs}ms</span>
                   </div>
 
@@ -722,14 +722,14 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
               ) : (
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 180 }}>
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#DC2626', textAlign: 'center', margin: 0 }}>
-                    Failed to run diagnostics:<br />{netDiagnosticData.error || 'Unknown network error'}
+                    {t('mon_net_failed')}<br />{netDiagnosticData.error || 'Unknown network error'}
                   </p>
                 </div>
               )
             ) : (
               <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 180, border: '1px dashed rgba(255,255,255,0.03)', borderRadius: 3 }}>
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-txt-muted)', textAlign: 'center', margin: 0 }}>
-                  No diagnostic run yet.<br />Click "Run Diagnostic" to scan connections in real time.
+                  {t('mon_net_no_diag')}
                 </p>
               </div>
             )}
@@ -742,17 +742,17 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
         <div className="glass-card" style={{ padding: 24, border: incidents.length > 0 ? '1px solid var(--color-pink-primary)' : '1px solid var(--color-border-main)', borderRadius: 24, marginBottom: 16 }}>
           <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--color-border-main)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: incidents.length > 0 ? 'var(--color-pink-primary)' : 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 'bold' }}>
-              Security Incidents
+              {t('mon_incidents_title')}
             </span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)' }}>
-              {incidents.filter(i => !i.resolved).length} Unresolved
+              {incidents.filter(i => !i.resolved).length} {t('mon_incidents_unresolved')}
             </span>
           </div>
           {incidents.length === 0 ? (
             <div style={{ padding: '32px 24px', textAlign: 'center' }}>
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, margin: '0 0 16px', color: 'var(--color-txt-muted)' }}>No security alerts yet.</p>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, margin: '0 0 16px', color: 'var(--color-txt-muted)' }}>{t('mon_incidents_none')}</p>
               <button onClick={handleScanRepo} disabled={scanning} style={{ background: 'rgba(0,240,255,0.03)', border: '1px solid rgba(0,240,255,0.2)', color: 'var(--color-acid)', padding: '8px 20px', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
-                {scanning ? 'Scanning...' : 'Scan Recent Commits'}
+                {scanning ? t('mon_incidents_scanning') : t('btn_scan_now')}
               </button>
             </div>
           ) : (
@@ -783,7 +783,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                         }}
                       >
                         {generatingPatchId === inc.id ? <Spinner color="var(--color-acid)" /> : null}
-                        AI Patch
+                        {t('mon_incidents_patch')}
                       </button>
                     )}
                     {!inc.resolved && (
@@ -791,17 +791,17 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                         setIncidents(prev => prev.map(item => item.id === inc.id ? { ...item, resolved: true } : item));
                       }} />
                     )}
-                    {inc.resolved && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#16A34A' }}>✓ RESOLVED</span>}
+                    {inc.resolved && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#16A34A' }}>{t('mon_incidents_resolved')}</span>}
                   </div>
                 </div>
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: inc.resolved ? 'var(--color-txt-muted)' : 'var(--color-txt-primary)', margin: '0 0 12px', lineHeight: 1.5 }}>{inc.description}</p>
                 <div style={{ background: 'rgba(255,20,147,0.05)', padding: 12, borderRadius: 3, border: '1px solid rgba(255,20,147,0.1)', marginBottom: 12 }}>
-                  <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-pink-primary)', marginBottom: 4, textTransform: 'uppercase' }}>Recommendation</span>
+                  <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-pink-primary)', marginBottom: 4, textTransform: 'uppercase' }}>{t('mon_incidents_recommendation')}</span>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#D0D0D0' }}>{inc.recommendation}</span>
                 </div>
                 <div style={{ display: 'flex', gap: 16 }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>Author: {inc.commitAuthor || 'Unknown'}</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>Commit: {inc.commitHash.substring(0, 7)}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>{t('mon_incidents_author')} {inc.commitAuthor || 'Unknown'}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>{t('mon_incidents_commit')} {inc.commitHash?.substring(0, 7) ?? '—'}</span>
                 </div>
 
                 {patchData[inc.id] && (
@@ -815,7 +815,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                         }}
                         style={{ background: 'transparent', border: 'none', color: 'var(--color-acid)', fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}
                       >
-                        [ Copy Code ]
+                        {t('mon_incidents_copy')}
                       </button>
                     </div>
                     <div style={{ padding: 12 }}>
@@ -824,7 +824,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                       </pre>
                       {patchData[inc.id].explanation && (
                         <div style={{ marginTop: 10, borderTop: '1px dashed var(--color-border-main)', paddingTop: 10 }}>
-                          <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', marginBottom: 4 }}>EXPLANATION</span>
+                          <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', marginBottom: 4 }}>{t('mon_incidents_explanation')}</span>
                           <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-txt-secondary)', lineHeight: 1.4 }}>{patchData[inc.id].explanation}</p>
                         </div>
                       )}
@@ -841,10 +841,10 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
       {checks.length > 0 && (
         <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 3, overflow: 'hidden' }}>
           <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--color-border-main)' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Check Log</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{t('mon_check_log')}</span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '100px 70px 90px 70px 1fr auto', padding: '10px 24px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-            {['Status', 'Code', 'Response', 'SSL', 'Time', 'Error'].map(h => (
+            {[t('mon_col_status'), t('mon_col_code'), t('mon_col_response'), 'SSL', t('mon_col_time'), t('mon_col_error')].map(h => (
               <span key={h} style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{h}</span>
             ))}
           </div>
