@@ -16,6 +16,7 @@ const translations = {
     nav_navigation: 'Navigation',
 
     btn_import: 'Import Repository',
+    btn_edit: 'Edit',
     btn_check: 'Check Now',
     btn_scan: 'Scan Commits',
     btn_scan_now: 'Scan Recent Commits Now',
@@ -131,6 +132,9 @@ const translations = {
     // Monitor detail
     mon_delete_title: 'Delete monitor?',
     mon_delete_desc: 'This will permanently delete the monitor and all its checks, metrics, and security incidents. This action cannot be undone.',
+    mon_breadcrumb: 'Monitors',
+    mon_edit_title: 'Edit Monitor',
+    mon_repo_only: 'Repo-only monitor — no URL configured',
     btn_cancel: 'Cancel',
 
     // Import modes
@@ -152,6 +156,7 @@ const translations = {
     nav_navigation: 'Navegación',
 
     btn_import: 'Importar Repositorio',
+    btn_edit: 'Editar',
     btn_check: 'Comprobar ahora',
     btn_scan: 'Escanear commits',
     btn_scan_now: 'Escanear commits recientes ahora',
@@ -267,6 +272,9 @@ const translations = {
     // Monitor detail
     mon_delete_title: '¿Eliminar monitor?',
     mon_delete_desc: 'Esto eliminará permanentemente el monitor y todos sus checks, métricas e incidentes de seguridad. Esta acción no se puede deshacer.',
+    mon_breadcrumb: 'Monitores',
+    mon_edit_title: 'Editar Monitor',
+    mon_repo_only: 'Monitor de repositorio — sin URL configurada',
     btn_cancel: 'Cancelar',
 
     // Import modes

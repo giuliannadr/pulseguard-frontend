@@ -100,6 +100,7 @@ function EditModal({ monitor, token, onSave, onClose }: {
   monitor: Monitor; token: string;
   onSave: (updated: Monitor) => void; onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const [name, setName] = useState(monitor.name);
   const [url, setUrl] = useState(monitor.url ?? '');
   const [interval, setInterval] = useState(String(monitor.intervalMinutes));
@@ -175,7 +176,7 @@ function EditModal({ monitor, token, onSave, onClose }: {
       overflowY: 'auto', padding: '24px 0',
     }}>
       <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: 32, maxWidth: 540, width: '90%', margin: 'auto' }}>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--color-txt-primary)', margin: '0 0 24px' }}>Edit Monitor</h3>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--color-txt-primary)', margin: '0 0 24px' }}>{t('mon_edit_title')}</h3>
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {[
             { label: 'Name', value: name, set: setName, placeholder: 'My API', type: 'text' },
@@ -277,6 +278,7 @@ function EditModal({ monitor, token, onSave, onClose }: {
 
 export default function MonitorDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { t, language } = useTranslation();
   const router = useRouter();
 
   const [monitor, setMonitor] = useState<Monitor | null>(null);
@@ -472,7 +474,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
       {/* Breadcrumb */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 32, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>
         <Link href="/dashboard" style={{ color: 'var(--color-txt-muted)', textDecoration: 'none' }} onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-txt-primary)')} onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-txt-muted)')}>
-          Monitors
+          {t('mon_breadcrumb')}
         </Link>
         <span>/</span>
         <span style={{ color: 'var(--color-violet-primary)' }}>{monitor.name}</span>
@@ -502,27 +504,27 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
               </svg>
             </a>
           ) : (
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>Repo-only monitor — no URL configured</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>{t('mon_repo_only')}</span>
           )}
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           {monitor.githubRepoUrl && (
             <button onClick={handleScanRepo} disabled={scanning} className="btn-strict-secondary" style={{ height: 38, fontSize: 12, border: '1px solid rgba(0,240,255,0.3)', color: 'var(--color-acid)', background: 'rgba(0,240,255,0.03)' }}>
               {scanning ? <Spinner color="var(--color-acid)" /> : <ShieldIcon />}
-              Scan Commits
+              {t('btn_scan')}
             </button>
           )}
           {monitor.url && (
             <button onClick={handleCheckNow} disabled={checking} className="btn-strict-secondary" style={{ height: 38, fontSize: 12 }}>
               {checking ? <Spinner color="var(--color-violet-primary)" /> : <RefreshIcon />}
-              Check Now
+              {t('btn_check')}
             </button>
           )}
-          <button onClick={() => setShowEdit(true)} className="btn-strict-secondary" style={{ height: 38, fontSize: 12 }}>Edit</button>
+          <button onClick={() => setShowEdit(true)} className="btn-strict-secondary" style={{ height: 38, fontSize: 12 }}>{t('btn_edit')}</button>
           <button onClick={handleToggle} className="btn-strict-secondary" style={{ height: 38, fontSize: 12 }}>
-            {monitor.isActive ? 'Pause' : 'Resume'}
+            {monitor.isActive ? t('btn_pause') : t('btn_resume')}
           </button>
-          <button onClick={() => setShowDeleteConfirm(true)} className="btn-strict-danger">Delete</button>
+          <button onClick={() => setShowDeleteConfirm(true)} className="btn-strict-danger">{t('btn_delete')}</button>
         </div>
       </div>
 
