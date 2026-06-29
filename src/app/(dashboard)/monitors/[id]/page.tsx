@@ -96,6 +96,40 @@ function fmtWindow(w: any) {
   return `${days} · ${pad(sh)}:${pad(sm)} – ${pad(eh)}:${pad(em)}`;
 }
 
+function TestEmailButton({ monitorId, email, token }: { monitorId: string; email: string; token: string }) {
+  const [state, setState] = useState<'idle' | 'sending' | 'ok' | 'err'>('idle');
+  const [msg, setMsg] = useState('');
+
+  async function handleTest() {
+    if (!email.trim()) { setMsg('Ingresá un email primero'); setState('err'); setTimeout(() => setState('idle'), 3000); return; }
+    setState('sending');
+    try {
+      const res = await api.monitors.testEmail(monitorId, token);
+      setMsg(res.message);
+      setState('ok');
+    } catch (e: any) {
+      setMsg(e.message ?? 'Error');
+      setState('err');
+    }
+    setTimeout(() => setState('idle'), 4000);
+  }
+
+  const bg = state === 'ok' ? 'rgba(0,230,118,0.12)' : state === 'err' ? 'rgba(255,23,68,0.12)' : 'rgba(255,255,255,0.04)';
+  const border = state === 'ok' ? '1px solid #16A34A' : state === 'err' ? '1px solid #DC2626' : '1px solid rgba(0,240,255,0.3)';
+  const color = state === 'ok' ? '#16A34A' : state === 'err' ? '#DC2626' : 'var(--color-acid)';
+  const label = state === 'sending' ? '...' : state === 'ok' ? '✓' : state === 'err' ? '✗' : 'Probar';
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end' }}>
+      <button type="button" onClick={handleTest} disabled={state === 'sending'}
+        style={{ background: bg, border, color, padding: '0 14px', borderRadius: 4, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer', whiteSpace: 'nowrap', height: 38, transition: 'all 0.2s' }}>
+        {label}
+      </button>
+      {msg && <span style={{ fontSize: 10, color, fontFamily: 'var(--font-mono)', maxWidth: 140, textAlign: 'right', lineHeight: 1.3 }}>{msg}</span>}
+    </div>
+  );
+}
+
 function EditModal({ monitor, token, onSave, onClose }: {
   monitor: Monitor; token: string;
   onSave: (updated: Monitor) => void; onClose: () => void;
@@ -182,13 +216,19 @@ function EditModal({ monitor, token, onSave, onClose }: {
             { label: 'Name', value: name, set: setName, placeholder: 'My API', type: 'text' },
             { label: 'URL', value: url, set: setUrl, placeholder: 'https://...', type: 'url' },
             { label: 'Notification Webhook (Discord / Slack)', value: webhookUrl, set: setWebhookUrl, placeholder: 'https://discord.com/api/webhooks/...', type: 'url' },
-            { label: 'Notification Email', value: email, set: setEmail, placeholder: 'you@example.com', type: 'email' },
           ].map(f => (
             <div key={f.label}>
               <label style={labelStyle}>{f.label}</label>
               <input className="input-strict" type={f.type} value={f.value} onChange={e => f.set(e.target.value)} placeholder={f.placeholder} />
             </div>
           ))}
+          <div>
+            <label style={labelStyle}>Email de notificación</label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input className="input-strict" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="vos@ejemplo.com" style={{ flex: 1 }} />
+              <TestEmailButton monitorId={monitor.id} email={email} token={token} />
+            </div>
+          </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>

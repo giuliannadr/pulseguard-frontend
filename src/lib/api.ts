@@ -143,7 +143,7 @@ export const api = {
     get:     (id: string, token: string) => apiFetch<Monitor>(`/monitors/${id}`, token),
     create:  (payload: CreateMonitorPayload, token: string) =>
                apiFetch<Monitor>('/monitors', token, { method: 'POST', body: JSON.stringify(payload) }),
-    update:  (id: string, payload: Partial<CreateMonitorPayload & { isActive: boolean; notificationWebhookUrl?: string }>, token: string) =>
+    update:  (id: string, payload: Partial<CreateMonitorPayload & { isActive: boolean; notificationWebhookUrl?: string; notificationEmail?: string }>, token: string) =>
                apiFetch<Monitor>(`/monitors/${id}`, token, { method: 'PATCH', body: JSON.stringify(payload) }),
     delete:  (id: string, token: string) => apiFetch<void>(`/monitors/${id}`, token, { method: 'DELETE' }),
     checks:  (id: string, token: string, limit = 100) =>
@@ -155,6 +155,7 @@ export const api = {
     scanRepo: (id: string, token: string, ghToken: string, force = false) =>
                apiFetch<any>(`/monitors/${id}/scan-repo${force ? '?force=true' : ''}`, token, { method: 'POST', headers: { 'x-github-token': ghToken } }),
     downtime: (id: string, token: string) => apiFetch<DowntimeWindow[]>(`/monitors/${id}/downtime`, token),
+    testEmail: (id: string, token: string) => apiFetch<{ ok: boolean; message: string }>(`/monitors/${id}/test-email`, token, { method: 'POST' }),
   },
   github: {
     repos: (token: string, ghToken: string) =>
