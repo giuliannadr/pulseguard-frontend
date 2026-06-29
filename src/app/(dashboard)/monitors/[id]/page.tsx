@@ -96,6 +96,188 @@ function fmtWindow(w: any) {
   return `${days} · ${pad(sh)}:${pad(sm)} – ${pad(eh)}:${pad(em)}`;
 }
 
+function AlertsPanel({ monitor, token, onUpdate }: { monitor: Monitor; token: string; onUpdate: (m: Monitor) => void }) {
+  const [editingEmail, setEditingEmail] = useState(false);
+  const [editingWebhook, setEditingWebhook] = useState(false);
+  const [emailVal, setEmailVal] = useState(monitor.notificationEmail ?? '');
+  const [webhookVal, setWebhookVal] = useState(monitor.notificationWebhookUrl ?? '');
+  const [saving, setSaving] = useState<'email' | 'webhook' | null>(null);
+  const [testState, setTestState] = useState<'idle' | 'sending' | 'ok' | 'err'>('idle');
+  const [testMsg, setTestMsg] = useState('');
+
+  async function saveField(field: 'email' | 'webhook') {
+    setSaving(field);
+    try {
+      const payload = field === 'email'
+        ? { notificationEmail: emailVal.trim() || undefined }
+        : { notificationWebhookUrl: webhookVal.trim() || undefined };
+      const updated = await api.monitors.update(monitor.id, payload, token);
+      onUpdate(updated);
+      if (field === 'email') setEditingEmail(false);
+      else setEditingWebhook(false);
+    } catch {}
+    setSaving(null);
+  }
+
+  async function handleTest() {
+    if (!monitor.notificationEmail && !emailVal.trim()) return;
+    setTestState('sending');
+    try {
+      const res = await api.monitors.testEmail(monitor.id, token);
+      setTestMsg(res.message);
+      setTestState('ok');
+    } catch (e: any) {
+      setTestMsg(e.message ?? 'Error');
+      setTestState('err');
+    }
+    setTimeout(() => { setTestState('idle'); setTestMsg(''); }, 5000);
+  }
+
+  const hasEmail = !!(monitor.notificationEmail);
+  const hasWebhook = !!(monitor.notificationWebhookUrl);
+  const noneConfigured = !hasEmail && !hasWebhook;
+
+  const rowStyle: React.CSSProperties = {
+    display: 'flex', alignItems: 'center', gap: 14,
+    padding: '14px 20px',
+    borderBottom: '1px solid var(--color-border-main)',
+  };
+  const chipStyle = (active: boolean): React.CSSProperties => ({
+    display: 'inline-flex', alignItems: 'center', gap: 5,
+    fontSize: 11, fontFamily: 'var(--font-mono)',
+    padding: '3px 10px', borderRadius: 20,
+    color: active ? '#16A34A' : '#9CA3AF',
+    background: active ? 'rgba(22,163,74,0.1)' : 'rgba(255,255,255,0.04)',
+    border: `1px solid ${active ? '#16A34A40' : 'rgba(255,255,255,0.08)'}`,
+  });
+
+  return (
+    <div className="glass-card" style={{ borderRadius: 16, marginBottom: 16, overflow: 'hidden' }}>
+      {/* Header */}
+      <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--color-border-main)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={noneConfigured ? '#9CA3AF' : '#16A34A'} strokeWidth="2" strokeLinecap="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-txt-muted)' }}>
+            Alertas
+          </span>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <span style={chipStyle(hasEmail)}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: hasEmail ? '#16A34A' : '#9CA3AF' }} />
+            Email {hasEmail ? 'activo' : 'inactivo'}
+          </span>
+          <span style={chipStyle(hasWebhook)}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: hasWebhook ? '#16A34A' : '#9CA3AF' }} />
+            Webhook {hasWebhook ? 'activo' : 'inactivo'}
+          </span>
+        </div>
+      </div>
+
+      {/* Warning si no hay nada configurado */}
+      {noneConfigured && (
+        <div style={{ padding: '10px 20px', background: 'rgba(217,119,6,0.06)', borderBottom: '1px solid var(--color-border-main)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#D97706' }}>
+            Sin alertas configuradas — no te enterarás si este monitor cae
+          </span>
+        </div>
+      )}
+
+      {/* Email row */}
+      <div style={rowStyle}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-txt-muted)" strokeWidth="1.5" strokeLinecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        <div style={{ flex: 1 }}>
+          {editingEmail ? (
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input
+                className="input-strict"
+                type="email"
+                value={emailVal}
+                onChange={e => setEmailVal(e.target.value)}
+                placeholder="vos@ejemplo.com"
+                autoFocus
+                style={{ flex: 1, height: 32, fontSize: 12 }}
+              />
+              <button onClick={() => saveField('email')} disabled={saving === 'email'}
+                style={{ background: 'rgba(0,240,255,0.08)', border: '1px solid rgba(0,240,255,0.3)', color: 'var(--color-acid)', padding: '0 12px', borderRadius: 4, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
+                {saving === 'email' ? '...' : 'Guardar'}
+              </button>
+              <button onClick={() => { setEditingEmail(false); setEmailVal(monitor.notificationEmail ?? ''); }}
+                style={{ background: 'transparent', border: '1px solid var(--color-border-main)', color: 'var(--color-txt-muted)', padding: '0 10px', borderRadius: 4, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
+                ✕
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: hasEmail ? 'var(--color-txt-primary)' : 'var(--color-txt-muted)' }}>
+                {hasEmail ? monitor.notificationEmail : 'Sin email configurado'}
+              </span>
+              <button onClick={() => setEditingEmail(true)}
+                style={{ background: 'transparent', border: 'none', color: 'var(--color-acid)', fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer', padding: 0 }}>
+                {hasEmail ? 'Cambiar' : '+ Agregar'}
+              </button>
+            </div>
+          )}
+        </div>
+        {hasEmail && !editingEmail && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+            <button onClick={handleTest} disabled={testState === 'sending'}
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid var(--color-border-main)', color: testState === 'ok' ? '#16A34A' : testState === 'err' ? '#DC2626' : 'var(--color-txt-muted)', padding: '4px 12px', borderRadius: 4, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer', transition: 'all 0.2s' }}>
+              {testState === 'sending' ? '...' : testState === 'ok' ? '✓ Enviado' : testState === 'err' ? '✗ Error' : 'Probar'}
+            </button>
+            {testMsg && <span style={{ fontSize: 9, color: testState === 'ok' ? '#16A34A' : '#DC2626', fontFamily: 'var(--font-mono)', maxWidth: 180, textAlign: 'right' }}>{testMsg}</span>}
+          </div>
+        )}
+      </div>
+
+      {/* Webhook row */}
+      <div style={{ ...rowStyle, borderBottom: 'none' }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-txt-muted)" strokeWidth="1.5" strokeLinecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        <div style={{ flex: 1 }}>
+          {editingWebhook ? (
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input
+                className="input-strict"
+                type="url"
+                value={webhookVal}
+                onChange={e => setWebhookVal(e.target.value)}
+                placeholder="https://discord.com/api/webhooks/..."
+                autoFocus
+                style={{ flex: 1, height: 32, fontSize: 12 }}
+              />
+              <button onClick={() => saveField('webhook')} disabled={saving === 'webhook'}
+                style={{ background: 'rgba(0,240,255,0.08)', border: '1px solid rgba(0,240,255,0.3)', color: 'var(--color-acid)', padding: '0 12px', borderRadius: 4, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
+                {saving === 'webhook' ? '...' : 'Guardar'}
+              </button>
+              <button onClick={() => { setEditingWebhook(false); setWebhookVal(monitor.notificationWebhookUrl ?? ''); }}
+                style={{ background: 'transparent', border: '1px solid var(--color-border-main)', color: 'var(--color-txt-muted)', padding: '0 10px', borderRadius: 4, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
+                ✕
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: hasWebhook ? 'var(--color-txt-primary)' : 'var(--color-txt-muted)', maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {hasWebhook ? monitor.notificationWebhookUrl : 'Sin webhook configurado'}
+              </span>
+              <button onClick={() => setEditingWebhook(true)}
+                style={{ background: 'transparent', border: 'none', color: 'var(--color-acid)', fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer', padding: 0, flexShrink: 0 }}>
+                {hasWebhook ? 'Cambiar' : '+ Agregar'}
+              </button>
+            </div>
+          )}
+        </div>
+        {hasWebhook && !editingWebhook && (
+          <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: '#9CA3AF' }}>
+            {monitor.notificationWebhookUrl?.includes('discord') ? 'Discord' : monitor.notificationWebhookUrl?.includes('slack') ? 'Slack' : 'Webhook'}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function TestEmailButton({ monitorId, email, token }: { monitorId: string; email: string; token: string }) {
   const [state, setState] = useState<'idle' | 'sending' | 'ok' | 'err'>('idle');
   const [msg, setMsg] = useState('');
@@ -917,6 +1099,9 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
           )}
         </div>
       )}
+
+      {/* Alerts / Notifications */}
+      {token && <AlertsPanel monitor={monitor} token={token} onUpdate={setMonitor} />}
 
       {/* Check log */}
       {checks.length > 0 && (
