@@ -481,22 +481,14 @@ export default function PlaygroundPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {apiResult ? (
                 <>
-                  <div style={{ background: 'var(--color-bg-card)', border: `2px solid ${getSeverityColor(apiResult.audit.overallRisk)}`, borderRadius: 20, padding: 20 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700, color: '#fff', background: getSeverityColor(apiResult.audit.overallRisk), padding: '3px 10px', borderRadius: 6 }}>
-                        {apiResult.audit.overallRisk.toUpperCase()}
-                      </span>
-                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: 'var(--color-txt-primary)' }}>Gemini AI API Audit</span>
-                    </div>
-                    <p style={{ ...labelStyle }}>Hallazgos</p>
-                    {apiResult.audit.findings?.length > 0 ? (
-                      <ul style={{ margin: '0 0 14px', paddingLeft: 16, color: 'var(--color-txt-secondary)', fontSize: 12, lineHeight: 1.6 }}>
-                        {apiResult.audit.findings.map((f: string, i: number) => <li key={i}>{f}</li>)}
-                      </ul>
-                    ) : <p style={{ color: '#16A34A', fontSize: 12, margin: '0 0 14px' }}>✓ Sin vulnerabilidades detectadas en headers o respuesta.</p>}
-                    <p style={{ ...labelStyle }}>Recomendaciones</p>
-                    <p style={{ margin: 0, color: 'var(--color-txt-muted)', fontSize: 11, fontFamily: 'var(--font-mono)', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>{apiResult.audit.recommendation}</p>
-                  </div>
+                  <AuditResultCard
+                    risk={apiResult.audit.overallRisk}
+                    title="Auditoría de API"
+                    findings={apiResult.audit.findings}
+                    recommendation={apiResult.audit.recommendation}
+                    getSeverityColor={getSeverityColor}
+                    labelStyle={labelStyle}
+                  />
 
                   <div className="glass-card" style={{ padding: 20, borderRadius: 20 }}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, textAlign: 'center', marginBottom: 16 }}>
@@ -954,6 +946,57 @@ export default function PlaygroundPage() {
         )}
 
       </div>
+    </div>
+  );
+}
+
+function AuditResultCard({ risk, title, findings, recommendation, getSeverityColor, labelStyle }: {
+  risk: string; title: string; findings: string[]; recommendation: string;
+  getSeverityColor: (s: string) => string; labelStyle: React.CSSProperties;
+}) {
+  const color = getSeverityColor(risk);
+  const recs = recommendation
+    ? recommendation.split(/\.\s+(?=[A-ZÁÉÍÓÚ])/g).filter(Boolean).map(s => s.endsWith('.') ? s : s + '.')
+    : [];
+  return (
+    <div style={{ background: 'var(--color-bg-card)', border: `2px solid ${color}`, borderRadius: 20, padding: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700, color: '#fff', background: color, padding: '3px 10px', borderRadius: 6 }}>
+          {risk.toUpperCase()}
+        </span>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: 'var(--color-txt-primary)' }}>{title}</span>
+      </div>
+
+      <p style={{ ...labelStyle, marginBottom: 8 }}>Hallazgos</p>
+      {findings?.length > 0 ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
+          {findings.map((f: string, i: number) => (
+            <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', background: 'var(--color-bg-card-hover)', borderRadius: 8, padding: '8px 10px' }}>
+              <span style={{ color, fontSize: 12, marginTop: 1, flexShrink: 0 }}>⚠</span>
+              <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-txt-secondary)', lineHeight: 1.5 }}>{f}</span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(22,163,74,0.08)', borderRadius: 8, padding: '8px 10px', marginBottom: 16 }}>
+          <span style={{ color: '#16A34A', fontSize: 12 }}>✓</span>
+          <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: '#16A34A' }}>Sin vulnerabilidades detectadas</span>
+        </div>
+      )}
+
+      {recs.length > 0 && (
+        <>
+          <p style={{ ...labelStyle, marginBottom: 8 }}>Recomendaciones</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {recs.map((r, i) => (
+              <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '6px 0', borderBottom: i < recs.length - 1 ? '1px solid var(--color-border-main)' : 'none' }}>
+                <span style={{ color: 'var(--color-brand-primary)', fontSize: 11, flexShrink: 0, marginTop: 1 }}>{i + 1}.</span>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-txt-muted)', lineHeight: 1.5 }}>{r}</span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
