@@ -4,8 +4,14 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { api, githubToken as ghTokenHelper, type Monitor } from '@/lib/api';
 import { useTranslation } from '@/lib/i18n';
+import { StatusBadge } from '@/components/ui/StatusBadge';
+import type { MonitorStatus } from '@/lib/api';
 
 type Tab = 'api' | 'code' | 'dns' | 'hacking';
+
+function getLastStatus(m: Monitor): MonitorStatus {
+  return (m.checks?.[0]?.status as MonitorStatus) ?? 'unknown';
+}
 
 export default function PlaygroundPage() {
   const { t } = useTranslation();
@@ -15,7 +21,9 @@ export default function PlaygroundPage() {
   const [monitors, setMonitors] = useState<Monitor[]>([]);
   const [loadingMonitors, setLoadingMonitors] = useState(true);
 
-  // Supabase Auth
+  // ── Shared selected monitor (auto-fills URL across all tabs)
+  const [selectedMonitor, setSelectedMonitor] = useState<Monitor | null>(null);
+
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -28,7 +36,7 @@ export default function PlaygroundPage() {
         setGithubToken(freshGToken ?? ghTokenHelper.get());
         if (tok) {
           api.monitors.list(tok)
-            .then(data => setMonitors(data))
+            .then(data => { setMonitors(data); })
             .catch(() => {})
             .finally(() => setLoadingMonitors(false));
         } else {
@@ -38,7 +46,23 @@ export default function PlaygroundPage() {
     });
   }, []);
 
-  // ── Tab 1: API Auditor States ──
+  // When a monitor is selected, auto-fill tab URLs
+  useEffect(() => {
+    if (!selectedMonitor) return;
+    const url = selectedMonitor.url ?? '';
+    if (url) setApiUrl(url);
+    if (url) {
+      try { setDomainInput(new URL(url).hostname); } catch {}
+    }
+    if (url) setCustomHackUrl(url);
+    // For code tab, switch to repo if monitor has a repo
+    if (selectedMonitor.githubRepoUrl) {
+      setCodeSourceMode('repo');
+      setSelectedRepoId(selectedMonitor.id);
+    }
+  }, [selectedMonitor]);
+
+  // ── Tab 1: API Auditor
   const [apiUrl, setApiUrl] = useState('https://httpbin.org/get');
   const [apiMethod, setApiMethod] = useState('GET');
   const [apiHeaders, setApiHeaders] = useState('{\n  "Accept": "application/json"\n}');
@@ -47,7 +71,7 @@ export default function PlaygroundPage() {
   const [apiRunning, setApiRunning] = useState(false);
   const [apiError, setApiError] = useState('');
 
-  // ── Tab 2: Code Auditor States ──
+  // ── Tab 2: Code Auditor
   const [codeSnippet, setCodeSnippet] = useState(
     `// Example Dockerfile snippet\nFROM node:18\nWORKDIR /app\nCOPY . .\nRUN npm install\n# Running as root (Vulnerability)\nCMD ["node", "server.js"]`
   );
@@ -55,115 +79,60 @@ export default function PlaygroundPage() {
   const [codeResult, setCodeResult] = useState<any | null>(null);
   const [codeRunning, setCodeRunning] = useState(false);
   const [codeError, setCodeError] = useState('');
-
-  // Code Auditor repository selection states
   const [codeSourceMode, setCodeSourceMode] = useState<'paste' | 'repo'>('paste');
   const [selectedRepoId, setSelectedRepoId] = useState('');
   const [commitsList, setCommitsList] = useState<any[]>([]);
   const [loadingCommits, setLoadingCommits] = useState(false);
   const [selectedCommitSha, setSelectedCommitSha] = useState('');
   const [fetchingDiff, setFetchingDiff] = useState(false);
+  const [patchResult, setPatchResult] = useState<any | null>(null);
+  const [patchRunning, setPatchRunning] = useState(false);
 
-  // Load commits when repository changes
   useEffect(() => {
     if (codeSourceMode !== 'repo' || !selectedRepoId || !githubToken) return;
-
     const mon = monitors.find(m => m.id === selectedRepoId);
-    if (!mon || !mon.githubRepoUrl) return;
-
+    if (!mon?.githubRepoUrl) return;
     const cleanUrl = mon.githubRepoUrl.replace('.git', '');
     const parts = cleanUrl.split('/');
-    const repo = parts.pop();
-    const owner = parts.pop();
-
+    const repo = parts.pop(); const owner = parts.pop();
     if (!owner || !repo) return;
-
     setLoadingCommits(true);
-    setCommitsList([]);
-    setSelectedCommitSha('');
-
-    fetch(`https://api.github.com/repos/${owner}/${repo}/commits?per_page=5`, {
-      headers: {
-        Authorization: `Bearer ${githubToken}`,
-        Accept: 'application/vnd.github.v3+json',
-      }
-    })
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then(data => {
-        const formatted = data.map((c: any) => ({
-          sha: c.sha,
-          message: c.commit.message.split('\n')[0],
-          author: c.commit.author.name
-        }));
-        setCommitsList(formatted);
-        setLoadingCommits(false);
-        if (formatted.length > 0) {
-          setSelectedCommitSha(formatted[0].sha);
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        setLoadingCommits(false);
-        setCodeError('Failed to load commits for this repository. Make sure you connected your GitHub account.');
-      });
+    setCommitsList([]); setSelectedCommitSha('');
+    fetch(`https://api.github.com/repos/${owner}/${repo}/commits?per_page=10`, {
+      headers: { Authorization: `Bearer ${githubToken}`, Accept: 'application/vnd.github.v3+json' }
+    }).then(r => r.json()).then(data => {
+      const formatted = data.map((c: any) => ({ sha: c.sha, message: c.commit.message.split('\n')[0], author: c.commit.author.name }));
+      setCommitsList(formatted);
+      if (formatted.length > 0) setSelectedCommitSha(formatted[0].sha);
+    }).catch(() => setCodeError('No se pudieron cargar los commits.')).finally(() => setLoadingCommits(false));
   }, [selectedRepoId, codeSourceMode, githubToken, monitors]);
 
-  // Load commit diff when selected commit changes
   useEffect(() => {
     if (codeSourceMode !== 'repo' || !selectedRepoId || !selectedCommitSha || !githubToken) return;
-
     const mon = monitors.find(m => m.id === selectedRepoId);
-    if (!mon || !mon.githubRepoUrl) return;
-
+    if (!mon?.githubRepoUrl) return;
     const cleanUrl = mon.githubRepoUrl.replace('.git', '');
     const parts = cleanUrl.split('/');
-    const repo = parts.pop();
-    const owner = parts.pop();
-
+    const repo = parts.pop(); const owner = parts.pop();
     if (!owner || !repo) return;
-
-    setFetchingDiff(true);
-    setCodeError('');
-
+    setFetchingDiff(true); setCodeError('');
     fetch(`https://api.github.com/repos/${owner}/${repo}/commits/${selectedCommitSha}`, {
-      headers: {
-        Authorization: `Bearer ${githubToken}`,
-        Accept: 'application/vnd.github.v3.diff',
-      }
-    })
-      .then(res => {
-        if (!res.ok) throw new Error(`Failed to fetch diff: HTTP ${res.status}`);
-        return res.text();
-      })
-      .then(diffText => {
-        setCodeSnippet(diffText);
-        setCodeLanguage('javascript'); // Set type to code/diff context
-        setFetchingDiff(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setFetchingDiff(false);
-        setCodeError('Failed to fetch commit diff.');
-      });
+      headers: { Authorization: `Bearer ${githubToken}`, Accept: 'application/vnd.github.v3.diff' }
+    }).then(r => r.text()).then(diff => { setCodeSnippet(diff); setCodeLanguage('javascript'); })
+      .catch(() => setCodeError('Error al obtener el diff del commit.'))
+      .finally(() => setFetchingDiff(false));
   }, [selectedCommitSha, selectedRepoId, codeSourceMode, githubToken, monitors]);
 
-  // ── Tab 3: SSL & DNS Inspector States ──
+  // ── Tab 3: DNS/SSL
   const [domainInput, setDomainInput] = useState('github.com');
   const [dnsResult, setDnsResult] = useState<any | null>(null);
   const [dnsRunning, setDnsRunning] = useState(false);
   const [dnsError, setDnsError] = useState('');
-
-  // New states for Code Auditor patch and DNS/SSL latency breakdown
-  const [patchResult, setPatchResult] = useState<any | null>(null);
-  const [patchRunning, setPatchRunning] = useState(false);
   const [latencyResult, setLatencyResult] = useState<any | null>(null);
   const [latencyRunning, setLatencyRunning] = useState(false);
   const [latencyError, setLatencyError] = useState('');
 
-  // ── Tab 4: Hacking Simulator States ──
+  // ── Tab 4: Hacking Simulator
   const [hackTargetMode, setHackTargetMode] = useState<'monitor' | 'custom'>('custom');
   const [selectedMonitorId, setSelectedMonitorId] = useState('');
   const [customHackUrl, setCustomHackUrl] = useState('https://httpbin.org/get');
@@ -176,1288 +145,800 @@ export default function PlaygroundPage() {
   // ── Handlers ──
   async function handleRunApi() {
     if (!token) return;
-    setApiRunning(true);
-    setApiError('');
-    setApiResult(null);
-
-    let parsedHeaders = {};
-    let parsedBody = null;
-
+    setApiRunning(true); setApiError(''); setApiResult(null);
+    let parsedHeaders = {}; let parsedBody = null;
+    try { if (apiHeaders.trim()) parsedHeaders = JSON.parse(apiHeaders); }
+    catch { setApiError('JSON inválido en Headers'); setApiRunning(false); return; }
+    try { if (apiBody.trim() && apiMethod !== 'GET') parsedBody = JSON.parse(apiBody); }
+    catch { setApiError('JSON inválido en Body'); setApiRunning(false); return; }
     try {
-      if (apiHeaders.trim()) parsedHeaders = JSON.parse(apiHeaders);
-    } catch {
-      setApiError('Invalid JSON in Request Headers');
-      setApiRunning(false);
-      return;
-    }
-
-    try {
-      if (apiBody.trim() && apiMethod !== 'GET') parsedBody = JSON.parse(apiBody);
-    } catch {
-      setApiError('Invalid JSON in Request Body');
-      setApiRunning(false);
-      return;
-    }
-
-    try {
-      const data = await api.playground.testEndpoint({
-        url: apiUrl,
-        method: apiMethod,
-        headers: parsedHeaders,
-        body: parsedBody
-      }, token);
+      const data = await api.playground.testEndpoint({ url: apiUrl, method: apiMethod, headers: parsedHeaders, body: parsedBody }, token);
       setApiResult(data);
-    } catch (err: any) {
-      setApiError(err.message || 'Request failed');
-    } finally {
-      setApiRunning(false);
-    }
+    } catch (err: any) { setApiError(err.message || 'Solicitud fallida'); }
+    finally { setApiRunning(false); }
   }
 
   async function handleRunCodeAudit() {
     if (!token) return;
-    setCodeRunning(true);
-    setCodeError('');
-    setCodeResult(null);
-    setPatchResult(null);
-
+    setCodeRunning(true); setCodeError(''); setCodeResult(null); setPatchResult(null);
     try {
-      const data = await api.playground.auditCode({
-        code: codeSnippet,
-        language: codeLanguage
-      }, token);
+      const data = await api.playground.auditCode({ code: codeSnippet, language: codeLanguage }, token);
       setCodeResult(data);
-    } catch (err: any) {
-      setCodeError(err.message || 'Audit failed');
-    } finally {
-      setCodeRunning(false);
-    }
+    } catch (err: any) { setCodeError(err.message || 'Auditoría fallida'); }
+    finally { setCodeRunning(false); }
   }
 
   async function handleGenerateCodePatch() {
     if (!token || !codeResult) return;
-    setPatchRunning(true);
-    setPatchResult(null);
+    setPatchRunning(true); setPatchResult(null);
     try {
-      const data = await api.playground.generatePatch({
-        code: codeSnippet,
-        findings: (codeResult.findings || []).join('\n') + '\n' + (codeResult.recommendations || ''),
-        language: codeLanguage
-      }, token);
+      const data = await api.playground.generatePatch({ code: codeSnippet, findings: (codeResult.findings || []).join('\n') + '\n' + (codeResult.recommendations || ''), language: codeLanguage }, token);
       setPatchResult(data);
-    } catch (err: any) {
-      alert(err.message || 'Failed to generate patch');
-    } finally {
-      setPatchRunning(false);
-    }
+    } catch (err: any) { alert(err.message || 'Error generando parche'); }
+    finally { setPatchRunning(false); }
   }
 
   async function handleRunDns() {
     if (!token) return;
-    setDnsRunning(true);
-    setDnsError('');
-    setDnsResult(null);
-    setLatencyResult(null);
-    setLatencyError('');
-
+    setDnsRunning(true); setDnsError(''); setDnsResult(null); setLatencyResult(null); setLatencyError('');
     try {
-      const data = await api.playground.inspectDomain({
-        domain: domainInput
-      }, token);
+      const data = await api.playground.inspectDomain({ domain: domainInput }, token);
       setDnsResult(data);
-    } catch (err: any) {
-      setDnsError(err.message || 'Domain lookup failed');
-    } finally {
-      setDnsRunning(false);
-    }
+    } catch (err: any) { setDnsError(err.message || 'Error consultando dominio'); }
+    finally { setDnsRunning(false); }
   }
 
   async function handleRunDomainLatency() {
     if (!token) return;
-    setLatencyRunning(true);
-    setLatencyError('');
-    setLatencyResult(null);
+    setLatencyRunning(true); setLatencyError(''); setLatencyResult(null);
     try {
       let targetUrl = domainInput.trim();
-      if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
-        targetUrl = 'https://' + targetUrl;
-      }
+      if (!targetUrl.startsWith('http')) targetUrl = 'https://' + targetUrl;
       const data = await api.playground.networkDiagnostics({ url: targetUrl }, token);
       setLatencyResult(data);
-    } catch (err: any) {
-      setLatencyError(err.message || 'Latency test failed');
-    } finally {
-      setLatencyRunning(false);
-    }
+    } catch (err: any) { setLatencyError(err.message || 'Error en test de latencia'); }
+    finally { setLatencyRunning(false); }
   }
 
   async function handleRunHacking() {
     if (!token) return;
-    setHackRunning(true);
-    setHackError('');
-    setHackResult(null);
-    setHackLogs([]);
-
-    // Determine target URL
+    setHackRunning(true); setHackError(''); setHackResult(null); setHackLogs([]);
     let targetUrl = '';
     if (hackTargetMode === 'monitor') {
       const mon = monitors.find(m => m.id === selectedMonitorId);
-      if (!mon) {
-        setHackError('Please select a project monitor');
-        setHackRunning(false);
-        return;
-      }
-      if (!mon.url) { setHackError('This monitor has no URL configured'); setHackRunning(false); return; }
+      if (!mon?.url) { setHackError('Monitor sin URL configurada'); setHackRunning(false); return; }
       targetUrl = mon.url;
     } else {
       targetUrl = customHackUrl;
     }
+    if (!targetUrl.startsWith('http')) { setHackError('URL debe comenzar con http:// o https://'); setHackRunning(false); return; }
 
-    if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
-      setHackError('Target URL must start with http:// or https://');
-      setHackRunning(false);
-      return;
-    }
-
-    // Run simulated logging
-    const addLog = (msg: string, delay: number) => {
-      return new Promise<void>((res) => {
-        setTimeout(() => {
-          setHackLogs(prev => [...prev, msg]);
-          res();
-        }, delay);
-      });
-    };
-
-    await addLog(`[${new Date().toLocaleTimeString()}] 🚀 Launching Safe Attack Simulator against ${targetUrl}...`, 0);
-    await addLog(`[${new Date().toLocaleTimeString()}] 📡 Attack vector configured: ${attackVector.toUpperCase()}`, 600);
-    await addLog(`[${new Date().toLocaleTimeString()}] 🧪 Injecting probe payloads...`, 800);
-    
-    if (attackVector === 'rate-limit') {
-      await addLog(`[${new Date().toLocaleTimeString()}] ⚡ Sending burst: 5 concurrent HTTP requests...`, 500);
-    } else if (attackVector === 'sqli') {
-      await addLog(`[${new Date().toLocaleTimeString()}] 🛠 Sending SQL injection query params...`, 500);
-    } else if (attackVector === 'xss') {
-      await addLog(`[${new Date().toLocaleTimeString()}] 🛠 Sending XSS payload query strings...`, 500);
-    } else {
-      await addLog(`[${new Date().toLocaleTimeString()}] 🛠 Probing sensitive path files...`, 500);
-    }
-
+    const addLog = (msg: string, delay: number) => new Promise<void>(res => setTimeout(() => { setHackLogs(prev => [...prev, msg]); res(); }, delay));
+    await addLog(`[${new Date().toLocaleTimeString()}] 🚀 Iniciando simulación contra ${targetUrl}...`, 0);
+    await addLog(`[${new Date().toLocaleTimeString()}] 📡 Vector configurado: ${attackVector.toUpperCase()}`, 600);
+    await addLog(`[${new Date().toLocaleTimeString()}] 🧪 Enviando payloads de prueba...`, 800);
+    if (attackVector === 'rate-limit') await addLog(`[${new Date().toLocaleTimeString()}] ⚡ Enviando ráfaga de 5 peticiones concurrentes...`, 500);
+    else if (attackVector === 'sqli') await addLog(`[${new Date().toLocaleTimeString()}] 🛠 Enviando parámetros de inyección SQL...`, 500);
+    else if (attackVector === 'xss') await addLog(`[${new Date().toLocaleTimeString()}] 🛠 Enviando payloads XSS en query strings...`, 500);
+    else await addLog(`[${new Date().toLocaleTimeString()}] 🛠 Sondeando rutas sensibles...`, 500);
     try {
-      const data = await api.playground.simulateAttack({
-        url: targetUrl,
-        attackType: attackVector
-      }, token);
-
-      await addLog(`[${new Date().toLocaleTimeString()}] 📥 Server responses received. Analysing headers & payloads...`, 800);
-      await addLog(`[${new Date().toLocaleTimeString()}] 🧠 Triggering Gemini AI Diagnostics for Vulnerability Check...`, 800);
-      await addLog(`[${new Date().toLocaleTimeString()}] ✅ Completed simulation analysis.`, 1000);
-
+      const data = await api.playground.simulateAttack({ url: targetUrl, attackType: attackVector }, token);
+      await addLog(`[${new Date().toLocaleTimeString()}] 📥 Respuestas recibidas. Analizando headers...`, 800);
+      await addLog(`[${new Date().toLocaleTimeString()}] 🧠 Ejecutando diagnóstico Gemini AI...`, 800);
+      await addLog(`[${new Date().toLocaleTimeString()}] ✅ Análisis completado.`, 1000);
       setHackResult(data);
     } catch (err: any) {
-      setHackError(err.message || 'Simulation execution failed');
-      setHackLogs(prev => [...prev, `[ERROR] Simulation halted: ${err.message || 'Unknown network error'}`]);
-    } finally {
-      setHackRunning(false);
-    }
+      setHackError(err.message || 'Simulación fallida');
+      setHackLogs(prev => [...prev, `[ERROR] ${err.message || 'Error desconocido'}`]);
+    } finally { setHackRunning(false); }
   }
 
-  // Color helpers
   function getSeverityColor(sev: string) {
     switch (sev?.toLowerCase()) {
-      case 'critical': return '#FF1744';
-      case 'high': return '#FF5252';
-      case 'medium': return '#FFB300';
-      case 'low': return '#00E676';
+      case 'critical': return '#FF1744'; case 'high': return '#FF5252';
+      case 'medium': return '#FFB300'; case 'low': return '#00E676';
       default: return 'var(--color-acid)';
     }
   }
 
   function getStatusStyle(isVuln: string) {
     switch (isVuln?.toLowerCase()) {
-      case 'yes':
-        return { label: 'VULNERABLE', color: '#FF1744', bg: 'rgba(255,23,68,0.1)', border: '#FF1744' };
-      case 'suspected':
-        return { label: 'RISK DETECTED', color: '#FFB300', bg: 'rgba(255,179,0,0.1)', border: '#FFB300' };
-      default:
-        return { label: 'SECURE / PROTECTED', color: '#00E676', bg: 'rgba(0,230,118,0.1)', border: '#00E676' };
+      case 'yes': return { label: 'VULNERABLE', color: '#FF1744', bg: 'rgba(255,23,68,0.1)', border: '#FF1744' };
+      case 'suspected': return { label: 'RIESGO DETECTADO', color: '#FFB300', bg: 'rgba(255,179,0,0.1)', border: '#FFB300' };
+      default: return { label: 'SEGURO / PROTEGIDO', color: '#00E676', bg: 'rgba(0,230,118,0.1)', border: '#00E676' };
     }
   }
 
+  const inputStyle: React.CSSProperties = {
+    width: '100%', background: 'var(--color-bg-base)', border: '1px solid var(--color-border-main)',
+    color: 'var(--color-txt-primary)', fontFamily: 'var(--font-mono)', fontSize: 12,
+    padding: '0 12px', borderRadius: 8, height: 40,
+  };
+  const labelStyle: React.CSSProperties = {
+    display: 'block', fontFamily: 'var(--font-mono)', fontSize: 9,
+    color: 'var(--color-txt-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8,
+  };
+
+  const TABS: { id: Tab; name: string; desc: string; icon: React.ReactNode }[] = [
+    {
+      id: 'api', name: t('play_tab_api'), desc: t('play_tab_api_desc'),
+      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
+    },
+    {
+      id: 'code', name: t('play_tab_code'), desc: t('play_tab_code_desc'),
+      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>,
+    },
+    {
+      id: 'dns', name: t('play_tab_dns'), desc: t('play_tab_dns_desc'),
+      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
+    },
+    {
+      id: 'hacking', name: t('play_tab_hack'), desc: t('play_tab_hack_desc'),
+      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+    },
+  ];
+
   return (
     <div style={{ width: '100%', animation: 'pg-fade-in 0.35s ease-out both' }}>
-      
-      {/* ── Title Header ── */}
-      <div style={{ marginBottom: 32 }}>
-        <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 8px', fontFamily: 'var(--font-body)' }}>
+
+      {/* ── Header ── */}
+      <div style={{ marginBottom: 28 }}>
+        <p style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 6px', fontFamily: 'var(--font-body)' }}>
           {t('play_sub')}
         </p>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: 'var(--color-txt-primary)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, color: 'var(--color-txt-primary)', margin: '0 0 6px', letterSpacing: '-0.02em' }}>
           {t('play_title')}
         </h1>
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-txt-muted)', marginTop: 8 }}>
+        <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-txt-muted)', margin: 0 }}>
           {t('play_desc')}
         </p>
       </div>
 
-      {/* ── Tabs Selector ── */}
-      <div style={{ display: 'flex', gap: 8, borderBottom: '1px solid var(--color-border-main)', paddingBottom: 16, marginBottom: 32 }}>
-        {[
-          { id: 'api', name: t('play_tab_api') },
-          { id: 'code', name: t('play_tab_code') },
-          { id: 'dns', name: t('play_tab_dns') },
-          { id: 'hacking', name: t('play_tab_hack') },
-        ].map(t => (
+      {/* ── Monitor Quick-Picker ── */}
+      <div className="glass-card" style={{ padding: '20px 24px', marginBottom: 28, borderRadius: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: 'var(--color-txt-primary)', marginBottom: 2 }}>
+              {t('play_pick_project')}
+            </div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)' }}>
+              {t('play_pick_desc')}
+            </div>
+          </div>
+          {selectedMonitor && (
+            <button
+              onClick={() => setSelectedMonitor(null)}
+              style={{ background: 'transparent', border: '1px solid var(--color-border-main)', borderRadius: 8, padding: '4px 10px', color: 'var(--color-txt-muted)', fontFamily: 'var(--font-mono)', fontSize: 10, cursor: 'pointer' }}
+            >
+              ✕ Deseleccionar
+            </button>
+          )}
+        </div>
+
+        {loadingMonitors ? (
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>Cargando monitores...</div>
+        ) : monitors.length === 0 ? (
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>{t('play_no_monitors')}</div>
+        ) : (
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            {monitors.map(m => {
+              const status = getLastStatus(m);
+              const isSelected = selectedMonitor?.id === m.id;
+              const statusColor = status === 'up' ? '#16A34A' : status === 'down' ? '#DC2626' : '#D97706';
+              return (
+                <button
+                  key={m.id}
+                  onClick={() => setSelectedMonitor(isSelected ? null : m)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    padding: '8px 14px', borderRadius: 12,
+                    background: isSelected ? 'var(--color-brand-light)' : 'var(--color-bg-card-hover)',
+                    border: `1px solid ${isSelected ? 'var(--color-brand-mid)' : 'var(--color-border-main)'}`,
+                    color: isSelected ? 'var(--color-brand-primary)' : 'var(--color-txt-primary)',
+                    cursor: 'pointer', fontFamily: 'var(--font-display)', fontSize: 12, fontWeight: 600,
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: statusColor, flexShrink: 0 }} />
+                  {m.name}
+                  {m.checks?.[0]?.responseTimeMs != null && (
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: isSelected ? 'var(--color-brand-primary)' : 'var(--color-txt-muted)', opacity: 0.8 }}>
+                      {m.checks[0].responseTimeMs}ms
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {selectedMonitor && (
+          <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--color-border-main)', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <StatusBadge status={getLastStatus(selectedMonitor)} showPulse />
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-brand-primary)', fontWeight: 600 }}>
+              {t('play_analyzing')}: {selectedMonitor.name}
+            </span>
+            {selectedMonitor.url && (
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)' }}>
+                — {selectedMonitor.url.replace('https://', '').replace('http://', '')}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ── Tab Bar ── */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 28, flexWrap: 'wrap' }}>
+        {TABS.map(tab => (
           <button
-            key={t.id}
-            onClick={() => setActiveTab(t.id as Tab)}
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
             style={{
-              padding: '8px 16px',
-              background: activeTab === t.id ? 'var(--color-brand-light)' : 'transparent',
-              border: activeTab === t.id ? '1px solid var(--color-brand-mid)' : '1px solid transparent',
-              borderRadius: 8,
-              color: activeTab === t.id ? 'var(--color-brand-primary)' : 'var(--color-txt-muted)',
-              fontFamily: 'var(--font-mono)',
-              fontSize: 12,
-              cursor: 'pointer',
-              transition: 'color 0.15s, background 0.15s, border-color 0.15s'
+              display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
+              padding: '10px 16px', borderRadius: 14,
+              background: activeTab === tab.id ? 'var(--color-brand-light)' : 'rgba(255,255,255,0.6)',
+              border: activeTab === tab.id ? '1px solid var(--color-brand-mid)' : '1px solid var(--color-border-main)',
+              color: activeTab === tab.id ? 'var(--color-brand-primary)' : 'var(--color-txt-secondary)',
+              cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s',
+              minWidth: 140,
             }}
           >
-            {t.name}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-display)', fontSize: 12, fontWeight: 700, marginBottom: 2 }}>
+              {tab.icon}
+              {tab.name}
+            </div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: activeTab === tab.id ? 'var(--color-brand-primary)' : 'var(--color-txt-muted)', opacity: 0.8, lineHeight: 1.3 }}>
+              {tab.desc}
+            </div>
           </button>
         ))}
       </div>
 
-      {/* ── Tab Content Container ── */}
+      {/* ── Tab Content ── */}
       <div style={{ minHeight: 400 }}>
 
-        {/* ── Tab 1: API Auditor ── */}
+        {/* ─── Tab 1: API Auditor ─── */}
         {activeTab === 'api' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 32 }} className="playground-grid">
-            {/* Form */}
-            <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, padding: 24, boxShadow: '0 4px 24px rgba(124,58,237,0.07)' }}>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--color-txt-primary)', margin: '0 0 16px' }}>Test API Endpoint</h3>
-               
-               <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
-                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', marginRight: 4 }}>Load Preset:</span>
-                 <button
-                   onClick={() => {
-                     setApiUrl('https://api.ipify.org?format=json');
-                     setApiMethod('GET');
-                     setApiHeaders('{\n  "Accept": "application/json"\n}');
-                   }}
-                   style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '4px 8px', color: 'var(--color-brand-primary)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
-                 >
-                   GET Public IP
-                 </button>
-                 <button
-                   onClick={() => {
-                     setApiUrl('https://httpbin.org/post');
-                     setApiMethod('POST');
-                     setApiHeaders('{\n  "Content-Type": "application/json"\n}');
-                     setApiBody('{\n  "username": "admin",\n  "action": "test"\n}');
-                   }}
-                   style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '4px 8px', color: 'var(--color-brand-primary)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
-                 >
-                   POST Echo HTTPBin
-                 </button>
-                 <button
-                   onClick={() => {
-                     setApiUrl('https://api.github.com/users/octocat');
-                     setApiMethod('GET');
-                     setApiHeaders('{\n  "User-Agent": "PulseGuard"\n}');
-                   }}
-                   style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '4px 8px', color: 'var(--color-brand-primary)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
-                 >
-                   GET GitHub User
-                 </button>
-               </div>
-              
-              <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
-                <select
-                  value={apiMethod}
-                  onChange={(e) => setApiMethod(e.target.value)}
-                  style={{
-                    background: 'var(--color-bg-base)',
-                    border: '1px solid var(--color-border-main)',
-                    color: 'var(--color-txt-primary)',
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 12,
-                    padding: '0 12px',
-                    borderRadius: 3,
-                    height: 40
-                  }}
-                >
-                  <option>GET</option>
-                  <option>POST</option>
-                  <option>PUT</option>
-                  <option>DELETE</option>
-                </select>
-                <input
-                  type="text"
-                  value={apiUrl}
-                  onChange={(e) => setApiUrl(e.target.value)}
-                  placeholder="https://api.yourdomain.com/endpoint"
-                  style={{
-                    flex: 1,
-                    background: 'var(--color-bg-base)',
-                    border: '1px solid var(--color-border-main)',
-                    color: 'var(--color-txt-primary)',
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 12,
-                    padding: '0 12px',
-                    borderRadius: 3,
-                    height: 40
-                  }}
-                />
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 24 }} className="playground-grid">
+            <div className="glass-card" style={{ padding: 24, borderRadius: 20 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--color-txt-primary)', margin: 0 }}>
+                  {t('play_tab_api')}
+                </h3>
+                {selectedMonitor?.url && (
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-brand-primary)', background: 'var(--color-brand-light)', padding: '2px 8px', borderRadius: 6 }}>
+                    {selectedMonitor.name}
+                  </span>
+                )}
               </div>
 
-              <div style={{ marginBottom: 20 }}>
-                <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)', textTransform: 'uppercase', marginBottom: 8 }}>
-                  Request Headers (JSON)
-                </label>
-                <textarea
-                  value={apiHeaders}
-                  onChange={(e) => setApiHeaders(e.target.value)}
-                  rows={4}
-                  style={{
-                    width: '100%',
-                    background: 'var(--color-bg-base)',
-                    border: '1px solid var(--color-border-main)',
-                    color: 'var(--color-txt-primary)',
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 12,
-                    padding: 12,
-                    borderRadius: 3,
-                    resize: 'vertical'
-                  }}
-                />
+              <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+                <span style={{ ...labelStyle, marginBottom: 0 }}>{t('play_load_preset')}</span>
+                {[
+                  { label: 'Public IP', url: 'https://api.ipify.org?format=json', method: 'GET', headers: '{\n  "Accept": "application/json"\n}' },
+                  { label: 'HTTPBin POST', url: 'https://httpbin.org/post', method: 'POST', headers: '{\n  "Content-Type": "application/json"\n}' },
+                  { label: 'GitHub API', url: 'https://api.github.com/users/octocat', method: 'GET', headers: '{\n  "User-Agent": "PulseGuard"\n}' },
+                ].map(p => (
+                  <button key={p.label} onClick={() => { setApiUrl(p.url); setApiMethod(p.method); setApiHeaders(p.headers); }}
+                    style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '4px 8px', color: 'var(--color-brand-primary)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}>
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                <select value={apiMethod} onChange={e => setApiMethod(e.target.value)}
+                  style={{ ...inputStyle, width: 90, flex: 'none', fontWeight: 700, color: apiMethod === 'GET' ? '#16A34A' : apiMethod === 'DELETE' ? '#DC2626' : '#D97706' }}>
+                  {['GET', 'POST', 'PUT', 'DELETE', 'PATCH'].map(m => <option key={m}>{m}</option>)}
+                </select>
+                <input type="text" value={apiUrl} onChange={e => setApiUrl(e.target.value)}
+                  placeholder="https://api.tudominio.com/endpoint" style={{ ...inputStyle, flex: 1 }} />
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={labelStyle}>Headers (JSON)</label>
+                <textarea value={apiHeaders} onChange={e => setApiHeaders(e.target.value)} rows={3}
+                  style={{ ...inputStyle, height: 'auto', padding: 10, resize: 'vertical' }} />
               </div>
 
               {apiMethod !== 'GET' && (
-                <div style={{ marginBottom: 20 }}>
-                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)', textTransform: 'uppercase', marginBottom: 8 }}>
-                    Request Body (JSON)
-                  </label>
-                  <textarea
-                    value={apiBody}
-                    onChange={(e) => setApiBody(e.target.value)}
-                    rows={4}
-                    style={{
-                      width: '100%',
-                      background: 'var(--color-bg-base)',
-                      border: '1px solid var(--color-border-main)',
-                      color: 'var(--color-txt-primary)',
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 12,
-                      padding: 12,
-                      borderRadius: 3,
-                      resize: 'vertical'
-                    }}
-                  />
+                <div style={{ marginBottom: 16 }}>
+                  <label style={labelStyle}>Body (JSON)</label>
+                  <textarea value={apiBody} onChange={e => setApiBody(e.target.value)} rows={3}
+                    style={{ ...inputStyle, height: 'auto', padding: 10, resize: 'vertical' }} />
                 </div>
               )}
 
-              {apiError && (
-                <div style={{ background: 'rgba(255,23,68,0.08)', border: '1px solid #FF1744', borderRadius: 3, color: '#FF1744', padding: 12, fontSize: 12, fontFamily: 'var(--font-mono)', marginBottom: 20 }}>
-                  Error: {apiError}
-                </div>
-              )}
+              {apiError && <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid #DC2626', borderRadius: 8, color: '#DC2626', padding: '10px 12px', fontSize: 12, fontFamily: 'var(--font-mono)', marginBottom: 16 }}>⚠ {apiError}</div>}
 
-              <button
-                onClick={handleRunApi}
-                disabled={apiRunning}
-                className="btn-strict-primary"
-                style={{ width: '100%', height: 42, fontSize: 13 }}
-              >
-                {apiRunning ? 'Running Audit Request...' : 'Send Request & Audit'}
+              <button onClick={handleRunApi} disabled={apiRunning} className="btn-solid-glow" style={{ width: '100%', height: 42, fontSize: 13, borderRadius: 12, justifyContent: 'center' }}>
+                {apiRunning ? t('play_running_api') : t('play_run_api')}
               </button>
             </div>
 
-            {/* Results */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {apiResult ? (
                 <>
-                  {/* AI Report Card */}
-                  <div style={{ background: 'var(--color-bg-card)', border: `1px solid ${getSeverityColor(apiResult.audit.overallRisk)}`, borderRadius: 3, padding: 24 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                      <span style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 11,
-                        fontWeight: 700,
-                        color: '#000',
-                        background: getSeverityColor(apiResult.audit.overallRisk),
-                        padding: '2px 8px',
-                        borderRadius: 2
-                      }}>
-                        {apiResult.audit.overallRisk.toUpperCase()} RISK
+                  <div style={{ background: 'var(--color-bg-card)', border: `2px solid ${getSeverityColor(apiResult.audit.overallRisk)}`, borderRadius: 20, padding: 20 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700, color: '#fff', background: getSeverityColor(apiResult.audit.overallRisk), padding: '3px 10px', borderRadius: 6 }}>
+                        {apiResult.audit.overallRisk.toUpperCase()}
                       </span>
-                      <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--color-txt-primary)', margin: 0 }}>Gemini AI API Audit</h4>
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: 'var(--color-txt-primary)' }}>Gemini AI API Audit</span>
                     </div>
-
-                    <div style={{ marginBottom: 16 }}>
-                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', margin: '0 0 6px' }}>Vulnerabilities & Findings</p>
-                      {apiResult.audit.findings && apiResult.audit.findings.length > 0 ? (
-                        <ul style={{ margin: 0, paddingLeft: 18, color: 'var(--color-txt-secondary)', fontSize: 13, fontFamily: 'var(--font-body)', lineHeight: 1.5 }}>
-                          {apiResult.audit.findings.map((f: string, i: number) => (
-                            <li key={i} style={{ marginBottom: 6 }}>{f}</li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p style={{ color: '#00E676', fontSize: 13, margin: 0 }}>No security flaws identified in the response headers or content.</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', margin: '0 0 6px' }}>Mitigation Advice</p>
-                      <p style={{ margin: 0, color: 'var(--color-txt-muted)', fontSize: 12, lineHeight: 1.5, fontFamily: 'var(--font-mono)', whiteSpace: 'pre-wrap' }}>
-                        {apiResult.audit.recommendation}
-                      </p>
-                    </div>
+                    <p style={{ ...labelStyle }}>Hallazgos</p>
+                    {apiResult.audit.findings?.length > 0 ? (
+                      <ul style={{ margin: '0 0 14px', paddingLeft: 16, color: 'var(--color-txt-secondary)', fontSize: 12, lineHeight: 1.6 }}>
+                        {apiResult.audit.findings.map((f: string, i: number) => <li key={i}>{f}</li>)}
+                      </ul>
+                    ) : <p style={{ color: '#16A34A', fontSize: 12, margin: '0 0 14px' }}>✓ Sin vulnerabilidades detectadas en headers o respuesta.</p>}
+                    <p style={{ ...labelStyle }}>Recomendaciones</p>
+                    <p style={{ margin: 0, color: 'var(--color-txt-muted)', fontSize: 11, fontFamily: 'var(--font-mono)', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>{apiResult.audit.recommendation}</p>
                   </div>
 
-                  {/* Network stats */}
-                  <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, padding: 20, boxShadow: '0 4px 24px rgba(124,58,237,0.07)' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, textAlign: 'center', marginBottom: 20 }}>
-                      <div style={{ borderRight: '1px solid var(--color-border-main)' }}>
-                        <div style={{ fontSize: 18, fontFamily: 'var(--font-mono)', color: apiResult.status >= 200 && apiResult.status < 300 ? '#00E676' : '#FF1744', fontWeight: 'bold' }}>
-                          {apiResult.status}
+                  <div className="glass-card" style={{ padding: 20, borderRadius: 20 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, textAlign: 'center', marginBottom: 16 }}>
+                      {[
+                        { label: 'Status', value: apiResult.status, color: apiResult.status >= 200 && apiResult.status < 300 ? '#16A34A' : '#DC2626' },
+                        { label: 'Latencia', value: `${apiResult.latencyMs}ms`, color: 'var(--color-brand-primary)' },
+                        { label: 'Tamaño', value: `${JSON.stringify(apiResult.responseBody).length}B`, color: 'var(--color-txt-primary)' },
+                      ].map(s => (
+                        <div key={s.label} style={{ borderRight: s.label !== 'Tamaño' ? '1px solid var(--color-border-main)' : 'none' }}>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 20, fontWeight: 800, color: s.color }}>{s.value}</div>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', marginTop: 4 }}>{s.label}</div>
                         </div>
-                        <div style={{ fontSize: 9, color: 'var(--color-txt-muted)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', marginTop: 4 }}>Status</div>
-                      </div>
-                      <div style={{ borderRight: '1px solid var(--color-border-main)' }}>
-                        <div style={{ fontSize: 18, fontFamily: 'var(--font-mono)', color: 'var(--color-acid)', fontWeight: 'bold' }}>
-                          {apiResult.latencyMs}ms
-                        </div>
-                        <div style={{ fontSize: 9, color: 'var(--color-txt-muted)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', marginTop: 4 }}>Latency</div>
-                      </div>
-                      <div>
-                        <div style={{ fontSize: 18, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-primary)', fontWeight: 'bold' }}>
-                          {JSON.stringify(apiResult.responseBody).length} B
-                        </div>
-                        <div style={{ fontSize: 9, color: 'var(--color-txt-muted)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', marginTop: 4 }}>Size</div>
-                      </div>
+                      ))}
                     </div>
-
-                    <details style={{ marginBottom: 12 }}>
-                      <summary style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-primary)', cursor: 'pointer', outline: 'none', padding: '6px 0' }}>
+                    <details style={{ marginBottom: 8 }}>
+                      <summary style={{ fontFamily: 'var(--font-mono)', fontSize: 11, cursor: 'pointer', color: 'var(--color-txt-secondary)', padding: '4px 0' }}>
                         Response Headers ({Object.keys(apiResult.responseHeaders).length})
                       </summary>
-                      <pre style={{ margin: '8px 0 0', padding: 12, background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 10, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-secondary)', overflowX: 'auto' }}>
+                      <pre style={{ margin: '8px 0 0', padding: 10, background: 'var(--color-bg-card-hover)', borderRadius: 8, fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-secondary)', overflowX: 'auto' }}>
                         {JSON.stringify(apiResult.responseHeaders, null, 2)}
                       </pre>
                     </details>
-
                     <details>
-                      <summary style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-primary)', cursor: 'pointer', outline: 'none', padding: '6px 0' }}>
-                        Response Body Snippet
+                      <summary style={{ fontFamily: 'var(--font-mono)', fontSize: 11, cursor: 'pointer', color: 'var(--color-txt-secondary)', padding: '4px 0' }}>
+                        Response Body
                       </summary>
-                      <pre style={{ margin: '8px 0 0', padding: 12, background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 10, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-secondary)', overflowX: 'auto', maxHeight: 200, overflowY: 'auto' }}>
+                      <pre style={{ margin: '8px 0 0', padding: 10, background: 'var(--color-bg-card-hover)', borderRadius: 8, fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-secondary)', overflowX: 'auto', maxHeight: 180, overflowY: 'auto' }}>
                         {typeof apiResult.responseBody === 'object' ? JSON.stringify(apiResult.responseBody, null, 2) : String(apiResult.responseBody)}
                       </pre>
                     </details>
                   </div>
                 </>
               ) : (
-                <div style={{ flex: 1, background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(12px)', border: '1px dashed rgba(196,181,253,0.4)', borderRadius: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, textAlign: 'center', color: 'var(--color-txt-muted)' }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginBottom: 12 }}>
-                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                  </svg>
-                  <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, margin: 0 }}>Results will appear here after sending a request.</p>
-                </div>
+                <EmptyResult icon="wave" text={t('play_results_empty')} />
               )}
             </div>
           </div>
         )}
 
-        {/* ── Tab 2: Code Auditor ── */}
+        {/* ─── Tab 2: Code Auditor ─── */}
         {activeTab === 'code' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 32 }} className="playground-grid">
-            {/* Editor */}
-            <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, padding: 24, boxShadow: '0 4px 24px rgba(124,58,237,0.07)' }}>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--color-txt-primary)', margin: '0 0 16px' }}>Audit Code Snippet</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 24 }} className="playground-grid">
+            <div className="glass-card" style={{ padding: 24, borderRadius: 20 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--color-txt-primary)', margin: 0 }}>{t('play_tab_code')}</h3>
+                {selectedMonitor?.githubRepoUrl && (
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-brand-primary)', background: 'var(--color-brand-light)', padding: '2px 8px', borderRadius: 6 }}>
+                    {selectedMonitor.name}
+                  </span>
+                )}
+              </div>
 
-               <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
-                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', marginRight: 4 }}>Load Preset:</span>
-                 <button
-                   onClick={() => {
-                     setCodeLanguage('dockerfile');
-                     setCodeSnippet('FROM ubuntu:latest\nRUN apt-get update && apt-get install -y curl\n# BAD PRACTICE: running container as root user\nUSER root\nCMD ["bash"]');
-                   }}
-                   style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '4px 8px', color: 'var(--color-brand-primary)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
-                 >
-                   Insecure Dockerfile
-                 </button>
-                 <button
-                   onClick={() => {
-                     setCodeLanguage('javascript');
-                     setCodeSnippet('const express = require("express");\nconst app = express();\nconst pg = require("pg");\nconst client = new pg.Client();\n\napp.get("/users", (req, res) => {\n  // VULNERABLE: Direct SQL injection concatenation\n  const sql = "SELECT * FROM users WHERE name = \'" + req.query.name + "\'";\n  client.query(sql, (err, result) => {\n    res.json(result.rows);\n  });\n});');
-                   }}
-                   style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '4px 8px', color: 'var(--color-brand-primary)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
-                 >
-                   SQL Injection Code
-                 </button>
-                 <button
-                   onClick={() => {
-                     setCodeLanguage('dependencies');
-                     setCodeSnippet('{\n  "name": "vulnerable-app",\n  "dependencies": {\n    "express": "^4.16.0",\n    "lodash": "4.17.4",\n    "mongoose": "5.7.5"\n  }\n}');
-                   }}
-                   style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '4px 8px', color: 'var(--color-brand-primary)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
-                 >
-                   Vulnerable Dependencies
-                 </button>
-               </div>
+              <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+                <span style={{ ...labelStyle, marginBottom: 0 }}>{t('play_load_preset')}</span>
+                {[
+                  { label: 'Dockerfile inseguro', lang: 'dockerfile', code: 'FROM ubuntu:latest\nRUN apt-get update && apt-get install -y curl\nUSER root\nCMD ["bash"]' },
+                  { label: 'SQL Injection', lang: 'javascript', code: 'app.get("/users", (req, res) => {\n  const sql = "SELECT * FROM users WHERE name = \'" + req.query.name + "\'";\n  client.query(sql, (err, result) => res.json(result.rows));\n});' },
+                  { label: 'Deps vulnerables', lang: 'dependencies', code: '{\n  "dependencies": {\n    "express": "^4.16.0",\n    "lodash": "4.17.4"\n  }\n}' },
+                ].map(p => (
+                  <button key={p.label} onClick={() => { setCodeLanguage(p.lang); setCodeSnippet(p.code); setCodeSourceMode('paste'); }}
+                    style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '4px 8px', color: 'var(--color-brand-primary)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}>
+                    {p.label}
+                  </button>
+                ))}
+              </div>
 
-              <div style={{ marginBottom: 20 }}>
-                <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)', textTransform: 'uppercase', marginBottom: 8 }}>
-                  Code Input Mode
-                </label>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button
-                    onClick={() => setCodeSourceMode('paste')}
-                    style={{
-                      flex: 1,
-                      height: 34,
-                      background: codeSourceMode === 'paste' ? 'var(--color-border-main)' : 'transparent',
-                      border: '1px solid var(--color-border-main)',
-                      color: codeSourceMode === 'paste' ? 'var(--color-txt-primary)' : 'var(--color-txt-muted)',
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 11,
-                      borderRadius: 3,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Paste Custom Code
+              <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                {[
+                  { id: 'paste', label: t('play_paste_code') },
+                  { id: 'repo', label: t('play_select_repo') },
+                ].map(m => (
+                  <button key={m.id} onClick={() => {
+                    setCodeSourceMode(m.id as 'paste' | 'repo');
+                    if (m.id === 'repo' && monitors.length > 0 && !selectedRepoId) {
+                      const first = monitors.find(mon => mon.githubRepoUrl);
+                      if (first) setSelectedRepoId(first.id);
+                    }
+                  }}
+                    style={{ flex: 1, height: 34, background: codeSourceMode === m.id ? 'var(--color-brand-light)' : 'transparent', border: `1px solid ${codeSourceMode === m.id ? 'var(--color-brand-mid)' : 'var(--color-border-main)'}`, color: codeSourceMode === m.id ? 'var(--color-brand-primary)' : 'var(--color-txt-muted)', fontFamily: 'var(--font-mono)', fontSize: 11, borderRadius: 8, cursor: 'pointer' }}>
+                    {m.label}
                   </button>
-                  <button
-                    onClick={() => {
-                      setCodeSourceMode('repo');
-                      if (monitors.length > 0 && !selectedRepoId) {
-                        const firstWithRepo = monitors.find(m => m.githubRepoUrl);
-                        if (firstWithRepo) setSelectedRepoId(firstWithRepo.id);
-                      }
-                    }}
-                    style={{
-                      flex: 1,
-                      height: 34,
-                      background: codeSourceMode === 'repo' ? 'var(--color-border-main)' : 'transparent',
-                      border: '1px solid var(--color-border-main)',
-                      color: codeSourceMode === 'repo' ? 'var(--color-txt-primary)' : 'var(--color-txt-muted)',
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 11,
-                      borderRadius: 3,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Select Monitored Repos
-                  </button>
-                </div>
+                ))}
               </div>
 
               {codeSourceMode === 'repo' && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
                   <div>
-                    <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)', textTransform: 'uppercase', marginBottom: 8 }}>
-                      Select Project Repository
-                    </label>
-                    <select
-                      value={selectedRepoId}
-                      onChange={(e) => setSelectedRepoId(e.target.value)}
-                      style={{
-                        width: '100%',
-                        background: 'var(--color-bg-base)',
-                        border: '1px solid var(--color-border-main)',
-                        color: 'var(--color-txt-primary)',
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 12,
-                        padding: '0 12px',
-                        borderRadius: 3,
-                        height: 40
-                      }}
-                    >
-                      {monitors.filter(m => m.githubRepoUrl).length === 0 ? (
-                        <option>No connected repos</option>
-                      ) : (
-                        monitors.filter(m => m.githubRepoUrl).map(m => (
-                          <option key={m.id} value={m.id}>{m.name} ({m.githubRepoUrl?.replace('https://github.com/', '')})</option>
-                        ))
-                      )}
+                    <label style={labelStyle}>Repositorio</label>
+                    <select value={selectedRepoId} onChange={e => setSelectedRepoId(e.target.value)} style={inputStyle}>
+                      {monitors.filter(m => m.githubRepoUrl).length === 0
+                        ? <option>Sin repos conectados</option>
+                        : monitors.filter(m => m.githubRepoUrl).map(m => <option key={m.id} value={m.id}>{m.name}</option>)
+                      }
                     </select>
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)', textTransform: 'uppercase', marginBottom: 8 }}>
-                      Select Recent Commit
-                    </label>
-                    <select
-                      value={selectedCommitSha}
-                      onChange={(e) => setSelectedCommitSha(e.target.value)}
-                      disabled={loadingCommits || commitsList.length === 0}
-                      style={{
-                        width: '100%',
-                        background: 'var(--color-bg-base)',
-                        border: '1px solid var(--color-border-main)',
-                        color: 'var(--color-txt-primary)',
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 12,
-                        padding: '0 12px',
-                        borderRadius: 3,
-                        height: 40
-                      }}
-                    >
-                      {loadingCommits ? (
-                        <option>Loading commits...</option>
-                      ) : commitsList.length === 0 ? (
-                        <option>No commits found</option>
-                      ) : (
-                        commitsList.map(c => (
-                          <option key={c.sha} value={c.sha}>{c.sha.substring(0, 7)} - {c.message}</option>
-                        ))
-                      )}
+                    <label style={labelStyle}>Commit</label>
+                    <select value={selectedCommitSha} onChange={e => setSelectedCommitSha(e.target.value)} disabled={loadingCommits || commitsList.length === 0} style={inputStyle}>
+                      {loadingCommits ? <option>Cargando...</option>
+                        : commitsList.length === 0 ? <option>Sin commits</option>
+                        : commitsList.map(c => <option key={c.sha} value={c.sha}>{c.sha.substring(0, 7)} — {c.message}</option>)}
                     </select>
                   </div>
                 </div>
               )}
 
               {codeSourceMode === 'paste' && (
-                <div style={{ marginBottom: 20 }}>
-                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)', textTransform: 'uppercase', marginBottom: 8 }}>
-                    Snippet Context / Type
-                  </label>
-                  <select
-                    value={codeLanguage}
-                    onChange={(e) => setCodeLanguage(e.target.value)}
-                    style={{
-                      width: '100%',
-                      background: 'var(--color-bg-base)',
-                      border: '1px solid var(--color-border-main)',
-                      color: 'var(--color-txt-primary)',
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 12,
-                      padding: '0 12px',
-                      borderRadius: 3,
-                      height: 40
-                    }}
-                  >
+                <div style={{ marginBottom: 16 }}>
+                  <label style={labelStyle}>Tipo de código</label>
+                  <select value={codeLanguage} onChange={e => setCodeLanguage(e.target.value)} style={inputStyle}>
                     <option value="javascript">JavaScript / TypeScript</option>
                     <option value="dockerfile">Dockerfile</option>
-                    <option value="dependencies">Dependency File (package.json, requirements.txt, go.mod)</option>
-                    <option value="yaml">Config Files (Kubernetes YAML, docker-compose.yml)</option>
-                    <option value="shell">Shell script (.sh)</option>
+                    <option value="dependencies">Dependencias (package.json, requirements.txt)</option>
+                    <option value="yaml">Config (Kubernetes, docker-compose)</option>
+                    <option value="shell">Shell script</option>
                   </select>
                 </div>
               )}
 
-              <div style={{ marginBottom: 20 }}>
-                <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)', textTransform: 'uppercase', marginBottom: 8 }}>
-                  {codeSourceMode === 'repo' ? 'Commit Diff (Loaded automatically)' : 'Paste Code'}
-                </label>
+              <div style={{ marginBottom: 16 }}>
+                <label style={labelStyle}>{codeSourceMode === 'repo' ? 'Diff del commit (cargado automáticamente)' : 'Código a auditar'}</label>
                 {fetchingDiff ? (
-                  <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg-base)', border: '1px solid var(--color-border-main)', borderRadius: 3, color: 'var(--color-txt-muted)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
-                    Fetching commit diff from GitHub...
+                  <div style={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg-base)', border: '1px solid var(--color-border-main)', borderRadius: 8, color: 'var(--color-txt-muted)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+                    Obteniendo diff de GitHub...
                   </div>
                 ) : (
-                  <textarea
-                    value={codeSnippet}
-                    onChange={(e) => setCodeSnippet(e.target.value)}
-                    rows={10}
-                    style={{
-                      width: '100%',
-                      background: 'var(--color-bg-base)',
-                      border: '1px solid var(--color-border-main)',
-                      color: 'var(--color-txt-primary)',
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 12,
-                      padding: 12,
-                      borderRadius: 3,
-                      resize: 'vertical'
-                    }}
-                  />
+                  <textarea value={codeSnippet} onChange={e => setCodeSnippet(e.target.value)} rows={10}
+                    style={{ ...inputStyle, height: 'auto', padding: 10, resize: 'vertical', lineHeight: 1.5 }} />
                 )}
               </div>
 
-              {codeError && (
-                <div style={{ background: 'rgba(255,23,68,0.08)', border: '1px solid #FF1744', borderRadius: 3, color: '#FF1744', padding: 12, fontSize: 12, fontFamily: 'var(--font-mono)', marginBottom: 20 }}>
-                  Error: {codeError}
-                </div>
-              )}
+              {codeError && <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid #DC2626', borderRadius: 8, color: '#DC2626', padding: '10px 12px', fontSize: 12, fontFamily: 'var(--font-mono)', marginBottom: 16 }}>⚠ {codeError}</div>}
 
-              <button
-                onClick={handleRunCodeAudit}
-                disabled={codeRunning}
-                className="btn-strict-primary"
-                style={{ width: '100%', height: 42, fontSize: 13 }}
-              >
-                {codeRunning ? 'Auditing Code Snippet...' : 'Audit Code'}
+              <button onClick={handleRunCodeAudit} disabled={codeRunning} className="btn-solid-glow" style={{ width: '100%', height: 42, fontSize: 13, borderRadius: 12, justifyContent: 'center' }}>
+                {codeRunning ? t('play_running_code') : t('play_run_code')}
               </button>
             </div>
 
-            {/* AI Results */}
             <div>
               {codeResult ? (
-                <div style={{ background: 'var(--color-bg-card)', border: `1px solid ${getSeverityColor(codeResult.severity)}`, borderRadius: 3, padding: 24, height: '100%' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                    <span style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 11,
-                      fontWeight: 700,
-                      color: '#000',
-                      background: getSeverityColor(codeResult.severity),
-                      padding: '2px 8px',
-                      borderRadius: 2
-                    }}>
-                      {codeResult.severity.toUpperCase()} RISK
+                <div style={{ background: 'var(--color-bg-card)', border: `2px solid ${getSeverityColor(codeResult.severity)}`, borderRadius: 20, padding: 20 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700, color: '#fff', background: getSeverityColor(codeResult.severity), padding: '3px 10px', borderRadius: 6 }}>
+                      {codeResult.severity.toUpperCase()}
                     </span>
-                    <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--color-txt-primary)', margin: 0 }}>Static Code Security Audit</h4>
+                    <span style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: 'var(--color-txt-primary)' }}>Static Code Audit</span>
                   </div>
 
-                  <div style={{ marginBottom: 20 }}>
-                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', margin: '0 0 8px' }}>Security Findings</p>
-                    {codeResult.findings && codeResult.findings.length > 0 ? (
-                      <ul style={{ margin: 0, paddingLeft: 18, color: 'var(--color-txt-secondary)', fontSize: 13, fontFamily: 'var(--font-body)', lineHeight: 1.5 }}>
-                        {codeResult.findings.map((f: string, i: number) => (
-                          <li key={i} style={{ marginBottom: 8 }}>{f}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p style={{ color: '#00E676', fontSize: 13, margin: 0 }}>No issues found. Code seems safe!</p>
-                    )}
-                  </div>
+                  <p style={labelStyle}>Hallazgos de seguridad</p>
+                  {codeResult.findings?.length > 0 ? (
+                    <ul style={{ margin: '0 0 16px', paddingLeft: 16, color: 'var(--color-txt-secondary)', fontSize: 12, lineHeight: 1.6 }}>
+                      {codeResult.findings.map((f: string, i: number) => <li key={i} style={{ marginBottom: 6 }}>{f}</li>)}
+                    </ul>
+                  ) : <p style={{ color: '#16A34A', fontSize: 12, margin: '0 0 16px' }}>✓ Sin problemas detectados.</p>}
 
-                  <div style={{ marginBottom: 20 }}>
-                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', margin: '0 0 8px' }}>Actionable Recommendations</p>
-                    <pre style={{ margin: 0, padding: 12, background: 'var(--color-bg-base)', border: '1px solid var(--color-border-main)', borderRadius: 3, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-muted)', whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>
-                      {codeResult.recommendations}
-                    </pre>
-                  </div>
+                  <p style={labelStyle}>Recomendaciones</p>
+                  <pre style={{ margin: '0 0 16px', padding: 10, background: 'var(--color-bg-base)', border: '1px solid var(--color-border-main)', borderRadius: 8, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-muted)', whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>
+                    {codeResult.recommendations}
+                  </pre>
 
-                  {/* Generate Patch Button */}
-                  <div style={{ borderTop: '1px solid var(--color-border-main)', paddingTop: 16 }}>
-                    <button
-                      onClick={handleGenerateCodePatch}
-                      disabled={patchRunning}
-                      className="btn-strict-secondary"
-                      style={{ width: '100%', border: '1px solid rgba(0,240,255,0.3)', color: 'var(--color-acid)', height: 38, fontSize: 12 }}
-                    >
-                      {patchRunning ? 'Generating Security Patch...' : 'Generate Secure Patch'}
+                  <div style={{ borderTop: '1px solid var(--color-border-main)', paddingTop: 14 }}>
+                    <button onClick={handleGenerateCodePatch} disabled={patchRunning}
+                      style={{ width: '100%', height: 38, background: 'transparent', border: '1px solid rgba(0,240,255,0.35)', color: 'var(--color-acid)', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 12, cursor: 'pointer' }}>
+                      {patchRunning ? 'Generando parche...' : '⚡ Generar parche con IA'}
                     </button>
-
                     {patchResult && (
-                      <div style={{ marginTop: 16, border: '1px solid rgba(0,240,255,0.2)', borderRadius: 3, background: '#020202', overflow: 'hidden' }}>
-                        <div style={{ padding: '6px 12px', background: 'rgba(0,240,255,0.03)', borderBottom: '1px solid rgba(0,240,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-acid)', fontWeight: 'bold' }}>AI SECURED CODE SUGGESTION</span>
-                          <button
-                            onClick={() => {
-                              navigator.clipboard.writeText(patchResult.patch);
-                              alert('Code copied to clipboard!');
-                            }}
-                            style={{ background: 'transparent', border: 'none', color: 'var(--color-acid)', fontSize: 9, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}
-                          >
-                            [ Copy ]
+                      <div style={{ marginTop: 14, border: '1px solid rgba(0,240,255,0.2)', borderRadius: 10, background: '#020202', overflow: 'hidden' }}>
+                        <div style={{ padding: '6px 12px', background: 'rgba(0,240,255,0.04)', borderBottom: '1px solid rgba(0,240,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-acid)', fontWeight: 700 }}>PARCHE SUGERIDO POR IA</span>
+                          <button onClick={() => navigator.clipboard.writeText(patchResult.patch)}
+                            style={{ background: 'transparent', border: 'none', color: 'var(--color-acid)', fontSize: 9, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
+                            [Copiar]
                           </button>
                         </div>
-                        <div style={{ padding: 12 }}>
-                          <pre style={{ margin: 0, overflowX: 'auto', fontFamily: 'var(--font-mono)', fontSize: 11, color: '#00FF00', lineHeight: 1.4 }}>
-                            <code>{patchResult.patch}</code>
-                          </pre>
-                          {patchResult.explanation && (
-                            <p style={{ margin: '8px 0 0', fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--color-txt-muted)', lineHeight: 1.4 }}>
-                              {patchResult.explanation}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div style={{ background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(12px)', border: '1px dashed rgba(196,181,253,0.4)', borderRadius: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, textAlign: 'center', color: 'var(--color-txt-muted)', height: '100%' }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginBottom: 12 }}>
-                    <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1M18 8h4M18 12h4"/>
-                  </svg>
-                  <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, margin: 0 }}>Results will appear here after starting static code auditing.</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ── Tab 3: SSL & DNS Inspector ── */}
-        {activeTab === 'dns' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 32 }} className="playground-grid">
-            {/* Input form */}
-            <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, padding: 24, boxShadow: '0 4px 24px rgba(124,58,237,0.07)' }}>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--color-txt-primary)', margin: '0 0 16px' }}>SSL & DNS Health Inspector</h3>
-               
-               <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
-                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', marginRight: 4 }}>Load Preset:</span>
-                 <button
-                   onClick={() => setDomainInput('github.com')}
-                   style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '4px 8px', color: 'var(--color-brand-primary)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
-                 >
-                   github.com
-                 </button>
-                 <button
-                   onClick={() => setDomainInput('google.com')}
-                   style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '4px 8px', color: 'var(--color-brand-primary)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
-                 >
-                   google.com
-                 </button>
-                 <button
-                   onClick={() => setDomainInput('vercel.com')}
-                   style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '4px 8px', color: 'var(--color-brand-primary)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}
-                 >
-                   vercel.com
-                 </button>
-               </div>
-              
-              <div style={{ marginBottom: 20 }}>
-                <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)', textTransform: 'uppercase', marginBottom: 8 }}>
-                  Domain name
-                </label>
-                <input
-                  type="text"
-                  value={domainInput}
-                  onChange={(e) => setDomainInput(e.target.value)}
-                  placeholder="domain.com"
-                  style={{
-                    width: '100%',
-                    background: 'var(--color-bg-base)',
-                    border: '1px solid var(--color-border-main)',
-                    color: 'var(--color-txt-primary)',
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 12,
-                    padding: '0 12px',
-                    borderRadius: 3,
-                    height: 40
-                  }}
-                />
-              </div>
-
-              {dnsError && (
-                <div style={{ background: 'rgba(255,23,68,0.08)', border: '1px solid #FF1744', borderRadius: 3, color: '#FF1744', padding: 12, fontSize: 12, fontFamily: 'var(--font-mono)', marginBottom: 20 }}>
-                  Error: {dnsError}
-                </div>
-              )}
-
-              <button
-                onClick={handleRunDns}
-                disabled={dnsRunning}
-                className="btn-strict-primary"
-                style={{ width: '100%', height: 42, fontSize: 13 }}
-              >
-                {dnsRunning ? 'Querying Domain Services...' : 'Inspect DNS & SSL'}
-              </button>
-            </div>
-
-            {/* Audit Results */}
-            <div>
-              {dnsResult ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                  
-                  {/* Score & AI recommendation */}
-                  <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, padding: 24, boxShadow: '0 4px 24px rgba(124,58,237,0.07)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                      <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--color-txt-primary)', margin: 0 }}>Network Posture Audit</h4>
-                      <div style={{
-                        width: 42,
-                        height: 42,
-                        borderRadius: '50%',
-                        background: 'rgba(0,240,255,0.1)',
-                        border: '2px solid var(--color-acid)',
-                        color: 'var(--color-acid)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 800,
-                        fontSize: 18,
-                        fontFamily: 'var(--font-mono)'
-                      }}>
-                        {dnsResult.audit.securityScore}
-                      </div>
-                    </div>
-
-                    <div style={{ marginBottom: 12 }}>
-                      <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-muted)', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>SSL Findings</span>
-                      {dnsResult.audit.sslFindings && dnsResult.audit.sslFindings.length > 0 ? (
-                        <ul style={{ margin: 0, paddingLeft: 16, color: 'var(--color-txt-secondary)', fontSize: 12, lineHeight: 1.4 }}>
-                          {dnsResult.audit.sslFindings.map((f: string, i: number) => <li key={i}>{f}</li>)}
-                        </ul>
-                      ) : <span style={{ color: '#00E676', fontSize: 12 }}>SSL certificate setup looks healthy.</span>}
-                    </div>
-
-                    <div style={{ marginBottom: 16 }}>
-                      <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-muted)', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>DNS Safety Findings</span>
-                      {dnsResult.audit.dnsFindings && dnsResult.audit.dnsFindings.length > 0 ? (
-                        <ul style={{ margin: 0, paddingLeft: 16, color: 'var(--color-txt-secondary)', fontSize: 12, lineHeight: 1.4 }}>
-                          {dnsResult.audit.dnsFindings.map((f: string, i: number) => <li key={i}>{f}</li>)}
-                        </ul>
-                      ) : <span style={{ color: '#00E676', fontSize: 12 }}>Email anti-spoofing and security records present.</span>}
-                    </div>
-
-                    <div style={{ borderTop: '1px solid var(--color-border-main)', paddingTop: 12 }}>
-                      <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-muted)', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>AI Advice</span>
-                      <p style={{ margin: 0, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-muted)', lineHeight: 1.4 }}>
-                        {dnsResult.audit.advice}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Raw properties */}
-                  <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, padding: 20, boxShadow: '0 4px 24px rgba(124,58,237,0.07)' }}>
-                    <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--color-txt-primary)', margin: '0 0 12px' }}>DNS & TLS Details</h4>
-                    
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12, fontFamily: 'var(--font-mono)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.03)', paddingBottom: 6 }}>
-                        <span style={{ color: 'var(--color-txt-muted)' }}>SPF Record</span>
-                        <span style={{ color: 'var(--color-txt-primary)', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: 200, whiteSpace: 'nowrap' }} title={dnsResult.dnsInfo.spf}>
-                          {dnsResult.dnsInfo.spf}
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.03)', paddingBottom: 6 }}>
-                        <span style={{ color: 'var(--color-txt-muted)' }}>DMARC Record</span>
-                        <span style={{ color: 'var(--color-txt-primary)', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: 200, whiteSpace: 'nowrap' }} title={dnsResult.dnsInfo.dmarc}>
-                          {dnsResult.dnsInfo.dmarc}
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.03)', paddingBottom: 6 }}>
-                        <span style={{ color: 'var(--color-txt-muted)' }}>TLS Certificate Status</span>
-                        <span style={{ color: dnsResult.sslInfo.status === 'Valid' ? '#00E676' : '#FF1744' }}>{dnsResult.sslInfo.status}</span>
-                      </div>
-                      {dnsResult.sslInfo.status === 'Valid' && (
-                        <>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.03)', paddingBottom: 6 }}>
-                            <span style={{ color: 'var(--color-txt-muted)' }}>Issuer</span>
-                            <span style={{ color: 'var(--color-txt-primary)' }}>{dnsResult.sslInfo.issuer}</span>
-                          </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span style={{ color: 'var(--color-txt-muted)' }}>Expires On</span>
-                            <span style={{ color: 'var(--color-txt-primary)' }}>{new Date(dnsResult.sslInfo.validTo).toLocaleDateString()}</span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Connection Latency Diagnostics Card */}
-                  <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, padding: 20, boxShadow: '0 4px 24px rgba(124,58,237,0.07)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                      <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--color-txt-primary)', margin: 0 }}>Connection Timing Breakdown</h4>
-                      {!latencyResult && !latencyRunning && (
-                        <button
-                          onClick={handleRunDomainLatency}
-                          style={{
-                            background: 'transparent',
-                            border: '1px solid rgba(0,240,255,0.3)',
-                            color: 'var(--color-acid)',
-                            padding: '3px 8px',
-                            borderRadius: 3,
-                            fontSize: 10,
-                            fontFamily: 'var(--font-mono)',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          Run Timing Diagnostic
-                        </button>
-                      )}
-                    </div>
-
-                    {latencyRunning && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 0' }}>
-                        <span style={{ width: 10, height: 10, border: '2px solid var(--color-border-main)', borderTopColor: 'var(--color-acid)', borderRadius: '50%', animation: 'pg-spin 0.7s linear infinite', display: 'inline-block' }} />
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>Measuring TCP/TLS handshakes...</span>
-                      </div>
-                    )}
-
-                    {latencyError && (
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#FF1744', padding: '6px 0' }}>
-                        Error: {latencyError}
-                      </div>
-                    )}
-
-                    {latencyResult && latencyResult.success && latencyResult.timings && (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                        {/* Segmented Phase Bar */}
-                        <div style={{ display: 'flex', height: 6, borderRadius: 2, overflow: 'hidden', background: '#222', marginTop: 4 }}>
-                          {[
-                            { name: 'DNS', val: latencyResult.timings.dnsLookupMs, color: '#00E676' },
-                            { name: 'TCP', val: latencyResult.timings.tcpConnectMs, color: 'var(--color-acid)' },
-                            { name: 'TLS', val: latencyResult.timings.tlsHandshakeMs, color: '#00B0FF' },
-                            { name: 'TTFB', val: Math.max(0, latencyResult.timings.ttfbMs - (latencyResult.timings.dnsLookupMs + latencyResult.timings.tcpConnectMs + latencyResult.timings.tlsHandshakeMs)), color: '#FF007F' }
-                          ].map((seg, idx) => {
-                            const pct = latencyResult.timings.totalMs > 0 ? (seg.val / latencyResult.timings.totalMs) * 100 : 0;
-                            if (pct <= 0) return null;
-                            return (
-                              <div
-                                key={idx}
-                                style={{ width: `${pct}%`, backgroundColor: seg.color, height: '100%' }}
-                                title={`${seg.name}: ${seg.val}ms`}
-                              />
-                            );
-                          })}
-                        </div>
-
-                        {/* Legend Grid */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, fontSize: 11, fontFamily: 'var(--font-mono)' }}>
-                          {[
-                            { label: 'DNS Lookup', val: latencyResult.timings.dnsLookupMs, color: '#00E676' },
-                            { label: 'TCP Connection', val: latencyResult.timings.tcpConnectMs, color: 'var(--color-acid)' },
-                            { label: 'TLS Handshake', val: latencyResult.timings.tlsHandshakeMs, color: '#00B0FF' },
-                            { label: 'TTFB (First Byte)', val: latencyResult.timings.ttfbMs, color: '#FF007F' }
-                          ].map((leg) => (
-                            <div key={leg.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                <span style={{ width: 5, height: 5, borderRadius: '50%', backgroundColor: leg.color }} />
-                                <span style={{ color: 'var(--color-txt-muted)' }}>{leg.label}</span>
-                              </div>
-                              <span style={{ color: 'var(--color-txt-btn-primary)', fontWeight: 'bold' }}>{leg.val}ms</span>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--color-border-main)', paddingTop: 8, fontSize: 11, fontFamily: 'var(--font-mono)' }}>
-                          <span style={{ color: 'var(--color-txt-muted)' }}>Total Latency:</span>
-                          <span style={{ color: 'var(--color-acid)', fontWeight: 'bold' }}>{latencyResult.timings.totalMs}ms</span>
-                        </div>
-
-                        {latencyResult.advice && (
-                          <div style={{ background: 'var(--color-bg-card)', border: '1px solid rgba(0,240,255,0.15)', borderRadius: 3, padding: 8, fontSize: 11 }}>
-                            <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--color-acid)', marginBottom: 2 }}>AI SRE SUGGESTION</span>
-                            <p style={{ margin: 0, color: 'var(--color-txt-secondary)', lineHeight: 1.4 }}>{latencyResult.advice}</p>
-                          </div>
+                        <pre style={{ margin: 0, padding: 12, fontFamily: 'var(--font-mono)', fontSize: 11, color: '#00FF00', lineHeight: 1.4, overflowX: 'auto' }}>
+                          {patchResult.patch}
+                        </pre>
+                        {patchResult.explanation && (
+                          <p style={{ margin: '0', padding: '8px 12px', fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--color-txt-muted)', lineHeight: 1.4, borderTop: '1px solid rgba(0,240,255,0.1)' }}>
+                            {patchResult.explanation}
+                          </p>
                         )}
                       </div>
                     )}
                   </div>
-
                 </div>
               ) : (
-                <div style={{ background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(12px)', border: '1px dashed rgba(196,181,253,0.4)', borderRadius: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, textAlign: 'center', color: 'var(--color-txt-muted)', height: '100%' }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginBottom: 12 }}>
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM12 8v4M12 16h.01"/>
-                  </svg>
-                  <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, margin: 0 }}>Results will appear here after requesting lookup.</p>
-                </div>
+                <EmptyResult icon="code" text={t('play_results_empty')} />
               )}
             </div>
           </div>
         )}
 
-        {/* ── Tab 4: Hacking Simulator ── */}
-        {activeTab === 'hacking' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 32 }} className="playground-grid">
-            {/* Controls */}
-            <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, padding: 24, boxShadow: '0 4px 24px rgba(124,58,237,0.07)' }}>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--color-txt-primary)', margin: '0 0 20px' }}>Hacking & Safety Simulator</h3>
+        {/* ─── Tab 3: SSL & DNS ─── */}
+        {activeTab === 'dns' && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 24 }} className="playground-grid">
+            <div className="glass-card" style={{ padding: 24, borderRadius: 20 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--color-txt-primary)', margin: 0 }}>{t('play_tab_dns')}</h3>
+                {selectedMonitor?.url && (
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-brand-primary)', background: 'var(--color-brand-light)', padding: '2px 8px', borderRadius: 6 }}>
+                    {selectedMonitor.name}
+                  </span>
+                )}
+              </div>
 
-              {/* Target Selector */}
+              <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+                <span style={{ ...labelStyle, marginBottom: 0 }}>{t('play_load_preset')}</span>
+                {['github.com', 'google.com', 'vercel.com'].map(d => (
+                  <button key={d} onClick={() => setDomainInput(d)}
+                    style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '4px 8px', color: 'var(--color-brand-primary)', fontFamily: 'var(--font-mono)', fontSize: 9, cursor: 'pointer' }}>
+                    {d}
+                  </button>
+                ))}
+              </div>
+
               <div style={{ marginBottom: 20 }}>
-                <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)', textTransform: 'uppercase', marginBottom: 8 }}>
-                  Simulation Target
-                </label>
-                <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
-                  <button
-                    onClick={() => setHackTargetMode('custom')}
-                    style={{
-                      flex: 1,
-                      height: 34,
-                      background: hackTargetMode === 'custom' ? 'var(--color-border-main)' : 'transparent',
-                      border: '1px solid var(--color-border-main)',
-                      color: hackTargetMode === 'custom' ? 'var(--color-txt-primary)' : 'var(--color-txt-muted)',
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 11,
-                      borderRadius: 3,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Custom URL
-                  </button>
-                  <button
-                    onClick={() => {
-                      setHackTargetMode('monitor');
-                      if (monitors.length > 0 && !selectedMonitorId) {
-                        setSelectedMonitorId(monitors[0].id);
-                      }
-                    }}
-                    style={{
-                      flex: 1,
-                      height: 34,
-                      background: hackTargetMode === 'monitor' ? 'var(--color-border-main)' : 'transparent',
-                      border: '1px solid var(--color-border-main)',
-                      color: hackTargetMode === 'monitor' ? 'var(--color-txt-primary)' : 'var(--color-txt-muted)',
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 11,
-                      borderRadius: 3,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    My Projects
-                  </button>
-                </div>
+                <label style={labelStyle}>Dominio</label>
+                <input type="text" value={domainInput} onChange={e => setDomainInput(e.target.value)}
+                  placeholder="dominio.com" style={inputStyle} />
+              </div>
 
-                {hackTargetMode === 'custom' ? (
-                  <input
-                    type="text"
-                    value={customHackUrl}
-                    onChange={(e) => setCustomHackUrl(e.target.value)}
-                    placeholder="https://api.domain.com/auth"
-                    style={{
-                      width: '100%',
-                      background: 'var(--color-bg-base)',
-                      border: '1px solid var(--color-border-main)',
-                      color: 'var(--color-txt-primary)',
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 12,
-                      padding: '0 12px',
-                      borderRadius: 3,
-                      height: 40
-                    }}
-                  />
-                ) : (
-                  <select
-                    value={selectedMonitorId}
-                    onChange={(e) => setSelectedMonitorId(e.target.value)}
-                    style={{
-                      width: '100%',
-                      background: 'var(--color-bg-base)',
-                      border: '1px solid var(--color-border-main)',
-                      color: 'var(--color-txt-primary)',
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 12,
-                      padding: '0 12px',
-                      borderRadius: 3,
-                      height: 40
-                    }}
-                  >
-                    {loadingMonitors ? (
-                      <option>Loading monitors...</option>
-                    ) : monitors.length === 0 ? (
-                      <option>No monitors available</option>
-                    ) : (
-                      monitors.map(m => (
-                        <option key={m.id} value={m.id}>{m.name} ({m.url})</option>
-                      ))
+              {dnsError && <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid #DC2626', borderRadius: 8, color: '#DC2626', padding: '10px 12px', fontSize: 12, fontFamily: 'var(--font-mono)', marginBottom: 16 }}>⚠ {dnsError}</div>}
+
+              <button onClick={handleRunDns} disabled={dnsRunning} className="btn-solid-glow" style={{ width: '100%', height: 42, fontSize: 13, borderRadius: 12, justifyContent: 'center' }}>
+                {dnsRunning ? t('play_running_dns') : t('play_run_dns')}
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {dnsResult ? (
+                <>
+                  <div className="glass-card" style={{ padding: 20, borderRadius: 20 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: 'var(--color-txt-primary)' }}>Network Posture Audit</span>
+                      <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(0,240,255,0.08)', border: '2px solid var(--color-acid)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 18, fontFamily: 'var(--font-mono)', color: 'var(--color-acid)' }}>
+                        {dnsResult.audit.securityScore}
+                      </div>
+                    </div>
+                    {[
+                      { label: 'SSL', items: dnsResult.audit.sslFindings, ok: 'SSL en buen estado.' },
+                      { label: 'DNS', items: dnsResult.audit.dnsFindings, ok: 'Registros de seguridad de email presentes.' },
+                    ].map(s => (
+                      <div key={s.label} style={{ marginBottom: 12 }}>
+                        <span style={{ ...labelStyle, marginBottom: 4 }}>Hallazgos {s.label}</span>
+                        {s.items?.length > 0 ? (
+                          <ul style={{ margin: 0, paddingLeft: 16, color: 'var(--color-txt-secondary)', fontSize: 11, lineHeight: 1.5 }}>
+                            {s.items.map((f: string, i: number) => <li key={i}>{f}</li>)}
+                          </ul>
+                        ) : <span style={{ color: '#16A34A', fontSize: 11 }}>✓ {s.ok}</span>}
+                      </div>
+                    ))}
+                    <div style={{ borderTop: '1px solid var(--color-border-main)', paddingTop: 10 }}>
+                      <span style={{ ...labelStyle, marginBottom: 4 }}>Consejo IA</span>
+                      <p style={{ margin: 0, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-muted)', lineHeight: 1.5 }}>{dnsResult.audit.advice}</p>
+                    </div>
+                  </div>
+
+                  <div className="glass-card" style={{ padding: 20, borderRadius: 20 }}>
+                    <span style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 700, color: 'var(--color-txt-primary)', display: 'block', marginBottom: 12 }}>DNS & TLS</span>
+                    {[
+                      { label: 'SPF', value: dnsResult.dnsInfo.spf },
+                      { label: 'DMARC', value: dnsResult.dnsInfo.dmarc },
+                      { label: 'TLS Status', value: dnsResult.sslInfo.status, color: dnsResult.sslInfo.status === 'Valid' ? '#16A34A' : '#DC2626' },
+                      dnsResult.sslInfo.status === 'Valid' && { label: 'Emisor', value: dnsResult.sslInfo.issuer },
+                      dnsResult.sslInfo.status === 'Valid' && { label: 'Vence', value: new Date(dnsResult.sslInfo.validTo).toLocaleDateString() },
+                    ].filter(Boolean).map((row: any) => (
+                      <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', fontSize: 11, fontFamily: 'var(--font-mono)' }}>
+                        <span style={{ color: 'var(--color-txt-muted)' }}>{row.label}</span>
+                        <span style={{ color: row.color ?? 'var(--color-txt-primary)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={row.value}>{row.value || '—'}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="glass-card" style={{ padding: 20, borderRadius: 20 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 700, color: 'var(--color-txt-primary)' }}>Desglose de conexión</span>
+                      {!latencyResult && !latencyRunning && (
+                        <button onClick={handleRunDomainLatency}
+                          style={{ background: 'transparent', border: '1px solid rgba(0,240,255,0.3)', color: 'var(--color-acid)', padding: '3px 10px', borderRadius: 6, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
+                          Ejecutar timing
+                        </button>
+                      )}
+                    </div>
+                    {latencyRunning && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>Midiendo TCP/TLS...</div>}
+                    {latencyError && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#DC2626' }}>⚠ {latencyError}</div>}
+                    {latencyResult?.success && latencyResult.timings && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        <div style={{ display: 'flex', height: 6, borderRadius: 4, overflow: 'hidden', background: '#222' }}>
+                          {[
+                            { name: 'DNS', val: latencyResult.timings.dnsLookupMs, color: '#16A34A' },
+                            { name: 'TCP', val: latencyResult.timings.tcpConnectMs, color: 'var(--color-acid)' },
+                            { name: 'TLS', val: latencyResult.timings.tlsHandshakeMs, color: '#00B0FF' },
+                            { name: 'TTFB', val: Math.max(0, latencyResult.timings.ttfbMs - latencyResult.timings.dnsLookupMs - latencyResult.timings.tcpConnectMs - latencyResult.timings.tlsHandshakeMs), color: '#FF007F' },
+                          ].map((s, i) => {
+                            const pct = latencyResult.timings.totalMs > 0 ? (s.val / latencyResult.timings.totalMs) * 100 : 0;
+                            return pct > 0 ? <div key={i} style={{ width: `${pct}%`, backgroundColor: s.color }} title={`${s.name}: ${s.val}ms`} /> : null;
+                          })}
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6, fontSize: 11, fontFamily: 'var(--font-mono)' }}>
+                          {[
+                            { label: 'DNS', val: latencyResult.timings.dnsLookupMs, color: '#16A34A' },
+                            { label: 'TCP', val: latencyResult.timings.tcpConnectMs, color: 'var(--color-acid)' },
+                            { label: 'TLS', val: latencyResult.timings.tlsHandshakeMs, color: '#00B0FF' },
+                            { label: 'TTFB', val: latencyResult.timings.ttfbMs, color: '#FF007F' },
+                          ].map(l => (
+                            <div key={l.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                              <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--color-txt-muted)' }}>
+                                <span style={{ width: 5, height: 5, borderRadius: '50%', backgroundColor: l.color }} />
+                                {l.label}
+                              </span>
+                              <span style={{ fontWeight: 700, color: 'var(--color-txt-primary)' }}>{l.val}ms</span>
+                            </div>
+                          ))}
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--color-border-main)', paddingTop: 8, fontSize: 11, fontFamily: 'var(--font-mono)' }}>
+                          <span style={{ color: 'var(--color-txt-muted)' }}>Total</span>
+                          <span style={{ color: 'var(--color-acid)', fontWeight: 800 }}>{latencyResult.timings.totalMs}ms</span>
+                        </div>
+                        {latencyResult.advice && (
+                          <div style={{ background: 'rgba(0,240,255,0.04)', border: '1px solid rgba(0,240,255,0.15)', borderRadius: 8, padding: 10 }}>
+                            <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--color-acid)', marginBottom: 3 }}>CONSEJO IA SRE</span>
+                            <p style={{ margin: 0, fontSize: 11, color: 'var(--color-txt-secondary)', lineHeight: 1.4 }}>{latencyResult.advice}</p>
+                          </div>
+                        )}
+                      </div>
                     )}
+                    {!latencyResult && !latencyRunning && !latencyError && (
+                      <p style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>
+                        Ejecutá el timing para ver el desglose de DNS, TCP, TLS y TTFB.
+                      </p>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <EmptyResult icon="shield" text={t('play_results_empty')} />
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ─── Tab 4: Attack Simulator ─── */}
+        {activeTab === 'hacking' && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 24 }} className="playground-grid">
+            <div className="glass-card" style={{ padding: 24, borderRadius: 20 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--color-txt-primary)', margin: 0 }}>{t('play_tab_hack')}</h3>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#16A34A', background: 'rgba(22,163,74,0.1)', border: '1px solid rgba(22,163,74,0.3)', padding: '2px 8px', borderRadius: 6 }}>
+                  ✓ SAFE — solo lectura
+                </span>
+              </div>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-txt-muted)', margin: '0 0 20px', lineHeight: 1.5 }}>
+                Envía payloads de prueba contra la URL objetivo y analiza la respuesta con Gemini IA. No modifica datos — solo testea headers y comportamiento del servidor.
+              </p>
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={labelStyle}>URL Objetivo</label>
+                <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                  {[{ id: 'custom', label: t('play_custom_url') }, { id: 'monitor', label: t('play_my_projects') }].map(m => (
+                    <button key={m.id} onClick={() => {
+                      setHackTargetMode(m.id as 'monitor' | 'custom');
+                      if (m.id === 'monitor' && monitors.length > 0 && !selectedMonitorId) setSelectedMonitorId(monitors[0].id);
+                    }}
+                      style={{ flex: 1, height: 32, background: hackTargetMode === m.id ? 'var(--color-brand-light)' : 'transparent', border: `1px solid ${hackTargetMode === m.id ? 'var(--color-brand-mid)' : 'var(--color-border-main)'}`, color: hackTargetMode === m.id ? 'var(--color-brand-primary)' : 'var(--color-txt-muted)', fontFamily: 'var(--font-mono)', fontSize: 10, borderRadius: 8, cursor: 'pointer' }}>
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
+                {hackTargetMode === 'custom' ? (
+                  <input type="text" value={customHackUrl} onChange={e => setCustomHackUrl(e.target.value)} placeholder="https://api.dominio.com/auth" style={inputStyle} />
+                ) : (
+                  <select value={selectedMonitorId} onChange={e => setSelectedMonitorId(e.target.value)} style={inputStyle}>
+                    {monitors.length === 0 ? <option>Sin monitores</option> : monitors.map(m => <option key={m.id} value={m.id}>{m.name} {m.url ? `(${m.url.replace('https://', '')})` : ''}</option>)}
                   </select>
                 )}
               </div>
 
-              {/* Vector Selector */}
               <div style={{ marginBottom: 20 }}>
-                <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)', textTransform: 'uppercase', marginBottom: 8 }}>
-                  Attack Vector (Simulation Type)
-                </label>
-                <select
-                  value={attackVector}
-                  onChange={(e) => setAttackVector(e.target.value)}
-                  style={{
-                    width: '100%',
-                    background: 'var(--color-bg-base)',
-                    border: '1px solid var(--color-border-main)',
-                    color: 'var(--color-txt-primary)',
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 12,
-                    padding: '0 12px',
-                    borderRadius: 3,
-                    height: 40
-                  }}
-                >
-                  <option value="sqli">SQL Injection Probe</option>
-                  <option value="xss">Reflected XSS Probe</option>
-                  <option value="rate-limit">Rate Limiting Stress Test (DOS)</option>
-                  <option value="sensitive-path">Sensitive Path Traversal (expose .env)</option>
-                </select>
+                <label style={labelStyle}>Vector de ataque</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  {[
+                    { id: 'sqli', label: 'SQL Injection', desc: 'Inyección en query params', color: '#FF5252' },
+                    { id: 'xss', label: 'XSS Reflejado', desc: 'Payloads en query strings', color: '#FFB300' },
+                    { id: 'rate-limit', label: 'Rate Limit (DOS)', desc: 'Ráfaga de 5 peticiones', color: '#FF1744' },
+                    { id: 'sensitive-path', label: 'Path Traversal', desc: 'Rutas sensibles (.env, /admin)', color: '#7C3AED' },
+                  ].map(v => (
+                    <button key={v.id} onClick={() => setAttackVector(v.id)}
+                      style={{ padding: '10px 12px', borderRadius: 10, textAlign: 'left', border: `1px solid ${attackVector === v.id ? v.color : 'var(--color-border-main)'}`, background: attackVector === v.id ? `${v.color}15` : 'transparent', cursor: 'pointer', transition: 'all 0.15s' }}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, color: attackVector === v.id ? v.color : 'var(--color-txt-primary)', marginBottom: 2 }}>{v.label}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)' }}>{v.desc}</div>
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              {hackError && (
-                <div style={{ background: 'rgba(255,23,68,0.08)', border: '1px solid #FF1744', borderRadius: 3, color: '#FF1744', padding: 12, fontSize: 12, fontFamily: 'var(--font-mono)', marginBottom: 20 }}>
-                  Error: {hackError}
-                </div>
-              )}
+              {hackError && <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid #DC2626', borderRadius: 8, color: '#DC2626', padding: '10px 12px', fontSize: 12, fontFamily: 'var(--font-mono)', marginBottom: 16 }}>⚠ {hackError}</div>}
 
-              <button
-                onClick={handleRunHacking}
-                disabled={hackRunning}
-                className="btn-strict-primary"
-                style={{ width: '100%', height: 42, fontSize: 13, background: 'linear-gradient(135deg,#DC2626,#7C3AED)', border: 'none', color: 'white', fontWeight: 'bold' }}
-                onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.9'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
-              >
-                {hackRunning ? 'Simulating Attack Vector...' : '⚡ Launch Simulation'}
+              <button onClick={handleRunHacking} disabled={hackRunning}
+                style={{ width: '100%', height: 44, background: 'linear-gradient(135deg,#DC2626,#7C3AED)', border: 'none', color: 'white', fontWeight: 800, fontSize: 13, borderRadius: 12, cursor: hackRunning ? 'not-allowed' : 'pointer', opacity: hackRunning ? 0.7 : 1, fontFamily: 'var(--font-display)', letterSpacing: '-0.01em' }}>
+                {hackRunning ? t('play_running_hack') : `⚡ ${t('play_run_hack')}`}
               </button>
             </div>
 
-            {/* Console log & AI diagnostic */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-              
-              {/* Terminal Logs */}
-              <div style={{ background: '#0F0A1E', border: '1px solid rgba(196,181,253,0.2)', borderRadius: 16, padding: 16, height: 180, display: 'flex', flexDirection: 'column', gap: 6, overflowY: 'auto' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--color-border-main)', paddingBottom: 6, marginBottom: 4 }}>
-                  <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-muted)', textTransform: 'uppercase' }}>Simulation Console Logs</span>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: hackRunning ? '#FF1744' : '#00E676', display: 'inline-block', animation: hackRunning ? 'pg-pulse 1s infinite' : 'none' }}></span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ background: '#080415', border: '1px solid rgba(124,58,237,0.25)', borderRadius: 16, padding: 16, height: 200, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, borderBottom: '1px solid rgba(124,58,237,0.15)', paddingBottom: 8 }}>
+                  <span style={{ fontSize: 9, fontFamily: 'var(--font-mono)', color: 'rgba(196,181,253,0.6)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Console</span>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: hackRunning ? '#FF1744' : '#16A34A', animation: hackRunning ? 'pg-pulse 1s infinite' : 'none' }} />
                 </div>
-                {hackLogs.length === 0 ? (
-                  <p style={{ color: 'var(--color-txt-muted)', fontFamily: 'var(--font-mono)', fontSize: 11, margin: 0 }}>Console idle. Launch an attack vector to begin probing.</p>
-                ) : (
-                  hackLogs.map((log, idx) => (
-                    <div key={idx} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: log.includes('[ERROR]') ? '#FF1744' : 'var(--color-txt-secondary)', lineHeight: 1.4 }}>
-                      {log}
-                    </div>
-                  ))
-                )}
+                <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {hackLogs.length === 0 ? (
+                    <span style={{ color: 'rgba(196,181,253,0.4)', fontFamily: 'var(--font-mono)', fontSize: 11 }}>{'>'} Console idle. Lanzá una simulación para comenzar.</span>
+                  ) : (
+                    hackLogs.map((log, idx) => (
+                      <div key={idx} style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: log.includes('[ERROR]') ? '#FF5252' : 'rgba(196,181,253,0.8)', lineHeight: 1.4 }}>
+                        {log}
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
 
-              {/* AI diagnostic report */}
               {hackResult ? (
                 (() => {
                   const uiStyle = getStatusStyle(hackResult.analysis.isVulnerable);
                   return (
-                    <div style={{ background: 'var(--color-bg-card)', border: `1px solid ${uiStyle.border}`, borderRadius: 3, padding: 24 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifySelf: 'start', gap: 12, marginBottom: 16 }}>
-                        <span style={{
-                          fontFamily: 'var(--font-mono)',
-                          fontSize: 11,
-                          fontWeight: 700,
-                          color: '#000',
-                          background: uiStyle.color,
-                          padding: '3px 8px',
-                          borderRadius: 2
-                        }}>
+                    <div style={{ background: 'var(--color-bg-card)', border: `2px solid ${uiStyle.border}`, borderRadius: 20, padding: 20 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700, color: '#000', background: uiStyle.color, padding: '3px 10px', borderRadius: 6 }}>
                           {uiStyle.label}
                         </span>
-                        <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 15, color: 'var(--color-txt-primary)', margin: 0 }}>Gemini AI Diagnostics</h4>
+                        <span style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: 'var(--color-txt-primary)' }}>Gemini AI Diagnóstico</span>
                       </div>
-
-                      <div style={{ marginBottom: 12, fontSize: 12, fontFamily: 'var(--font-mono)' }}>
-                        <span style={{ color: 'var(--color-txt-muted)', display: 'block', textTransform: 'uppercase', fontSize: 9, marginBottom: 4 }}>Server Diagnosis</span>
-                        <p style={{ margin: 0, color: 'var(--color-txt-primary)', lineHeight: 1.4 }}>
-                          {hackResult.analysis.diagnosis}
-                        </p>
-                      </div>
-
-                      <div>
-                        <span style={{ color: 'var(--color-txt-muted)', display: 'block', textTransform: 'uppercase', fontSize: 9, marginBottom: 4 }}>Actionable Mitigations</span>
-                        <p style={{ margin: 0, color: 'var(--color-txt-muted)', fontSize: 12, lineHeight: 1.4, fontFamily: 'var(--font-mono)' }}>
-                          {hackResult.analysis.mitigation}
-                        </p>
-                      </div>
+                      <p style={labelStyle}>Diagnóstico del servidor</p>
+                      <p style={{ margin: '0 0 14px', color: 'var(--color-txt-primary)', fontSize: 12, lineHeight: 1.5, fontFamily: 'var(--font-mono)' }}>{hackResult.analysis.diagnosis}</p>
+                      <p style={labelStyle}>Mitigaciones recomendadas</p>
+                      <p style={{ margin: 0, color: 'var(--color-txt-muted)', fontSize: 11, lineHeight: 1.5, fontFamily: 'var(--font-mono)' }}>{hackResult.analysis.mitigation}</p>
                     </div>
                   );
                 })()
               ) : (
-                <div style={{ flex: 1, border: '1px dashed var(--color-border-main)', borderRadius: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 30, textAlign: 'center', color: 'var(--color-txt-muted)' }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginBottom: 10 }}>
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                  </svg>
-                  <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, margin: 0 }}>Diagnostic report will display here after simulation completes.</p>
-                </div>
+                <EmptyResult icon="shield" text="El reporte de IA aparecerá aquí después de la simulación." />
               )}
-
             </div>
           </div>
         )}
 
       </div>
+    </div>
+  );
+}
 
+function EmptyResult({ icon, text }: { icon: 'wave' | 'code' | 'shield'; text: string }) {
+  const icons = {
+    wave: <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>,
+    code: <><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></>,
+    shield: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>,
+  };
+  return (
+    <div style={{ background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(12px)', border: '1px dashed rgba(196,181,253,0.35)', borderRadius: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 48, textAlign: 'center', color: 'var(--color-txt-muted)', height: '100%', minHeight: 200 }}>
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginBottom: 12, opacity: 0.4 }}>
+        {icons[icon]}
+      </svg>
+      <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, margin: 0, opacity: 0.7 }}>{text}</p>
     </div>
   );
 }

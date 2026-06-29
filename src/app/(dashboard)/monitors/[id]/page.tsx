@@ -369,7 +369,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
     try {
       const gToken = ghTokenHelper.get() ?? '';
       if (!gToken) { showToast('GitHub account not connected. Go to Settings → Integrations.', 'error'); return; }
-      await api.monitors.scanRepo(id, token, gToken);
+      await api.monitors.scanRepo(id, token, gToken, true);
       await load(token);
       showToast('GitHub scan completed successfully');
     } catch (e: any) {

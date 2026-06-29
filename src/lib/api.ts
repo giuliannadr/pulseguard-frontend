@@ -152,8 +152,8 @@ export const api = {
     securityIncidents: (id: string, token: string) => apiFetch<SecurityIncident[]>(`/monitors/${id}/security-incidents`, token),
     checkNow:(id: string, token: string) =>
                apiFetch<Check>(`/monitors/${id}/check-now`, token, { method: 'POST' }),
-    scanRepo: (id: string, token: string, ghToken: string) =>
-               apiFetch<any>(`/monitors/${id}/scan-repo`, token, { method: 'POST', headers: { 'x-github-token': ghToken } }),
+    scanRepo: (id: string, token: string, ghToken: string, force = false) =>
+               apiFetch<any>(`/monitors/${id}/scan-repo${force ? '?force=true' : ''}`, token, { method: 'POST', headers: { 'x-github-token': ghToken } }),
     downtime: (id: string, token: string) => apiFetch<DowntimeWindow[]>(`/monitors/${id}/downtime`, token),
   },
   github: {
