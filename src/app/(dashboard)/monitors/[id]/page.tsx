@@ -791,6 +791,9 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
         </div>
       </div>
 
+      {/* Alerts / Notifications */}
+      {token && <AlertsPanel monitor={monitor} token={token} onUpdate={setMonitor} />}
+
       {/* Metrics */}
       {monitor.url && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }} className="metrics-deck">
@@ -1099,9 +1102,6 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
           )}
         </div>
       )}
-
-      {/* Alerts / Notifications */}
-      {token && <AlertsPanel monitor={monitor} token={token} onUpdate={setMonitor} />}
 
       {/* Check log */}
       {checks.length > 0 && (
