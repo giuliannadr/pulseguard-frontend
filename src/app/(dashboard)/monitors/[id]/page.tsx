@@ -435,11 +435,52 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
   }
 
   if (loading) {
+    const Bone = ({ w = '100%', h = 14, r = 4 }: { w?: string | number; h?: number; r?: number }) => (
+      <div style={{ width: w, height: h, borderRadius: r, flexShrink: 0, background: 'linear-gradient(90deg,rgba(255,255,255,0.06) 25%,rgba(255,255,255,0.12) 50%,rgba(255,255,255,0.06) 75%)', backgroundSize: '200% 100%', animation: 'skeleton-shimmer 1.4s ease-in-out infinite' }} />
+    );
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {[80, 120, 280].map((h) => (
-          <div key={h} style={{ height: h, background: 'var(--color-bg-card)', borderRadius: 3, opacity: 0.5 }} />
-        ))}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <Bone w={220} h={28} r={6} />
+            <Bone w={160} h={13} />
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <Bone w={80} h={34} r={4} />
+            <Bone w={80} h={34} r={4} />
+          </div>
+        </div>
+        {/* Stats row */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }}>
+          {[...Array(4)].map((_, i) => (
+            <div key={i} style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <Bone w="50%" h={11} />
+              <Bone w="70%" h={24} r={6} />
+            </div>
+          ))}
+        </div>
+        {/* Chart */}
+        <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '24px 20px' }}>
+          <div style={{ marginBottom: 20 }}><Bone w={140} h={14} /></div>
+          <Bone w="100%" h={160} r={6} />
+        </div>
+        {/* Incidents */}
+        <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '20px' }}>
+          <Bone w={160} h={14} r={4} />
+          <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {[...Array(3)].map((_, i) => (
+              <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '14px 0', borderBottom: '1px solid var(--color-border-main)' }}>
+                <Bone w={10} h={10} r={5} />
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <Bone w="60%" h={12} />
+                  <Bone w="30%" h={9} />
+                </div>
+                <Bone w={60} h={22} r={11} />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

@@ -185,6 +185,57 @@ export default function ImportPage() {
         ))}
       </div>
 
+      {/* Quick presets */}
+      {(() => {
+        const presets: { label: string; name: string; url: string }[] = [
+          { label: 'Vercel App',    name: 'Mi App',       url: 'https://mi-app.vercel.app' },
+          { label: 'Railway API',   name: 'API Backend',  url: 'https://api.railway.app' },
+          { label: 'Supabase',      name: 'Supabase DB',  url: 'https://app.supabase.com' },
+          { label: 'GitHub Pages',  name: 'Mi Sitio',     url: 'https://usuario.github.io' },
+          { label: 'Custom API',    name: 'API REST',     url: 'https://api.dominio.com/health' },
+        ];
+        return (
+          <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, padding: '16px 24px', boxShadow: '0 4px 24px rgba(124,58,237,0.06)', marginBottom: 4 }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)', margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              Quick presets
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {presets.map(p => (
+                <button
+                  key={p.label}
+                  type="button"
+                  onClick={() => { setName(p.name); setUrl(p.url); }}
+                  style={{
+                    background: 'rgba(124,58,237,0.08)',
+                    border: '1px solid rgba(124,58,237,0.22)',
+                    borderRadius: 999,
+                    padding: '5px 14px',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: 'var(--color-brand-primary)',
+                    cursor: 'pointer',
+                    transition: 'background 0.15s, border-color 0.15s',
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLButtonElement).style.background = 'linear-gradient(135deg,#7C3AED,#2563EB)';
+                    (e.currentTarget as HTMLButtonElement).style.color = 'white';
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = 'transparent';
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLButtonElement).style.background = 'rgba(124,58,237,0.08)';
+                    (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-brand-primary)';
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(124,58,237,0.22)';
+                  }}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       <form onSubmit={handleImport} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
         {/* Name — always shown */}

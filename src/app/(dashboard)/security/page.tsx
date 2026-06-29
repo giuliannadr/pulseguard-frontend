@@ -138,6 +138,8 @@ export default function SecurityPage() {
     return 'var(--color-txt-muted)';
   };
 
+  if (loading) return <SecuritySkeleton />;
+
   return (
     <div style={{ width: '100%', animation: 'pg-fade-in 0.35s ease-out both' }}>
 
@@ -345,6 +347,55 @@ export default function SecurityPage() {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function Bone({ w = '100%', h = 16, r = 8 }: { w?: string | number; h?: number; r?: number }) {
+  return (
+    <div style={{
+      width: w, height: h, borderRadius: r, flexShrink: 0,
+      background: 'linear-gradient(90deg, var(--color-bg-card-hover) 25%, var(--color-border-main) 50%, var(--color-bg-card-hover) 75%)',
+      backgroundSize: '200% 100%',
+      animation: 'skeleton-shimmer 1.4s ease-in-out infinite',
+    }} />
+  );
+}
+
+function SecuritySkeleton() {
+  return (
+    <div style={{ width: '100%' }}>
+      <style>{`@keyframes skeleton-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }`}</style>
+      <div style={{ marginBottom: 32 }}>
+        <Bone w={100} h={10} r={4} />
+        <div style={{ height: 8 }} />
+        <Bone w={260} h={28} r={6} />
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 28 }}>
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="glass-card" style={{ padding: 20, borderRadius: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <Bone w="50%" h={10} r={4} />
+            <Bone w="35%" h={28} r={6} />
+          </div>
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+        {[...Array(5)].map((_, i) => <Bone key={i} w={80} h={32} r={20} />)}
+      </div>
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="glass-card" style={{ padding: 20, borderRadius: 20, marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', gap: 8, flex: 1 }}>
+              <Bone w={60} h={22} r={6} />
+              <Bone w="40%" h={22} r={6} />
+            </div>
+            <Bone w={80} h={32} r={16} />
+          </div>
+          <Bone w="90%" h={12} r={4} />
+          <Bone w="70%" h={12} r={4} />
+          <Bone w="100%" h={48} r={8} />
+        </div>
+      ))}
     </div>
   );
 }
