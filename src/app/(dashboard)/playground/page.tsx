@@ -629,11 +629,51 @@ export default function PlaygroundPage() {
 
             <div>
               {scan.status === 'scanning' && codeSourceMode === 'repo' && (
-                <div style={{ background: 'rgba(217,119,6,0.08)', border: '1px solid rgba(217,119,6,0.3)', borderRadius: 16, padding: '16px 20px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#D97706', flexShrink: 0, animation: 'pg-pulse 1.2s ease-in-out infinite' }} />
-                  <div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#D97706', fontWeight: 700 }}>Analizando commits con Gemini IA...</div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)', marginTop: 3 }}>Podés navegar a otra sección — el análisis continúa en segundo plano.</div>
+                <div style={{ background: 'rgba(217,119,6,0.05)', border: '1px solid rgba(217,119,6,0.25)', borderRadius: 20, padding: '20px 24px', marginBottom: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#D97706', flexShrink: 0, animation: 'pg-pulse 1.2s ease-in-out infinite' }} />
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#D97706', fontWeight: 700 }}>Analizando commits con Gemini IA...</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {['Obteniendo diffs de GitHub', 'Enviando a Gemini para análisis de seguridad', 'Guardando resultados en la base de datos'].map((step, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'rgba(217,119,6,0.4)', flexShrink: 0 }} />
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)' }}>{step}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', margin: '12px 0 0', opacity: 0.7 }}>
+                    Podés navegar a otra sección — el análisis continúa en segundo plano.
+                  </p>
+                </div>
+              )}
+              {scan.status === 'done' && codeSourceMode === 'repo' && !codeResult && (
+                <div style={{ background: 'rgba(22,163,74,0.05)', border: '1px solid rgba(22,163,74,0.25)', borderRadius: 20, padding: '28px 24px', textAlign: 'center' }}>
+                  <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(22,163,74,0.1)', border: '2px solid #16A34A', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 800, color: '#16A34A', marginBottom: 6 }}>
+                    Análisis completado
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)', marginBottom: 18, lineHeight: 1.5 }}>
+                    {scan.count > 0
+                      ? `${scan.count} commit${scan.count !== 1 ? 's' : ''} analizados y guardados.`
+                      : 'Todos los commits ya estaban analizados.'}
+                    <br />Revisá los resultados en la sección de Seguridad del monitor.
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+                    {monitors.find(m => m.id === selectedRepoId) && (
+                      <a href={`/monitors/${selectedRepoId}`}
+                        style={{ textDecoration: 'none', background: 'rgba(22,163,74,0.1)', border: '1px solid rgba(22,163,74,0.3)', color: '#16A34A', padding: '8px 16px', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 11, cursor: 'pointer' }}>
+                        Ver monitor →
+                      </a>
+                    )}
+                    <button onClick={() => { setCodeResult(null); }}
+                      style={{ background: 'transparent', border: '1px solid var(--color-border-main)', color: 'var(--color-txt-muted)', padding: '8px 16px', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 11, cursor: 'pointer' }}>
+                      Nuevo análisis
+                    </button>
                   </div>
                 </div>
               )}

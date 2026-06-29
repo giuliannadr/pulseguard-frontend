@@ -120,6 +120,10 @@ export default function DashboardPage() {
     .sort((a, b) => new Date(b.checkedAt).getTime() - new Date(a.checkedAt).getTime())
     .slice(0, 8);
 
+  if (loading) {
+    return <DashboardSkeleton />;
+  }
+
   if (!loading && monitors.length === 0) {
     return (
       <div style={{ width: '100%', animation: 'pg-fade-in 0.35s ease-out both' }}>
@@ -421,6 +425,97 @@ export default function DashboardPage() {
         </div>
       </div>
 
+    </div>
+  );
+}
+
+function Bone({ w = '100%', h = 16, r = 8, style }: { w?: string | number; h?: number; r?: number; style?: React.CSSProperties }) {
+  return (
+    <div style={{
+      width: w, height: h, borderRadius: r,
+      background: 'linear-gradient(90deg, var(--color-bg-card-hover) 25%, var(--color-border-main) 50%, var(--color-bg-card-hover) 75%)',
+      backgroundSize: '200% 100%',
+      animation: 'skeleton-shimmer 1.4s ease-in-out infinite',
+      flexShrink: 0,
+      ...style,
+    }} />
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div style={{ width: '100%' }}>
+      <style>{`
+        @keyframes skeleton-shimmer {
+          0%   { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+      `}</style>
+
+      {/* Header */}
+      <div style={{ marginBottom: 28 }}>
+        <Bone w={80} h={10} r={4} style={{ marginBottom: 10 }} />
+        <Bone w={220} h={28} r={6} />
+      </div>
+
+      {/* Stats row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 32 }}>
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="glass-card" style={{ padding: 20, borderRadius: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <Bone w="60%" h={10} r={4} />
+            <Bone w="40%" h={28} r={6} />
+            <Bone w="80%" h={8} r={4} />
+          </div>
+        ))}
+      </div>
+
+      {/* Section header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <Bone w={160} h={14} r={4} />
+        <Bone w={80} h={14} r={4} />
+      </div>
+
+      {/* Monitor cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16, marginBottom: 32 }}>
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="glass-card" style={{ padding: 20, borderRadius: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
+                <Bone w="55%" h={14} r={4} />
+                <Bone w="70%" h={10} r={4} />
+              </div>
+              <Bone w={52} h={22} r={6} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
+              {[...Array(3)].map((_, j) => (
+                <div key={j} style={{ background: 'var(--color-bg-card-hover)', borderRadius: 10, padding: '10px 8px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <Bone w="50%" h={8} r={3} />
+                  <Bone w="70%" h={16} r={4} />
+                </div>
+              ))}
+            </div>
+            <Bone w="100%" h={6} r={3} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Bone w={60} h={10} r={4} />
+              <div style={{ display: 'flex', gap: 6 }}>
+                <Bone w={28} h={28} r={8} />
+                <Bone w={28} h={28} r={8} />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Incidents section */}
+      <div className="glass-card" style={{ padding: 20, borderRadius: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <Bone w={140} h={12} r={4} style={{ marginBottom: 6 }} />
+        {[...Array(3)].map((_, i) => (
+          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'var(--color-bg-card-hover)', borderRadius: 10 }}>
+            <Bone w="30%" h={10} r={4} />
+            <Bone w="20%" h={10} r={4} />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
