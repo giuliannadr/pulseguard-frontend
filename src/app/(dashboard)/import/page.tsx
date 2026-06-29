@@ -112,7 +112,7 @@ export default function ImportPage() {
     setImporting(true);
 
     try {
-      const monitorName = name.trim() || selectedRepo?.name || new URL(url).hostname;
+      const monitorName = name.trim() || selectedRepo?.name || (url ? new URL(url).hostname : 'Monitor');
 
       // Create monitor (url is optional for repo-only mode)
       const savedWebhook = typeof window !== 'undefined' ? localStorage.getItem('pg_webhook_url') ?? undefined : undefined;

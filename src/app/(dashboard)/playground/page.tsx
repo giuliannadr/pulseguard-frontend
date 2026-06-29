@@ -175,8 +175,6 @@ export default function PlaygroundPage() {
           return { count: result.count ?? 0 };
         } finally {
           setCodeRunning(false);
-          // reload incidents if still on page
-          setCodeResult({ findings: [], recommendations: 'Scan completado. Revisá la sección de incidentes del monitor.', severity: 'None' });
         }
       });
       return;

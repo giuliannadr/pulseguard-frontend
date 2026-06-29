@@ -256,6 +256,11 @@ body::after {
 .btn-strict-danger:hover { background: rgba(255, 23, 68, 0.15); border-color: rgba(255, 23, 68, 0.35); }
 
 /* ── Animations ───────────────────────────────────────────────── */
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 @keyframes pg-fade-in {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
