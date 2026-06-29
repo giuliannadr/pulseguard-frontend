@@ -390,7 +390,7 @@ export default function PlaygroundPage() {
       </div>
 
       {/* ── Tab Bar ── */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 28, flexWrap: 'wrap' }}>
+      <div className="playground-tabs" style={{ display: 'flex', gap: 6, marginBottom: 28, flexWrap: 'wrap' }}>
         {TABS.map(tab => (
           <button
             key={tab.id}
@@ -638,27 +638,16 @@ export default function PlaygroundPage() {
                 </div>
               )}
               {codeResult ? (
-                <div style={{ background: 'var(--color-bg-card)', border: `2px solid ${getSeverityColor(codeResult.severity)}`, borderRadius: 20, padding: 20 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700, color: '#fff', background: getSeverityColor(codeResult.severity), padding: '3px 10px', borderRadius: 6 }}>
-                      {codeResult.severity.toUpperCase()}
-                    </span>
-                    <span style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: 'var(--color-txt-primary)' }}>Static Code Audit</span>
-                  </div>
-
-                  <p style={labelStyle}>Hallazgos de seguridad</p>
-                  {codeResult.findings?.length > 0 ? (
-                    <ul style={{ margin: '0 0 16px', paddingLeft: 16, color: 'var(--color-txt-secondary)', fontSize: 12, lineHeight: 1.6 }}>
-                      {codeResult.findings.map((f: string, i: number) => <li key={i} style={{ marginBottom: 6 }}>{f}</li>)}
-                    </ul>
-                  ) : <p style={{ color: '#16A34A', fontSize: 12, margin: '0 0 16px' }}>✓ Sin problemas detectados.</p>}
-
-                  <p style={labelStyle}>Recomendaciones</p>
-                  <pre style={{ margin: '0 0 16px', padding: 10, background: 'var(--color-bg-base)', border: '1px solid var(--color-border-main)', borderRadius: 8, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-muted)', whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>
-                    {codeResult.recommendations}
-                  </pre>
-
-                  <div style={{ borderTop: '1px solid var(--color-border-main)', paddingTop: 14 }}>
+                <div>
+                  <AuditResultCard
+                    risk={codeResult.severity}
+                    title="Auditoría de Código"
+                    findings={codeResult.findings}
+                    recommendation={codeResult.recommendations}
+                    getSeverityColor={getSeverityColor}
+                    labelStyle={labelStyle}
+                  />
+                  <div style={{ borderTop: '1px solid var(--color-border-main)', paddingTop: 14, marginTop: 14 }}>
                     <button onClick={handleGenerateCodePatch} disabled={patchRunning}
                       style={{ width: '100%', height: 38, background: 'transparent', border: '1px solid rgba(0,240,255,0.35)', color: 'var(--color-acid)', borderRadius: 10, fontFamily: 'var(--font-mono)', fontSize: 12, cursor: 'pointer' }}>
                       {patchRunning ? 'Generando parche...' : '⚡ Generar parche con IA'}
@@ -730,31 +719,19 @@ export default function PlaygroundPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {dnsResult ? (
                 <>
-                  <div className="glass-card" style={{ padding: 20, borderRadius: 20 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: 'var(--color-txt-primary)' }}>Network Posture Audit</span>
-                      <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(0,240,255,0.08)', border: '2px solid var(--color-acid)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 18, fontFamily: 'var(--font-mono)', color: 'var(--color-acid)' }}>
-                        {dnsResult.audit.securityScore}
-                      </div>
-                    </div>
-                    {[
-                      { label: 'SSL', items: dnsResult.audit.sslFindings, ok: 'SSL en buen estado.' },
-                      { label: 'DNS', items: dnsResult.audit.dnsFindings, ok: 'Registros de seguridad de email presentes.' },
-                    ].map(s => (
-                      <div key={s.label} style={{ marginBottom: 12 }}>
-                        <span style={{ ...labelStyle, marginBottom: 4 }}>Hallazgos {s.label}</span>
-                        {s.items?.length > 0 ? (
-                          <ul style={{ margin: 0, paddingLeft: 16, color: 'var(--color-txt-secondary)', fontSize: 11, lineHeight: 1.5 }}>
-                            {s.items.map((f: string, i: number) => <li key={i}>{f}</li>)}
-                          </ul>
-                        ) : <span style={{ color: '#16A34A', fontSize: 11 }}>✓ {s.ok}</span>}
-                      </div>
-                    ))}
-                    <div style={{ borderTop: '1px solid var(--color-border-main)', paddingTop: 10 }}>
-                      <span style={{ ...labelStyle, marginBottom: 4 }}>Consejo IA</span>
-                      <p style={{ margin: 0, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-muted)', lineHeight: 1.5 }}>{dnsResult.audit.advice}</p>
-                    </div>
-                  </div>
+                  <AuditResultCard
+                    risk={dnsResult.audit.securityScore ?? 'B'}
+                    title={`Auditoría de Red — Nota: ${dnsResult.audit.securityScore}`}
+                    findings={[...(dnsResult.audit.sslFindings ?? []), ...(dnsResult.audit.dnsFindings ?? [])]}
+                    recommendation={dnsResult.audit.advice}
+                    getSeverityColor={(s) => {
+                      if (s === 'A+' || s === 'A') return '#16A34A';
+                      if (s === 'B') return '#D97706';
+                      if (s === 'C') return '#FF5252';
+                      return '#DC2626';
+                    }}
+                    labelStyle={labelStyle}
+                  />
 
                   <div className="glass-card" style={{ padding: 20, borderRadius: 20 }}>
                     <span style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 700, color: 'var(--color-txt-primary)', display: 'block', marginBottom: 12 }}>DNS & TLS</span>
