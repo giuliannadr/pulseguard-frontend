@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardNav from '@/components/DashboardNav';
+import { ScanProvider } from '@/lib/scan-context';
 import Link from 'next/link';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -57,6 +58,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
+    <ScanProvider>
     <div className="dashboard-container">
       {/* Mobile Top Bar */}
       <div className="mobile-top-bar">
@@ -116,5 +118,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </main>
     </div>
+    </ScanProvider>
   );
 }

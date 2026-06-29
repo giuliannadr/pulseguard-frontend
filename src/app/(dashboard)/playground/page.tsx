@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { api, githubToken as ghTokenHelper, type Monitor } from '@/lib/api';
 import { useTranslation } from '@/lib/i18n';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import { useScan } from '@/lib/scan-context';
 import type { MonitorStatus } from '@/lib/api';
 
 type Tab = 'api' | 'code' | 'dns' | 'hacking';
@@ -20,6 +21,7 @@ export default function PlaygroundPage() {
   const [githubToken, setGithubToken] = useState<string | null>(null);
   const [monitors, setMonitors] = useState<Monitor[]>([]);
   const [loadingMonitors, setLoadingMonitors] = useState(true);
+  const { startScan, scan } = useScan();
 
   // ── Shared selected monitor (auto-fills URL across all tabs)
   const [selectedMonitor, setSelectedMonitor] = useState<Monitor | null>(null);
@@ -160,6 +162,26 @@ export default function PlaygroundPage() {
 
   async function handleRunCodeAudit() {
     if (!token) return;
+    // Repo mode: scan commits via backend (long-running — use global context so it survives navigation)
+    if (codeSourceMode === 'repo' && selectedRepoId && githubToken) {
+      const mon = monitors.find(m => m.id === selectedRepoId);
+      if (!mon) return;
+      const gToken = githubToken;
+      const tok = token;
+      setCodeRunning(true);
+      startScan(async () => {
+        try {
+          const result = await api.monitors.scanRepo(mon.id, tok, gToken, true);
+          return { count: result.count ?? 0 };
+        } finally {
+          setCodeRunning(false);
+          // reload incidents if still on page
+          setCodeResult({ findings: [], recommendations: 'Scan completado. Revisá la sección de incidentes del monitor.', severity: 'None' });
+        }
+      });
+      return;
+    }
+    // Paste mode: inline Gemini audit (fast, stays on page)
     setCodeRunning(true); setCodeError(''); setCodeResult(null); setPatchResult(null);
     try {
       const data = await api.playground.auditCode({ code: codeSnippet, language: codeLanguage }, token);
@@ -614,6 +636,15 @@ export default function PlaygroundPage() {
             </div>
 
             <div>
+              {scan.status === 'scanning' && codeSourceMode === 'repo' && (
+                <div style={{ background: 'rgba(217,119,6,0.08)', border: '1px solid rgba(217,119,6,0.3)', borderRadius: 16, padding: '16px 20px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#D97706', flexShrink: 0, animation: 'pg-pulse 1.2s ease-in-out infinite' }} />
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#D97706', fontWeight: 700 }}>Analizando commits con Gemini IA...</div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)', marginTop: 3 }}>Podés navegar a otra sección — el análisis continúa en segundo plano.</div>
+                  </div>
+                </div>
+              )}
               {codeResult ? (
                 <div style={{ background: 'var(--color-bg-card)', border: `2px solid ${getSeverityColor(codeResult.severity)}`, borderRadius: 20, padding: 20 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>

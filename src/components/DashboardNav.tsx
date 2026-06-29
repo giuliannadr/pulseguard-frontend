@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { api } from '@/lib/api';
+import { useScan } from '@/lib/scan-context';
 
 export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: string | null; onCloseMobile?: () => void }) {
   const pathname = usePathname();
@@ -14,6 +15,7 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
   const { t } = useTranslation();
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [alertCount, setAlertCount] = useState(0);
+  const { scan, clearDone } = useScan();
 
   useEffect(() => {
     const isDark = document.documentElement.classList.contains('dark');
@@ -70,6 +72,8 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
       href: '/playground',
       label: t('nav_playground'),
       badge: 0,
+      scanStatus: scan.status,
+      scanCount: scan.count,
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
@@ -160,6 +164,27 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
                   padding: '1px 5px', minWidth: 16, textAlign: 'center', lineHeight: '14px',
                 }}>
                   {link.badge > 99 ? '99+' : link.badge}
+                </span>
+              )}
+              {'scanStatus' in link && link.scanStatus === 'scanning' && (
+                <span title="Análisis en progreso..." style={{
+                  marginLeft: 'auto', width: 8, height: 8, borderRadius: '50%',
+                  background: '#D97706', flexShrink: 0,
+                  animation: 'pg-pulse 1.2s ease-in-out infinite',
+                }} />
+              )}
+              {'scanStatus' in link && link.scanStatus === 'done' && (
+                <span
+                  title={`${link.scanCount} commits analizados`}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); clearDone(); }}
+                  style={{
+                    marginLeft: 'auto', background: '#16A34A', color: 'white',
+                    borderRadius: '50%', width: 16, height: 16, fontSize: 9, fontWeight: 700,
+                    fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', flexShrink: 0, cursor: 'pointer',
+                  }}
+                >
+                  {link.scanCount > 9 ? '9+' : link.scanCount || '✓'}
                 </span>
               )}
             </Link>
