@@ -173,7 +173,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Tab Content */}
-      <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 24, padding: 28, boxShadow: '0 4px 24px rgba(124,58,237,0.07)' }}>
+      <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 16, padding: 28 }}>
         
         {/* Tab 1: Preferences */}
         {activeTab === 'pref' && (
@@ -285,7 +285,7 @@ export default function SettingsPage() {
                   {applyingToAll ? 'Applying...' : 'Apply to all existing monitors'}
                 </button>
                 {applyResult && (
-                  <span style={{ marginLeft: 12, fontSize: 11, fontFamily: 'var(--font-mono)', color: applyResult.includes('Failed') ? '#FF1744' : '#00E676' }}>
+                  <span style={{ marginLeft: 12, fontSize: 11, fontFamily: 'var(--font-mono)', color: applyResult.includes('Failed') ? 'var(--color-status-down)' : 'var(--color-status-up)' }}>
                     {applyResult}
                   </span>
                 )}
@@ -297,7 +297,7 @@ export default function SettingsPage() {
 
             {/* Msg Success */}
             {successMsg && (
-              <div style={{ background: 'rgba(0,230,118,0.08)', border: '1px solid #00E676', borderRadius: 3, color: '#00E676', padding: 12, fontSize: 12, fontFamily: 'var(--font-mono)' }}>
+              <div style={{ background: 'rgba(22,163,74,0.08)', border: '1px solid rgba(22,163,74,0.3)', borderRadius: 8, color: 'var(--color-status-up)', padding: 12, fontSize: 12, fontFamily: 'var(--font-mono)' }}>
                 {successMsg}
               </div>
             )}
@@ -369,7 +369,7 @@ export default function SettingsPage() {
                 <span style={{ color: 'var(--color-txt-primary)' }}>{userEmail || '—'}</span>
                 
                 <span style={{ color: 'var(--color-txt-muted)' }}>Status:</span>
-                <span style={{ color: '#00E676' }}>{t('settings_active_session') || 'Active Session'}</span>
+                <span style={{ color: 'var(--color-status-up)' }}>{t('settings_active_session') || 'Active Session'}</span>
               </div>
             </div>
           </div>
