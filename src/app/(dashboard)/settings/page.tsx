@@ -259,30 +259,70 @@ export default function SettingsPage() {
                   border: '1px solid var(--color-border-main)',
                   color: 'var(--color-txt-primary)',
                   padding: '6px 12px',
-                  borderRadius: 3,
+                  borderRadius: 6,
                   fontSize: 11,
                   fontFamily: 'var(--font-mono)',
                   cursor: 'pointer',
                   transition: 'background 0.15s'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-border-main)'}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-bg-card-hover)'}
                 onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
               >
-                Send Test Alert Webhook
+                🔔 Enviar alerta de prueba
               </button>
               {testStatus && (
                 <div style={{ marginTop: 8, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-muted)' }}>
                   {testStatus}
                 </div>
               )}
+
+              {/* Message Preview */}
+              {webhookUrl && (
+                <div style={{ marginTop: 14, padding: 14, background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 10 }}>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10 }}>
+                    Preview del mensaje
+                  </div>
+                  {webhookUrl.includes('discord.com') ? (
+                    <div style={{ background: '#36393f', borderRadius: 8, padding: 14, borderLeft: '4px solid #5865F2' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                        <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#7C3AED', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>🔔</div>
+                        <div>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: '#fff' }}>PulseGuard</div>
+                          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#72767d' }}>Today at {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                        </div>
+                      </div>
+                      <div style={{ background: '#2f3136', borderRadius: 6, padding: 12, borderLeft: '4px solid #7C3AED' }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: '#fff', marginBottom: 4 }}>🚨 Alerta de Monitor</div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#dcddde' }}>Tu servicio está caído. PulseGuard detectó una interrupción.</div>
+                        <div style={{ display: 'flex', gap: 16, marginTop: 8 }}>
+                          <div><div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#72767d', textTransform: 'uppercase' }}>Estado</div><div style={{ color: '#ED4245', fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700 }}>● CAÍDO</div></div>
+                          <div><div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: '#72767d', textTransform: 'uppercase' }}>Hora</div><div style={{ color: '#fff', fontFamily: 'var(--font-mono)', fontSize: 11 }}>{new Date().toLocaleString()}</div></div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : webhookUrl.includes('hooks.slack.com') ? (
+                    <div style={{ background: '#1d1c1d', borderRadius: 8, padding: 14, borderLeft: '4px solid #4A154B' }}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#fff', fontWeight: 700, marginBottom: 4 }}>PulseGuard Alerts</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#d1d2d3' }}>🚨 *Alerta de Monitor* — Tu servicio está CAÍDO. Revisá inmediatamente.</div>
+                    </div>
+                  ) : (
+                    <div style={{ background: 'var(--color-bg-card)', borderRadius: 8, padding: 14, border: '1px solid var(--color-border-main)' }}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-muted)', marginBottom: 6 }}>JSON Payload</div>
+                      <pre style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-secondary)', margin: 0, overflow: 'auto' }}>{JSON.stringify({ event: 'monitor_down', monitor: 'My Service', status: 'down', timestamp: new Date().toISOString() }, null, 2)}</pre>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--color-border-main)' }}>
+
                 <button
                   type="button"
                   onClick={handleApplyWebhookToAll}
                   disabled={applyingToAll || !webhookUrl}
                   style={{ background: 'transparent', border: '1px solid var(--color-border-main)', color: webhookUrl ? 'var(--color-brand-primary)' : 'var(--color-txt-muted)', padding: '6px 12px', borderRadius: 8, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: webhookUrl ? 'pointer' : 'not-allowed' }}
                 >
-                  {applyingToAll ? 'Applying...' : 'Apply to all existing monitors'}
+                  {applyingToAll ? 'Aplicando...' : 'Aplicar a todos los monitores'}
                 </button>
                 {applyResult && (
                   <span style={{ marginLeft: 12, fontSize: 11, fontFamily: 'var(--font-mono)', color: applyResult.includes('Failed') ? 'var(--color-status-down)' : 'var(--color-status-up)' }}>
@@ -290,7 +330,7 @@ export default function SettingsPage() {
                   </span>
                 )}
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: '#555', margin: '6px 0 0' }}>
-                  Saves this webhook URL on all your current monitors.
+                  Guarda esta URL de webhook en todos tus monitores actuales.
                 </p>
               </div>
             </div>

@@ -11,6 +11,8 @@ export default function StatusPage() {
   const { t } = useTranslation();
   const [monitors, setMonitors] = useState<Monitor[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const supabase = createClient();
 
@@ -27,6 +29,7 @@ export default function StatusPage() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) { setLoading(false); return; }
+      setUserId(user.id);
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (session?.access_token) loadMonitors(session.access_token);
         else setLoading(false);
@@ -53,6 +56,20 @@ export default function StatusPage() {
         <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--color-txt-muted)', margin: 0 }}>
           {t('stat_desc')}
         </p>
+        {userId && (
+          <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>Tu página pública:</span>
+            <code style={{ fontFamily: 'var(--font-mono)', fontSize: 11, background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', padding: '4px 10px', borderRadius: 6, color: 'var(--color-brand-primary)', maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {typeof window !== 'undefined' ? `${window.location.origin}/s/${userId}` : `/s/${userId}`}
+            </code>
+            <button
+              onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/s/${userId}`); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+              style={{ fontFamily: 'var(--font-mono)', fontSize: 11, background: copied ? 'var(--color-status-up)' : 'var(--color-brand-primary)', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 12px', cursor: 'pointer' }}
+            >
+              {copied ? '✓ Copiado' : 'Copiar'}
+            </button>
+          </div>
+        )}
       </div>
 
       {loading ? (

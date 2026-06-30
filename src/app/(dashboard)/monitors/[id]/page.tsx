@@ -17,9 +17,9 @@ function getGradeColor(grade: string) {
   if (!grade) return 'var(--color-txt-muted)';
   const g = grade.toUpperCase();
   if (g.startsWith('A')) return '#16A34A';
-  if (g.startsWith('B')) return 'var(--color-acid)';
-  if (g.startsWith('C')) return '#FFB300';
-  if (g.startsWith('D')) return '#FF9100';
+  if (g.startsWith('B')) return '#C4B5FD';
+  if (g.startsWith('C')) return '#F59E0B';
+  if (g.startsWith('D')) return '#F97316';
   if (g.startsWith('F')) return '#DC2626';
   return 'var(--color-txt-muted)';
 }
@@ -29,6 +29,86 @@ function fmtDate(d: string) {
 }
 function fmtTime(d: string) {
   return new Date(d).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+// ── CSV Export ────────────────────────────────────────────
+function exportChecksCSV(checks: Check[], monitorName: string) {
+  const rows = [
+    ['Date', 'Status', 'Response (ms)', 'Status Code', 'SSL Days Left', 'Error'],
+    ...checks.map(c => [
+      new Date(c.checkedAt).toISOString(),
+      c.status,
+      c.responseTimeMs ?? '',
+      c.statusCode ?? '',
+      c.sslDaysLeft ?? '',
+      c.errorMessage ?? '',
+    ]),
+  ];
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `${monitorName.replace(/[^a-z0-9]/gi, '_')}_checks.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+// ── Uptime Badge ──────────────────────────────────────────
+function generateUptimeBadge(uptimePct: number | null, monitorName: string): string {
+  const pct = uptimePct ?? 0;
+  const color = pct >= 99 ? '22c55e' : pct >= 95 ? 'f59e0b' : 'ef4444';
+  const label = encodeURIComponent(monitorName.slice(0, 20));
+  return `https://img.shields.io/badge/${label}-${pct}%25_uptime-${color}?style=flat-square`;
+}
+
+// ── Check Heatmap ─────────────────────────────────────────
+function CheckHeatmap({ checks }: { checks: Check[] }) {
+  // Build a map of date → status (worst status of the day wins)
+  const dayMap = new Map<string, 'up' | 'down' | 'degraded' | 'unknown'>();
+  const statusPriority = { down: 3, degraded: 2, unknown: 1, up: 0 };
+  for (const c of checks) {
+    const day = c.checkedAt.slice(0, 10);
+    const existing = dayMap.get(day);
+    if (!existing || (statusPriority[c.status] ?? 0) > (statusPriority[existing] ?? 0)) {
+      dayMap.set(day, c.status);
+    }
+  }
+  // Last 84 days (12 weeks)
+  const days: { date: string; status: string }[] = [];
+  for (let i = 83; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    days.push({ date: key, status: dayMap.get(key) ?? 'none' });
+  }
+  const getColor = (s: string) => {
+    if (s === 'up') return 'var(--color-status-up)';
+    if (s === 'down') return 'var(--color-status-down)';
+    if (s === 'degraded') return 'var(--color-status-degraded)';
+    return 'var(--color-border-main)';
+  };
+  const weeks: typeof days[] = [];
+  for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7));
+
+  return (
+    <div style={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
+      {weeks.map((week, wi) => (
+        <div key={wi} style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {week.map((d, di) => (
+            <div
+              key={di}
+              title={`${d.date}: ${d.status}`}
+              style={{
+                width: 10, height: 10, borderRadius: 2,
+                background: getColor(d.status),
+                opacity: d.status === 'none' ? 0.25 : 1,
+                cursor: 'default',
+                transition: 'opacity 0.15s',
+              }}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -682,6 +762,23 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
     } catch (e: any) { showToast(e.message, 'error'); }
   }
 
+  async function handleClone() {
+    if (!token || !monitor) return;
+    try {
+      const cloned = await api.monitors.create({
+        name: `${monitor.name} (copy)`,
+        url: monitor.url ?? undefined,
+        expectedStatus: monitor.expectedStatus,
+        intervalMinutes: monitor.intervalMinutes,
+        notificationWebhookUrl: monitor.notificationWebhookUrl ?? undefined,
+        notificationEmail: monitor.notificationEmail ?? undefined,
+      }, token);
+      showToast(`Cloned as "${cloned.name}" ✓`);
+      setTimeout(() => router.push(`/monitors/${cloned.id}`), 1200);
+    } catch (e: any) { showToast(e.message || 'Clone failed', 'error'); }
+  }
+
+
   if (loading) {
     const Bone = ({ w = '100%', h = 14, r = 4 }: { w?: string | number; h?: number; r?: number }) => (
       <div style={{ width: w, height: h, borderRadius: r, flexShrink: 0, background: 'linear-gradient(90deg,rgba(255,255,255,0.06) 25%,rgba(255,255,255,0.12) 50%,rgba(255,255,255,0.06) 75%)', backgroundSize: '200% 100%', animation: 'skeleton-shimmer 1.4s ease-in-out infinite' }} />
@@ -766,7 +863,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
           {t('mon_breadcrumb')}
         </Link>
         <span>/</span>
-        <span style={{ color: 'var(--color-violet-primary)' }}>{monitor.name}</span>
+        <span style={{ color: 'var(--color-brand-primary)' }}>{monitor.name}</span>
       </div>
 
       {/* Header */}
@@ -785,7 +882,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
           </div>
           {monitor.url ? (
             <a href={monitor.url} target="_blank" rel="noopener noreferrer"
-              style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-violet-primary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6, opacity: 0.8 }}>
+              style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-brand-primary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6, opacity: 0.8 }}>
               {monitor.url}
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
@@ -795,20 +892,43 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
           ) : (
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>{t('mon_repo_only')}</span>
           )}
+          {/* Maintenance window active badge */}
+          {Array.isArray(monitor.maintenanceWindows) && monitor.maintenanceWindows.length > 0 && (() => {
+            const now = new Date();
+            const day = now.getDay(); const h = now.getHours(); const m = now.getMinutes();
+            const inMaint = monitor.maintenanceWindows.some(w =>
+              Array.isArray(w.days) && w.days.includes(day) &&
+              (h * 60 + m) >= (w.startHour * 60 + w.startMin) &&
+              (h * 60 + m) < (w.endHour * 60 + w.endMin)
+            );
+            return inMaint ? (
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#F59E0B', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 6, padding: '3px 10px', letterSpacing: '0.08em', marginTop: 4, display: 'inline-block' }}>
+                🔧 IN MAINTENANCE
+              </span>
+            ) : null;
+          })()}
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           {monitor.githubRepoUrl && (
-            <button onClick={handleScanRepo} disabled={scanning} className="btn-strict-secondary" style={{ height: 38, fontSize: 12, border: '1px solid rgba(0,240,255,0.3)', color: 'var(--color-acid)', background: 'rgba(0,240,255,0.03)' }}>
-              {scanning ? <Spinner color="var(--color-acid)" /> : <ShieldIcon />}
+            <button onClick={handleScanRepo} disabled={scanning} className="btn-strict-secondary" style={{ height: 38, fontSize: 12 }}>
+              {scanning ? <Spinner color="var(--color-brand-primary)" /> : <ShieldIcon />}
               {t('btn_scan')}
             </button>
           )}
           {monitor.url && (
             <button onClick={handleCheckNow} disabled={checking} className="btn-strict-secondary" style={{ height: 38, fontSize: 12 }}>
-              {checking ? <Spinner color="var(--color-violet-primary)" /> : <RefreshIcon />}
+              {checking ? <Spinner color="var(--color-brand-primary)" /> : <RefreshIcon />}
               {t('btn_check')}
             </button>
           )}
+          <button onClick={() => exportChecksCSV(checks, monitor.name)} className="btn-strict-secondary" style={{ height: 38, fontSize: 12 }} title="Download checks as CSV">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 4 }}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            CSV
+          </button>
+          <button onClick={handleClone} className="btn-strict-secondary" style={{ height: 38, fontSize: 12 }} title="Clone this monitor">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 4 }}><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Clone
+          </button>
           <button onClick={() => setShowEdit(true)} className="btn-strict-secondary" style={{ height: 38, fontSize: 12 }}>{t('btn_edit')}</button>
           <button onClick={handleToggle} className="btn-strict-secondary" style={{ height: 38, fontSize: 12 }}>
             {monitor.isActive ? t('btn_pause') : t('btn_resume')}
@@ -848,24 +968,46 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
         </div>
       )}
 
+      {/* Heatmap — 84-day check history */}
+      {checks.length > 0 && monitor.url && (
+        <div className="glass-card" style={{ padding: '20px 24px', marginBottom: 16, borderRadius: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>12-Week Check History</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)' }}>
+              {[['up','Operational'],['degraded','Degraded'],['down','Down']].map(([s, l]) => (
+                <span key={s} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: 2, background: s === 'up' ? 'var(--color-status-up)' : s === 'degraded' ? 'var(--color-status-degraded)' : 'var(--color-status-down)' }} />
+                  {l}
+                </span>
+              ))}
+            </div>
+          </div>
+          <CheckHeatmap checks={checks} />
+        </div>
+      )}
+
       {/* Chart */}
       {chartData.length > 1 && (
-        <div className="glass-card" style={{ padding: '20px 24px', marginBottom: 16, borderRadius: 24 }}>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-text-2)', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 20px' }}>{t('mon_chart_response')}</p>
+        <div className="glass-card" style={{ padding: '20px 24px', marginBottom: 16, borderRadius: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>{t('mon_chart_response')}</p>
+            {/* Uptime badge generator */}
+            <BadgeGenerator uptimePct={metrics?.uptime ?? null} monitorName={monitor.name} />
+          </div>
           <div style={{ height: 200, width: '100%' }}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData} margin={{ top: 4, right: 0, left: -24, bottom: 0 }}>
                 <defs>
                   <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-violet-primary)" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="var(--color-violet-primary)" stopOpacity={0} />
+                    <stop offset="5%" stopColor="var(--color-brand-primary)" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="var(--color-brand-primary)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} strokeDasharray="4 4" />
+                <CartesianGrid stroke="var(--color-border-main)" vertical={false} strokeDasharray="4 4" />
                 <XAxis dataKey="time" tick={{ fontSize: 10, fill: 'var(--color-txt-muted)', fontFamily: 'var(--font-mono)' }} tickLine={false} axisLine={false} interval="preserveStartEnd" dy={8} />
                 <YAxis tick={{ fontSize: 10, fill: 'var(--color-txt-muted)', fontFamily: 'var(--font-mono)' }} tickLine={false} axisLine={false} />
                 <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'var(--color-border-main)' }} />
-                <Area type="monotone" dataKey="ms" name="Response" stroke="var(--color-violet-primary)" strokeWidth={1.5} fill="url(#grad)" dot={false} activeDot={{ r: 4, fill: 'var(--color-violet-primary)', stroke: '#000', strokeWidth: 2 }} />
+                <Area type="monotone" dataKey="ms" name="Response" stroke="var(--color-brand-primary)" strokeWidth={1.5} fill="url(#grad)" dot={false} activeDot={{ r: 4, fill: 'var(--color-brand-primary)', strokeWidth: 2 }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -909,7 +1051,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                   return (
                     <div key={hdr.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 8, borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                       <div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-btn-primary)' }}>{hdr.name}</div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-primary)' }}>{hdr.name}</div>
                         <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={hdr.value || undefined}>
                           {hdr.value || t('mon_sec_not_configured')}
                         </div>
@@ -1195,6 +1337,42 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
       <style>{`@keyframes pg-spin { to { transform: rotate(360deg); } }`}</style>
     </div>
     </>
+  );
+}
+
+// ── Badge Generator ──────────────────────────────────────
+function BadgeGenerator({ uptimePct, monitorName }: { uptimePct: number | null; monitorName: string }) {
+  const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const badgeUrl = generateUptimeBadge(uptimePct, monitorName);
+  const markdown = `![${monitorName} uptime](${badgeUrl})`;
+
+  function copy() {
+    navigator.clipboard.writeText(markdown).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', color: 'var(--color-txt-muted)', padding: '4px 10px', borderRadius: 6, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}
+      >
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Badge
+      </button>
+      {open && (
+        <div style={{ position: 'absolute', right: 0, top: 32, zIndex: 50, background: 'var(--color-bg-card)', border: '1px solid var(--color-border-main)', borderRadius: 10, padding: 16, width: 320, boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 10px' }}>Uptime Badge</p>
+          <img src={badgeUrl} alt="uptime badge" style={{ marginBottom: 10, height: 20 }} />
+          <div style={{ background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 6, padding: '8px 10px', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-txt-secondary)', wordBreak: 'break-all', marginBottom: 10 }}>
+            {markdown}
+          </div>
+          <button onClick={copy} style={{ background: copied ? 'rgba(22,163,74,0.1)' : 'var(--color-brand-light)', border: `1px solid ${copied ? '#16A34A' : 'var(--color-brand-mid)'}`, color: copied ? '#16A34A' : 'var(--color-brand-primary)', padding: '6px 12px', borderRadius: 6, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer', width: '100%' }}>
+            {copied ? '✓ Copied!' : 'Copy Markdown'}
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
