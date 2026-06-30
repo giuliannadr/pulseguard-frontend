@@ -1,71 +1,104 @@
-# PulseGuard — Frontend (Next.js App Router + TypeScript)
+# PulseGuard — Frontend
 
-PulseGuard es una consola interactiva de DevSecOps y monitoreo de disponibilidad de APIs en tiempo real. Este repositorio contiene el código de la aplicación de usuario, desarrollada en **Next.js (React)** con integración de **Supabase Client** y visualización interactiva de analíticas mediante **Recharts**.
+> Plataforma DevSecOps de monitoreo de disponibilidad e inteligencia de seguridad en tiempo real.
 
----
-
-## 🎨 Características de la Interfaz y UX/UI Premium
-
-Siguiendo las pautas de diseño más estrictas de **AranguriApps**, implementamos una interfaz futurista retro-tech con una paleta de colores de alto contraste (Ácido, Fucsia, Negro Puro, y Carbono) y micro-animaciones:
-
-1. **Dashboard de Proyectos:** Lista los proyectos y calcula de forma dinámica el porcentaje de disponibilidad (Uptime), latencia media (ms), y estado de expiración del SSL.
-2. **Escaneo On-Demand de Commits:** Incluye un botón interactivo **[ 🔍 Scan Commits ]** que se conecta mediante el token de proveedor de GitHub a su API para extraer diffs recientes y auditar vulnerabilidades en el momento.
-3. **SecOps Playground (Developer Toolbox):**
-   - **API Auditor:** Suite de pruebas con botones preconfigurados (Load Presets) para lanzar peticiones instantáneas y ver respuestas junto a un reporte AI de Gemini.
-   - **Code Auditor:** Pestaña con plantillas de código inseguro (SQLi express, Dockerfile como root, dependencias vulnerables) listas para ser auditadas.
-   - **SSL/DNS Inspector:** Inspección DNS y TLS automatizada con evaluación de red Gemini.
-   - **Hacking Simulator:** Lanzamiento seguro de ataques (SQLi, XSS, rate-limit, traversal) con una consola interactiva que simula logs de penetración.
+**Demo en vivo:** https://pulseguard-frontend.vercel.app  
+**Repositorio backend:** https://github.com/giuliannadr/pulseguard-backend
 
 ---
 
-## ⚙️ Tecnologías y Arquitectura
+## ¿De qué trata el proyecto?
 
-- **Next.js (App Router):** Enrutamiento basado en archivos con componentes del cliente altamente optimizados.
-- **Supabase JS Client:** Autenticación e integración de eventos en tiempo real. La interfaz se suscribe a los canales de Supabase (`realtime`) para actualizar las tablas de checks e incidentes instantáneamente cuando se detectan novedades en el backend.
-- **Recharts:** Renderizado premium de áreas gradientes para el histórico de latencia de servidores.
-- **Vanilla CSS & Tailwind CSS:** Combinación híbrida para un control máximo del diseño visual sin placeholders.
+PulseGuard es un sistema de monitoreo de uptime y seguridad para desarrolladores y equipos de producto. Permite:
 
----
-
-## 🤖 Uso de Herramientas de IA
-
-El frontend fue diseñado con apoyo de herramientas generativas de IA. La salida fue auditada minuciosamente para evitar código innecesario, asegurar la responsividad en móviles y consolidar un flujo de usuario robusto e integrado.
+- **Monitorear la disponibilidad** de APIs y sitios web con checks automáticos cada N minutos
+- **Detectar vulnerabilidades** en commits de GitHub usando análisis estático con IA (Gemini)
+- **Auditar APIs y código** en tiempo real desde una consola interactiva (Playground)
+- **Recibir alertas** por email o webhook (Discord/Slack) cuando un servicio cae
+- **Compartir una página de estado pública** con clientes (`/s/[userId]`)
 
 ---
 
-## 📦 Instalación y Configuración Local
+## Tecnologías elegidas y por qué
+
+| Tecnología | Rol | Motivo |
+|---|---|---|
+| **Next.js 15 (App Router)** | Framework frontend | Server components, routing basado en archivos, excelente DX |
+| **TypeScript** | Lenguaje | Tipado estricto, menor superficie de bugs en runtime |
+| **Supabase** | Auth + Realtime | BaaS que maneja autenticación JWT y suscripciones Postgres en tiempo real sin servidor propio |
+| **Recharts** | Gráficos | Componentes React nativos para el historial de latencia |
+| **NestJS (backend)** | API REST | Arquitectura modular con inyección de dependencias, ideal para servicios escalables |
+
+**Decisión de arquitectura clave:** Se eligió separar completamente el frontend (Vercel) del backend (Railway) para poder escalar cada capa independientemente y mantener la lógica de negocio (checks, AI scanning, notificaciones) fuera del browser.
+
+---
+
+## Pantallas principales
+
+1. **Dashboard** — Vista general de todos los monitores con uptime, latencia y estado en tiempo real (Supabase Realtime)
+2. **Monitor Detail** — Métricas históricas, gráfico de respuesta, security headers, incidentes de seguridad detectados por IA, panel de alertas
+3. **Security** — Vista consolidada de todos los incidentes de seguridad con filtros por severidad
+4. **Playground / Consola** — Herramientas de auditoría: API Auditor, Code Auditor (SAST), DNS/SSL Inspector, Attack Simulator
+5. **Import** — Creación de monitores con presets rápidos (Vercel, Railway, Supabase, etc.)
+6. **Settings** — Configuración global de notificaciones webhook
+7. **Página de estado pública** (`/s/[userId]`) — Página sin autenticación para compartir con clientes, con auto-refresh cada 60s
+
+---
+
+## Uso de herramientas de IA
+
+Este proyecto fue desarrollado usando **Claude Code (Anthropic)** como asistente principal de desarrollo durante toda la semana del challenge.
+
+**Cómo se usó la IA:**
+- **Generación de componentes:** Los componentes de UI complejos (gráficos, skeletons, tablas) se generaron con Claude y luego se ajustaron manualmente para seguir el sistema de diseño del proyecto
+- **Arquitectura del backend:** Se usó IA para proponer la estructura modular de NestJS y los DTOs, validando cada decisión contra las convenciones del framework
+- **Debugging:** Cuando el build de Vercel fallaba por keys i18n faltantes o cuando Railway deployaba código viejo (dist/ commiteado), se usó Claude para diagnosticar y corregir
+- **Auditoría de código:** La IA generó código que fue revisado y corregido — por ejemplo, se detectó un bug donde `setCodeResult()` en el `finally` block bloqueaba la pantalla de scan-done, y otro donde `new URL('')` causaba crash en modo repo-only
+- **Prompts de Gemini:** Los prompts para el análisis de seguridad de commits fueron iterados con IA para obtener respuestas en español, concisas y en formato JSON estructurado
+
+**El criterio humano aplicado:**
+- Revisión de cada componente generado para consistencia con el sistema de diseño
+- QA de flujos completos (login → crear monitor → scan → alertas)
+- Corrección de bugs que la IA introdujo o no detectó
+- Decisiones de arquitectura (separación frontend/backend, uso de ScanContext global, paralelización de llamadas a Gemini)
+
+---
+
+## Instalación local
 
 ### Prerrequisitos
-- Node.js v20.x o v22.x
-- Backend de PulseGuard corriendo en tu red o producción
+- Node.js v20+
+- Backend de PulseGuard corriendo (ver [pulseguard-backend](https://github.com/giuliannadr/pulseguard-backend))
 
-### Variables de Entorno (`.env.local`)
-Crea un archivo `.env.local` en la raíz de `pulseguard-frontend/`:
+### Variables de entorno (`.env.local`)
+
 ```env
-# URL del backend (incluye la ruta base /api)
-NEXT_PUBLIC_API_URL="http://localhost:3001/api"
-
-# Credenciales de Supabase del proyecto
-NEXT_PUBLIC_SUPABASE_URL="https://rswebvxvtppfopegedfb.supabase.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJhbGciOi..."
+NEXT_PUBLIC_API_URL=http://localhost:3001/api
+NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key
 ```
 
-### Ejecutar Localmente
-1. Instalar dependencias:
-   ```bash
-   npm install
-   ```
-2. Levantar el servidor Next.js en desarrollo:
-   ```bash
-   npm run dev
-   ```
-3. Abrir [http://localhost:3000](http://localhost:3000) en el navegador.
+### Pasos
+
+```bash
+npm install
+npm run dev
+# Abrir http://localhost:3000
+```
+
+### Build de producción
+
+```bash
+npm run build
+npm start
+```
 
 ---
 
-## 🛡 Verificación y Compilación
+## CI/CD
 
-Para compilar y verificar que no existen fallos de tipado o de Next.js antes de desplegar en Vercel:
-```bash
-npm run build
-```
+GitHub Actions corre en cada push a `main`:
+- **Type check** — `tsc --noEmit`
+- **Build** — `next build`
+
+Ver [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
