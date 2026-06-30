@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useTranslation, type Language } from '@/lib/i18n';
 import { api, githubToken as ghTokenHelper } from '@/lib/api';
+import { notify } from '@/lib/toast';
 
 type Tab = 'pref' | 'integ';
 
@@ -20,10 +21,7 @@ export default function SettingsPage() {
 
   // Preference Settings
   const [webhookUrl, setWebhookUrl] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
-  const [testStatus, setTestStatus] = useState('');
   const [applyingToAll, setApplyingToAll] = useState(false);
-  const [applyResult, setApplyResult] = useState('');
 
   useEffect(() => {
     // Load local settings
@@ -46,33 +44,30 @@ export default function SettingsPage() {
   function handleSavePreferences(e: React.FormEvent) {
     e.preventDefault();
     localStorage.setItem('pg_webhook_url', webhookUrl);
-    setSuccessMsg(t('settings_saved'));
-    setTimeout(() => setSuccessMsg(''), 3000);
+    notify.success(t('settings_saved'));
   }
 
   async function handleApplyWebhookToAll() {
     if (!token || !webhookUrl) return;
     setApplyingToAll(true);
-    setApplyResult('');
     try {
       const monitors = await api.monitors.list(token);
       await Promise.all(monitors.map(m => api.monitors.update(m.id, { notificationWebhookUrl: webhookUrl }, token)));
-      setApplyResult(`Applied to ${monitors.length} monitor${monitors.length !== 1 ? 's' : ''}.`);
+      notify.success(`Webhook aplicado a ${monitors.length} monitor${monitors.length !== 1 ? 'es' : ''}`);
     } catch {
-      setApplyResult('Failed to apply. Try again.');
+      notify.error('No se pudo aplicar el webhook. Intentá de nuevo.');
     } finally {
       setApplyingToAll(false);
-      setTimeout(() => setApplyResult(''), 4000);
     }
   }
 
   async function handleSendTestWebhook() {
     if (!webhookUrl) {
-      setTestStatus('Please enter a Webhook URL first.');
+      notify.warning('Ingresá una URL de webhook primero');
       return;
     }
 
-    setTestStatus('Sending test payload...');
+    const toastId = notify.loading('Enviando payload de prueba...');
     try {
       const isDiscord = webhookUrl.includes('discord.com/api/webhooks');
       const isSlack = webhookUrl.includes('hooks.slack.com');
@@ -112,10 +107,11 @@ export default function SettingsPage() {
         mode: 'no-cors' // avoid CORS block for Discord/Slack direct calls
       });
 
-      setTestStatus('Test alert sent! Check your channel.');
+      notify.dismiss(toastId);
+      notify.success('Test enviado — verificá tu canal');
     } catch (e: any) {
-      console.error(e);
-      setTestStatus('Failed to send webhook request: ' + e.message);
+      notify.dismiss(toastId);
+      notify.error('Error al enviar webhook', e.message);
     }
   }
 
@@ -270,12 +266,6 @@ export default function SettingsPage() {
               >
                 🔔 Enviar alerta de prueba
               </button>
-              {testStatus && (
-                <div style={{ marginTop: 8, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--color-txt-muted)' }}>
-                  {testStatus}
-                </div>
-              )}
-
               {/* Message Preview */}
               {webhookUrl && (
                 <div style={{ marginTop: 14, padding: 14, background: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-main)', borderRadius: 10 }}>
@@ -324,23 +314,11 @@ export default function SettingsPage() {
                 >
                   {applyingToAll ? 'Aplicando...' : 'Aplicar a todos los monitores'}
                 </button>
-                {applyResult && (
-                  <span style={{ marginLeft: 12, fontSize: 11, fontFamily: 'var(--font-mono)', color: applyResult.includes('Failed') ? 'var(--color-status-down)' : 'var(--color-status-up)' }}>
-                    {applyResult}
-                  </span>
-                )}
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: '#555', margin: '6px 0 0' }}>
                   Guarda esta URL de webhook en todos tus monitores actuales.
                 </p>
               </div>
             </div>
-
-            {/* Msg Success */}
-            {successMsg && (
-              <div style={{ background: 'rgba(22,163,74,0.08)', border: '1px solid rgba(22,163,74,0.3)', borderRadius: 8, color: 'var(--color-status-up)', padding: 12, fontSize: 12, fontFamily: 'var(--font-mono)' }}>
-                {successMsg}
-              </div>
-            )}
 
             <button
               type="submit"

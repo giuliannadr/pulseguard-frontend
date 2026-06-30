@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { api, type SecurityIncident } from '@/lib/api';
 import Link from 'next/link';
 import { useTranslation } from '@/lib/i18n';
+import { notify } from '@/lib/toast';
 
 function fmtDate(d: string) {
   return new Date(d).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -41,8 +42,8 @@ export default function SecurityPage() {
     try {
       const data = await api.securityIncidents.listAll(tok);
       setIncidents(data as any);
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      notify.error('Error al cargar incidentes', e?.message);
     } finally {
       setLoading(false);
     }
@@ -84,8 +85,12 @@ export default function SecurityPage() {
     try {
       await Promise.all(toResolve.map(i => api.securityIncidents.resolve(i.id, token!)));
       await loadIncidents(token);
-    } catch {}
-    finally { setResolvingAll(false); }
+      notify.success(`${toResolve.length} incidente${toResolve.length !== 1 ? 's' : ''} resuelto${toResolve.length !== 1 ? 's' : ''}`);
+    } catch (e: any) {
+      notify.error('Error al resolver incidentes', e?.message);
+    } finally {
+      setResolvingAll(false);
+    }
   }
 
   const critical = incidents.filter(i => i.severity === 'Critical' && !i.resolved).length;

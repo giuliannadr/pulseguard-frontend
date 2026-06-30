@@ -12,6 +12,7 @@ import { api, githubToken as ghTokenHelper, type Monitor, type Check, type Metri
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { UptimeBar } from '@/components/ui/UptimeBar';
 import { useTranslation } from '@/lib/i18n';
+import { notify } from '@/lib/toast';
 
 function getGradeColor(grade: string) {
   if (!grade) return 'var(--color-txt-muted)';
@@ -121,23 +122,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-// Inline toast notification
-function Toast({ msg, type }: { msg: string; type: 'success' | 'error' }) {
-  return (
-    <div style={{
-      position: 'fixed', bottom: 24, right: 24, zIndex: 999,
-      background: type === 'success' ? 'rgba(0,230,118,0.1)' : 'rgba(255,23,68,0.1)',
-      border: `1px solid ${type === 'success' ? '#16A34A' : '#DC2626'}`,
-      borderRadius: 4, padding: '12px 20px',
-      fontFamily: 'var(--font-mono)', fontSize: 13,
-      color: type === 'success' ? '#16A34A' : '#DC2626',
-      animation: 'pg-fade-in 0.2s ease-out both',
-    }}>
-      {msg}
-    </div>
-  );
-}
-
 // Inline delete confirmation
 function DeleteConfirm({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void }) {
   const { t } = useTranslation();
@@ -195,7 +179,10 @@ function AlertsPanel({ monitor, token, onUpdate }: { monitor: Monitor; token: st
       onUpdate(updated);
       if (field === 'email') setEditingEmail(false);
       else setEditingWebhook(false);
-    } catch {}
+      notify.success(field === 'email' ? 'Email de notificación guardado' : 'Webhook guardado');
+    } catch (e: any) {
+      notify.error('Error al guardar', e?.message);
+    }
     setSaving(null);
   }
 
@@ -207,9 +194,12 @@ function AlertsPanel({ monitor, token, onUpdate }: { monitor: Monitor; token: st
       const result = await sendTestEmailViaWeb3Forms(emailToTest, monitor.name);
       setTestMsg(result.message);
       setTestState(result.ok ? 'ok' : 'err');
+      if (result.ok) notify.success('Email de prueba enviado', result.message);
+      else notify.error('Error al enviar email', result.message);
     } catch (e: any) {
       setTestMsg(e.message ?? 'Error');
       setTestState('err');
+      notify.error('Error al enviar email', e.message);
     }
     setTimeout(() => { setTestState('idle'); setTestMsg(''); }, 5000);
   }
@@ -621,7 +611,6 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
   const [scanning, setScanning] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
   // Network and Patch States
   const [diagnosingNet, setDiagnosingNet] = useState(false);
@@ -634,8 +623,8 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
   const supabase = supabaseRef.current;
 
   function showToast(msg: string, type: 'success' | 'error' = 'success') {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3500);
+    if (type === 'success') notify.success(msg);
+    else notify.error(msg);
   }
 
   const load = useCallback(async (tok: string) => {
@@ -737,7 +726,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
       });
       if (!res.ok) throw new Error(`Failed to fetch diff: HTTP ${res.status}`);
       const diffText = await res.text();
-      const patchResult = await api.playground.generatePatch({ code: diffText, findings: description, language: 'diff' }, token);
+      const patchResult = await api.playground.generatePatch({ code: diffText, findings: description, language: 'diff' }, token) as { patch: string; explanation: string };
       setPatchData(prev => ({ ...prev, [incId]: { patch: patchResult.patch, explanation: patchResult.explanation } }));
     } catch (e: any) {
       setPatchError(e.message);
@@ -855,8 +844,6 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
       {showDeleteConfirm && <DeleteConfirm onConfirm={handleDelete} onCancel={() => setShowDeleteConfirm(false)} />}
       {showEdit && token && <EditModal monitor={monitor} token={token} onSave={(m) => { setMonitor(m); setShowEdit(false); showToast('Monitor updated'); }} onClose={() => setShowEdit(false)} />}
       <div style={{ width: '100%', animation: 'pg-fade-in 0.35s ease-out both' }}>
-        {toast && <Toast msg={toast.msg} type={toast.type} />}
-
       {/* Breadcrumb */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 32, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>
         <Link href="/dashboard" style={{ color: 'var(--color-txt-muted)', textDecoration: 'none' }} onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-txt-primary)')} onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-txt-muted)')}>

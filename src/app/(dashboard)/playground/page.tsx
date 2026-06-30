@@ -171,7 +171,7 @@ export default function PlaygroundPage() {
       setCodeRunning(true);
       startScan(async () => {
         try {
-          const result = await api.monitors.scanRepo(mon.id, tok, gToken, true);
+          const result = await api.monitors.scanRepo(mon.id, tok, gToken, true) as { count?: number };
           return { count: result.count ?? 0 };
         } finally {
           setCodeRunning(false);

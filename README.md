@@ -27,20 +27,60 @@ PulseGuard es un sistema de monitoreo de uptime y seguridad para desarrolladores
 | **TypeScript** | Lenguaje | Tipado estricto, menor superficie de bugs en runtime |
 | **Supabase** | Auth + Realtime | BaaS que maneja autenticación JWT y suscripciones Postgres en tiempo real sin servidor propio |
 | **Recharts** | Gráficos | Componentes React nativos para el historial de latencia |
-| **NestJS (backend)** | API REST | Arquitectura modular con inyección de dependencias, ideal para servicios escalables |
+| **Sonner** | Notificaciones | Toast notifications con soporte de éxito, error, warning, loading y promise |
 
 **Decisión de arquitectura clave:** Se eligió separar completamente el frontend (Vercel) del backend (Railway) para poder escalar cada capa independientemente y mantener la lógica de negocio (checks, AI scanning, notificaciones) fuera del browser.
+
+---
+
+## Estructura del proyecto
+
+```
+src/
+├── app/
+│   ├── (auth)/
+│   │   ├── login/          # Página de login (email/password + OAuth GitHub/Google)
+│   │   └── signup/         # Página de registro
+│   ├── (dashboard)/        # Layout protegido con sidebar
+│   │   ├── dashboard/      # Vista general — todos los monitores, stats globales
+│   │   ├── monitors/[id]/  # Detalle de monitor — métricas, gráficos, seguridad, alertas
+│   │   ├── security/       # Consola de incidentes de seguridad con filtros
+│   │   ├── playground/     # Herramientas de auditoría en tiempo real
+│   │   ├── import/         # Creación de monitores con presets
+│   │   ├── settings/       # Configuración de notificaciones y cuenta
+│   │   └── status/         # Vista previa de la página de estado pública
+│   ├── auth/
+│   │   ├── callback/       # Handler del OAuth flow de Supabase
+│   │   └── signout/        # Endpoint de cierre de sesión
+│   └── s/[userId]/         # Página de estado pública (sin autenticación)
+├── components/
+│   ├── DashboardNav.tsx    # Sidebar de navegación
+│   └── ui/
+│       ├── GlassCard.tsx
+│       ├── GlowingButton.tsx
+│       ├── StatusBadge.tsx
+│       └── UptimeBar.tsx
+└── lib/
+    ├── api.ts              # Cliente HTTP tipado para el backend
+    ├── toast.ts            # Helper de notificaciones (notify.success/error/warning/...)
+    ├── i18n.tsx            # Internacionalización (ES/EN)
+    ├── scan-context.tsx    # Context global para el estado del scan de seguridad
+    ├── utils.ts
+    └── supabase/
+        ├── client.ts       # Cliente Supabase para componentes client-side
+        └── server.ts       # Cliente Supabase para server components y middleware
+```
 
 ---
 
 ## Pantallas principales
 
 1. **Dashboard** — Vista general de todos los monitores con uptime, latencia y estado en tiempo real (Supabase Realtime)
-2. **Monitor Detail** — Métricas históricas, gráfico de respuesta, security headers, incidentes de seguridad detectados por IA, panel de alertas
-3. **Security** — Vista consolidada de todos los incidentes de seguridad con filtros por severidad
-4. **Playground / Consola** — Herramientas de auditoría: API Auditor, Code Auditor (SAST), DNS/SSL Inspector, Attack Simulator
-5. **Import** — Creación de monitores con presets rápidos (Vercel, Railway, Supabase, etc.)
-6. **Settings** — Configuración global de notificaciones webhook
+2. **Monitor Detail** — Métricas históricas, gráfico de respuesta, security headers, heatmap de disponibilidad, incidentes de seguridad detectados por IA, panel de alertas, exportación CSV
+3. **Security** — Vista consolidada de todos los incidentes de seguridad con filtros por severidad, resolución en lote
+4. **Playground / Consola** — Herramientas de auditoría: API Auditor, Code Auditor (SAST), DNS/SSL Inspector, Attack Simulator, Network Diagnostics
+5. **Import** — Creación de monitores con presets rápidos (Vercel, Railway, Supabase, etc.) y selección de repo GitHub
+6. **Settings** — Configuración global de notificaciones webhook, integración GitHub
 7. **Página de estado pública** (`/s/[userId]`) — Página sin autenticación para compartir con clientes, con auto-refresh cada 60s
 
 ---
@@ -50,11 +90,12 @@ PulseGuard es un sistema de monitoreo de uptime y seguridad para desarrolladores
 Este proyecto fue desarrollado usando **Claude Code (Anthropic)** como asistente principal de desarrollo durante toda la semana del challenge.
 
 **Cómo se usó la IA:**
-- **Generación de componentes:** Los componentes de UI complejos (gráficos, skeletons, tablas) se generaron con Claude y luego se ajustaron manualmente para seguir el sistema de diseño del proyecto
+- **Generación de componentes:** Los componentes de UI complejos (gráficos, skeletons, tablas, heatmaps) se generaron con Claude y luego se ajustaron manualmente para seguir el sistema de diseño del proyecto
 - **Arquitectura del backend:** Se usó IA para proponer la estructura modular de NestJS y los DTOs, validando cada decisión contra las convenciones del framework
 - **Debugging:** Cuando el build de Vercel fallaba por keys i18n faltantes o cuando Railway deployaba código viejo (dist/ commiteado), se usó Claude para diagnosticar y corregir
 - **Auditoría de código:** La IA generó código que fue revisado y corregido — por ejemplo, se detectó un bug donde `setCodeResult()` en el `finally` block bloqueaba la pantalla de scan-done, y otro donde `new URL('')` causaba crash en modo repo-only
 - **Prompts de Gemini:** Los prompts para el análisis de seguridad de commits fueron iterados con IA para obtener respuestas en español, concisas y en formato JSON estructurado
+- **Auditoría de seguridad:** Análisis completo del codebase que identificó y corrigió SSRF en webhooks, webhook spoofing en GitHub, HTML injection en emails, y datos expuestos en endpoints públicos
 
 **El criterio humano aplicado:**
 - Revisión de cada componente generado para consistencia con el sistema de diseño
@@ -73,9 +114,15 @@ Este proyecto fue desarrollado usando **Claude Code (Anthropic)** como asistente
 ### Variables de entorno (`.env.local`)
 
 ```env
+# Backend
 NEXT_PUBLIC_API_URL=http://localhost:3001/api
+
+# Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key
+
+# Web3Forms — para el email de prueba de notificaciones (gratuito en web3forms.com)
+NEXT_PUBLIC_WEB3FORMS_KEY=tu_key
 ```
 
 ### Pasos
@@ -91,6 +138,25 @@ npm run dev
 ```bash
 npm run build
 npm start
+```
+
+---
+
+## Notificaciones UI
+
+Las notificaciones de la app usan [Sonner](https://sonner.emilkowal.ski/). Para mostrar toasts en cualquier componente:
+
+```ts
+import { notify } from '@/lib/toast';
+
+notify.success('Monitor activado');
+notify.error('Error al guardar', err.message);
+notify.warning('Sin email configurado');
+notify.promise(apiCall(), {
+  loading: 'Guardando...',
+  success: '¡Listo!',
+  error: 'Error',
+});
 ```
 
 ---

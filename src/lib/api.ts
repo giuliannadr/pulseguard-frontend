@@ -19,7 +19,7 @@ export interface Monitor {
   notificationEmail?: string | null;
   maintenanceWindows?: MaintenanceWindow[] | null;
   securityGrade?: string | null;
-  securityHeaders?: any | null;
+  securityHeaders?: Record<string, string> | null;
   createdAt: string;
   updatedAt: string;
   checks?: Check[];
@@ -103,37 +103,28 @@ async function apiFetch<T>(path: string, token: string, options?: RequestInit): 
     }
 
     return res.json() as Promise<T>;
-  } catch (err: any) {
-    if (err.name === 'AbortError') throw new Error('Request timed out. Check your connection.');
+  } catch (err: unknown) {
+    if (err instanceof Error && err.name === 'AbortError') throw new Error('Request timed out. Check your connection.');
     throw err;
   } finally {
     clearTimeout(timer);
   }
 }
 
-// GitHub token helpers — stored with a 7-day TTL so stale tokens are auto-cleared
+// GitHub token — stored in sessionStorage (cleared on tab close, not persisted across sessions)
+// sessionStorage is still XSS-vulnerable but has a much shorter lifetime than localStorage.
 const GH_TOKEN_KEY = 'gh_provider_token';
-const GH_TOKEN_TS_KEY = 'gh_provider_token_ts';
-const GH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 export const githubToken = {
   get(): string | null {
     if (typeof window === 'undefined') return null;
-    const ts = Number(localStorage.getItem(GH_TOKEN_TS_KEY) ?? 0);
-    if (Date.now() - ts > GH_TOKEN_TTL_MS) {
-      localStorage.removeItem(GH_TOKEN_KEY);
-      localStorage.removeItem(GH_TOKEN_TS_KEY);
-      return null;
-    }
-    return localStorage.getItem(GH_TOKEN_KEY);
+    return sessionStorage.getItem(GH_TOKEN_KEY);
   },
   set(token: string) {
-    localStorage.setItem(GH_TOKEN_KEY, token);
-    localStorage.setItem(GH_TOKEN_TS_KEY, String(Date.now()));
+    sessionStorage.setItem(GH_TOKEN_KEY, token);
   },
   clear() {
-    localStorage.removeItem(GH_TOKEN_KEY);
-    localStorage.removeItem(GH_TOKEN_TS_KEY);
+    sessionStorage.removeItem(GH_TOKEN_KEY);
   },
 };
 
@@ -153,7 +144,7 @@ export const api = {
     checkNow:(id: string, token: string) =>
                apiFetch<Check>(`/monitors/${id}/check-now`, token, { method: 'POST' }),
     scanRepo: (id: string, token: string, ghToken: string, force = false) =>
-               apiFetch<any>(`/monitors/${id}/scan-repo${force ? '?force=true' : ''}`, token, { method: 'POST', headers: { 'x-github-token': ghToken } }),
+               apiFetch<unknown>(`/monitors/${id}/scan-repo${force ? '?force=true' : ''}`, token, { method: 'POST', headers: { 'x-github-token': ghToken } }),
     downtime: (id: string, token: string) => apiFetch<DowntimeWindow[]>(`/monitors/${id}/downtime`, token),
     testEmail: (id: string, token: string) => apiFetch<{ ok: boolean; message: string }>(`/monitors/${id}/test-email`, token, { method: 'POST' }),
   },
@@ -173,16 +164,16 @@ export const api = {
   },
   playground: {
     testEndpoint: (payload: { url: string; method: string; headers?: Record<string, string>; body?: any }, token: string) =>
-      apiFetch<any>('/playground/test-endpoint', token, { method: 'POST', body: JSON.stringify(payload) }),
+      apiFetch<unknown>('/playground/test-endpoint', token, { method: 'POST', body: JSON.stringify(payload) }),
     auditCode: (payload: { code: string; language: string }, token: string) =>
-      apiFetch<any>('/playground/audit-code', token, { method: 'POST', body: JSON.stringify(payload) }),
+      apiFetch<unknown>('/playground/audit-code', token, { method: 'POST', body: JSON.stringify(payload) }),
     inspectDomain: (payload: { domain: string }, token: string) =>
-      apiFetch<any>('/playground/inspect-domain', token, { method: 'POST', body: JSON.stringify(payload) }),
+      apiFetch<unknown>('/playground/inspect-domain', token, { method: 'POST', body: JSON.stringify(payload) }),
     simulateAttack: (payload: { url: string; attackType: string }, token: string) =>
-      apiFetch<any>('/playground/simulate-attack', token, { method: 'POST', body: JSON.stringify(payload) }),
+      apiFetch<unknown>('/playground/simulate-attack', token, { method: 'POST', body: JSON.stringify(payload) }),
     generatePatch: (payload: { code: string; findings: string; language?: string }, token: string) =>
-      apiFetch<any>('/playground/generate-patch', token, { method: 'POST', body: JSON.stringify(payload) }),
+      apiFetch<unknown>('/playground/generate-patch', token, { method: 'POST', body: JSON.stringify(payload) }),
     networkDiagnostics: (payload: { url: string }, token: string) =>
-      apiFetch<any>('/playground/network-diagnostic', token, { method: 'POST', body: JSON.stringify(payload) }),
+      apiFetch<unknown>('/playground/network-diagnostic', token, { method: 'POST', body: JSON.stringify(payload) }),
   },
 };

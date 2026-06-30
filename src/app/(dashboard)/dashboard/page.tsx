@@ -7,6 +7,7 @@ import { api, type Monitor, type MonitorStatus } from '@/lib/api';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { UptimeBar } from '@/components/ui/UptimeBar';
 import { useTranslation } from '@/lib/i18n';
+import { notify } from '@/lib/toast';
 
 function getLastStatus(monitor: Monitor): MonitorStatus {
   return (monitor.checks?.[0]?.status as MonitorStatus) ?? 'unknown';
@@ -45,8 +46,8 @@ export default function DashboardPage() {
     try {
       const data = await api.monitors.list(tok);
       setMonitors(data);
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      notify.error('No se pudieron cargar los monitores', e?.message);
     } finally {
       setLoading(false);
     }
@@ -87,8 +88,12 @@ export default function DashboardPage() {
     try {
       await api.monitors.checkNow(monitorId, token);
       await loadMonitors(token);
-    } catch {}
-    finally { setCheckingId(null); }
+      notify.success('Check completado');
+    } catch (err: any) {
+      notify.error('Error al chequear', err?.message);
+    } finally {
+      setCheckingId(null);
+    }
   }
 
   async function handleToggle(monitor: Monitor, e: React.MouseEvent) {
@@ -98,8 +103,12 @@ export default function DashboardPage() {
     try {
       await api.monitors.update(monitor.id, { isActive: !monitor.isActive }, token);
       await loadMonitors(token);
-    } catch {}
-    finally { setTogglingId(null); }
+      notify.success(monitor.isActive ? 'Monitor pausado' : 'Monitor activado');
+    } catch (err: any) {
+      notify.error('Error al actualizar el monitor', err?.message);
+    } finally {
+      setTogglingId(null);
+    }
   }
 
   const upCount       = monitors.filter(m => getLastStatus(m) === 'up').length;
@@ -269,7 +278,23 @@ export default function DashboardPage() {
                         PAUSADO
                       </span>
                     )}
+                    {(() => {
+                      if (!Array.isArray(m.maintenanceWindows) || m.maintenanceWindows.length === 0) return null;
+                      const now = new Date();
+                      const day = now.getDay(); const h = now.getHours(); const min = now.getMinutes();
+                      const inMaint = m.maintenanceWindows.some((w: any) =>
+                        Array.isArray(w.days) && w.days.includes(day) &&
+                        (h * 60 + min) >= ((w.startHour ?? 0) * 60 + (w.startMin ?? 0)) &&
+                        (h * 60 + min) < ((w.endHour ?? 0) * 60 + (w.endMin ?? 0))
+                      );
+                      return inMaint ? (
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 7, color: '#F59E0B', background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', padding: '1px 5px', borderRadius: 4, flexShrink: 0 }}>
+                          🔧 MAINT
+                        </span>
+                      ) : null;
+                    })()}
                   </div>
+
                   {m.url && (
                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {m.url.replace('https://', '').replace('http://', '')}
