@@ -249,8 +249,9 @@ export default function DashboardPage() {
           const latSt = getLatencyStatus(latestMs ?? 0);
 
           return (
-            <div
+            <Link
               key={m.id}
+              href={`/monitors/${m.id}`}
               className="glass-card"
               style={{
                 padding: '20px',
@@ -260,6 +261,9 @@ export default function DashboardPage() {
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 14,
+                textDecoration: 'none',
+                cursor: 'pointer',
+                position: 'relative',
               }}
             >
               {/* Card header */}
@@ -337,7 +341,7 @@ export default function DashboardPage() {
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)' }}>
                   {lastCheckedAt ? `Hace ${timeAgo(lastCheckedAt)}` : '—'}
                 </span>
-                <div style={{ display: 'flex', gap: 6 }}>
+                <div style={{ display: 'flex', gap: 6, position: 'relative', zIndex: 1 }}>
                   {/* Check Now */}
                   {m.url && (
                     <button
@@ -368,19 +372,9 @@ export default function DashboardPage() {
                       : <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                     }
                   </button>
-                  {/* Open detail */}
-                  <Link
-                    href={`/monitors/${m.id}`}
-                    title={t('dash_view_details')}
-                    style={{ width: 28, height: 28, borderRadius: 8, border: '1px solid var(--color-border-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-txt-muted)', textDecoration: 'none', transition: 'all 0.15s' }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-brand-light)'; e.currentTarget.style.color = 'var(--color-brand-primary)'; e.currentTarget.style.borderColor = 'var(--color-brand-mid)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--color-txt-muted)'; e.currentTarget.style.borderColor = 'var(--color-border-main)'; }}
-                  >
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                  </Link>
                 </div>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>
