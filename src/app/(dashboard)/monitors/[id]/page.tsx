@@ -928,6 +928,27 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
         </div>
       </div>
 
+      {/* Unknown status explanation — shown when monitor has no URL (repo-only) */}
+      {status === 'unknown' && !monitor.url && (
+        <div style={{
+          display: 'flex', alignItems: 'flex-start', gap: 14,
+          background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.18)',
+          borderRadius: 16, padding: '16px 20px', marginBottom: 24,
+        }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <div>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600, color: 'var(--color-txt-primary)', margin: '0 0 4px' }}>
+              Este monitor no mide uptime ni tiempo de respuesta
+            </p>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-txt-muted)', margin: 0, lineHeight: 1.6 }}>
+              Solo está vinculado a un repositorio de GitHub — no tiene URL a la cual hacerle ping. Las métricas de disponibilidad, SSL y latencia requieren una URL. Podés agregar una editando el monitor, o usarlo únicamente para escaneos de seguridad del repo.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Alerts / Notifications */}
       {token && <AlertsPanel monitor={monitor} token={token} onUpdate={setMonitor} />}
 
