@@ -234,7 +234,7 @@ function AlertsPanel({ monitor, token, onUpdate }: { monitor: Monitor; token: st
             Alertas
           </span>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="alert-chips" style={{ display: 'flex', gap: 8 }}>
           <span style={chipStyle(hasEmail)}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: hasEmail ? '#16A34A' : '#9CA3AF' }} />
             Email {hasEmail ? 'activo' : 'inactivo'}
@@ -858,10 +858,10 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
       </div>
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 24, marginBottom: 32, flexWrap: 'wrap' }}>
+      <div className="monitor-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 24, marginBottom: 32, flexWrap: 'wrap' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 8, flexWrap: 'wrap' }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 800, color: 'var(--color-txt-primary)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
+            <h1 className="monitor-title" style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 800, color: 'var(--color-txt-primary)', margin: 0, letterSpacing: '-0.02em', lineHeight: 1 }}>
               {monitor.name}
             </h1>
             <StatusBadge status={status} />
@@ -899,7 +899,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
             ) : null;
           })()}
         </div>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        <div className="monitor-actions" style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           {monitor.githubRepoUrl && (
             <button onClick={handleScanRepo} disabled={scanning} className="btn-strict-secondary" style={{ height: 38, fontSize: 12 }}>
               {scanning ? <Spinner color="var(--color-brand-primary)" /> : <ShieldIcon />}
@@ -994,7 +994,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
               ))}
             </div>
           </div>
-          <CheckHeatmap checks={checks} />
+          <div className="heatmap-scroll"><CheckHeatmap checks={checks} /></div>
         </div>
       )}
 
@@ -1134,7 +1134,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                     </div>
 
                     {/* Timeline legend */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                    <div className="net-legend" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
                       {[
                         { label: 'DNS Lookup', val: netDiagnosticData.timings.dnsLookupMs, color: '#16A34A' },
                         { label: 'TCP Conn', val: netDiagnosticData.timings.tcpConnectMs, color: 'var(--color-acid)' },
@@ -1204,11 +1204,11 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
           ) : (
             incidents.map((inc, i) => (
               <div key={inc.id} style={{ padding: '16px 24px', borderBottom: i < incidents.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', opacity: inc.resolved ? 0.5 : 1 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                <div className="incident-row-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: inc.resolved ? 'var(--color-txt-muted)' : 'var(--color-pink-primary)', fontWeight: 'bold' }}>
                     [{inc.severity.toUpperCase()}] {inc.riskType}
                   </span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div className="incident-row-actions" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>{fmtDate(inc.createdAt)}</span>
                     {monitor.githubRepoUrl && !inc.resolved && (
                       <button
@@ -1289,6 +1289,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
           <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--color-border-main)' }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{t('mon_check_log')}</span>
           </div>
+          <div className="check-log-scroll">
           <div style={{ display: 'grid', gridTemplateColumns: '100px 70px 90px 70px 1fr auto', padding: '10px 24px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
             {[t('mon_col_status'), t('mon_col_code'), t('mon_col_response'), 'SSL', t('mon_col_time'), t('mon_col_error')].map(h => (
               <span key={h} style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{h}</span>
@@ -1320,6 +1321,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
               </span>
             </div>
           ))}
+          </div>
         </div>
       )}
 
@@ -1346,7 +1348,24 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
         </div>
       )}
 
-      <style>{`@keyframes pg-spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes pg-spin { to { transform: rotate(360deg); } }
+        @media (max-width: 640px) {
+          .monitor-title { font-size: 24px !important; }
+          .monitor-actions { gap: 6px !important; }
+          .monitor-actions button, .monitor-actions a button { height: 34px !important; font-size: 11px !important; padding: 0 10px !important; }
+          .metrics-deck { grid-template-columns: repeat(2,1fr) !important; gap: 10px !important; }
+          .check-log-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+          .check-log-scroll > div { min-width: 560px; }
+          .incident-row-header { flex-direction: column !important; align-items: flex-start !important; gap: 6px !important; }
+          .incident-row-actions { flex-wrap: wrap !important; gap: 6px !important; }
+          .alert-chips { flex-wrap: wrap !important; gap: 6px !important; }
+          .heatmap-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+          .net-legend { grid-template-columns: repeat(2,1fr) !important; }
+          .monitor-header { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
+          .monitor-header-left h1 { font-size: 24px !important; }
+        }
+      `}</style>
     </div>
     </>
   );
