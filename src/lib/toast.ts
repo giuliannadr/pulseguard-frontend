@@ -1,26 +1,30 @@
-import { toast } from 'sonner';
+import { sileo } from 'sileo';
 
 export const notify = {
-  success: (msg: string, description?: string) =>
-    toast.success(msg, { description }),
+  success: (title: string, description?: string) =>
+    sileo.success({ title, description }),
 
-  error: (msg: string, description?: string) =>
-    toast.error(msg, { description }),
+  error: (title: string, description?: string) =>
+    sileo.error({ title, description }),
 
-  warning: (msg: string, description?: string) =>
-    toast.warning(msg, { description }),
+  warning: (title: string, description?: string) =>
+    sileo.warning({ title, description }),
 
-  info: (msg: string, description?: string) =>
-    toast.info(msg, { description }),
+  info: (title: string, description?: string) =>
+    sileo.info({ title, description }),
 
-  loading: (msg: string) =>
-    toast.loading(msg),
+  loading: (title: string) =>
+    sileo.show({ title, type: 'loading', duration: null }),
 
   promise: <T>(
     promise: Promise<T>,
     msgs: { loading: string; success: string; error: string },
   ) =>
-    toast.promise(promise, msgs),
+    sileo.promise(promise, {
+      loading: { title: msgs.loading, type: 'loading' },
+      success: { title: msgs.success, type: 'success' },
+      error: { title: msgs.error, type: 'error' },
+    }),
 
-  dismiss: (id?: string | number) => toast.dismiss(id),
+  dismiss: (id?: string) => { if (id) sileo.dismiss(id); },
 };

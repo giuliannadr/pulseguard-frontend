@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Bricolage_Grotesque, JetBrains_Mono, DM_Sans } from 'next/font/google';
-import { Toaster } from 'sonner';
+import { Toaster } from 'sileo';
 import './globals.css';
 import { TranslationProvider } from '@/lib/i18n';
 
@@ -55,11 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <TranslationProvider>
           {children}
         </TranslationProvider>
-        <Toaster
-          position="bottom-right"
-          richColors
-          closeButton
-        />
+        <Toaster position="bottom-right" theme="system" />
       </body>
     </html>
   );
