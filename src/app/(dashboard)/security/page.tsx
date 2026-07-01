@@ -123,18 +123,18 @@ export default function SecurityPage() {
   ];
 
   const severityBg = (sev: string, resolved: boolean) => {
-    if (resolved) return 'rgba(255,255,255,0.6)';
+    if (resolved) return 'var(--color-bg-card)';
     if (sev === 'Critical') return 'rgba(220,38,38,0.04)';
     if (sev === 'High')     return 'rgba(217,119,6,0.04)';
     if (sev === 'Medium')   return 'rgba(124,58,237,0.04)';
-    return 'rgba(255,255,255,0.72)';
+    return 'var(--color-bg-card)';
   };
   const severityBorder = (sev: string, resolved: boolean) => {
-    if (resolved) return '1px solid rgba(255,255,255,0.6)';
+    if (resolved) return '1px solid var(--color-bg-card)';
     if (sev === 'Critical') return '1px solid rgba(220,38,38,0.25)';
     if (sev === 'High')     return '1px solid rgba(217,119,6,0.25)';
     if (sev === 'Medium')   return '1px solid rgba(124,58,237,0.2)';
-    return '1px solid rgba(255,255,255,0.75)';
+    return '1px solid var(--color-bg-card)';
   };
   const severityColor = (sev: string) => {
     if (sev === 'Critical') return '#DC2626';
@@ -196,9 +196,9 @@ export default function SecurityPage() {
               key={f.id}
               onClick={() => setFilter(f.id)}
               style={{
-                background: filter === f.id ? f.color : 'rgba(255,255,255,0.7)',
+                background: filter === f.id ? f.color : 'var(--color-bg-card)',
                 color: filter === f.id ? 'white' : 'var(--color-txt-secondary)',
-                border: `1px solid ${filter === f.id ? f.color : 'rgba(255,255,255,0.85)'}`,
+                border: `1px solid ${filter === f.id ? f.color : 'var(--color-border-main)'}`,
                 borderRadius: 20,
                 padding: '5px 14px',
                 fontSize: 11,
@@ -255,12 +255,12 @@ export default function SecurityPage() {
           ))}
         </div>
       ) : filtered.length === 0 && incidents.length === 0 ? (
-        <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.8)', borderRadius: 24, padding: '80px 40px', textAlign: 'center', boxShadow: '0 4px 24px rgba(124,58,237,0.06)' }}>
+        <div style={{ background: 'var(--color-bg-card)', backdropFilter: 'blur(16px)', border: '1px solid var(--color-bg-card)', borderRadius: 24, padding: '80px 40px', textAlign: 'center', boxShadow: '0 4px 24px rgba(124,58,237,0.06)' }}>
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: '#16A34A', margin: '0 0 8px' }}>{t('sec_all_clear')}</h3>
           <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-txt-muted)', margin: 0 }}>{t('sec_no_incidents')}</p>
         </div>
       ) : filtered.length === 0 ? (
-        <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.8)', borderRadius: 20, padding: '48px 40px', textAlign: 'center' }}>
+        <div style={{ background: 'var(--color-bg-card)', backdropFilter: 'blur(16px)', border: '1px solid var(--color-bg-card)', borderRadius: 20, padding: '48px 40px', textAlign: 'center' }}>
           <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--color-txt-muted)', margin: 0 }}>
             {language === 'es' ? 'Sin incidentes con este filtro.' : 'No incidents match this filter.'}
           </p>

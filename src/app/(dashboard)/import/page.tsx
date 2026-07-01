@@ -199,7 +199,7 @@ export default function ImportPage() {
           { label: 'Custom API',    name: 'API REST',     url: 'https://api.dominio.com/health' },
         ];
         return (
-          <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, padding: '16px 24px', boxShadow: '0 4px 24px rgba(124,58,237,0.06)', marginBottom: 4 }}>
+          <div style={{ background: 'var(--color-bg-card)', backdropFilter: 'blur(16px)', border: '1px solid var(--color-border-main)', borderRadius: 20, padding: '16px 24px', boxShadow: '0 4px 24px rgba(124,58,237,0.06)', marginBottom: 4 }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)', margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               Quick presets
             </p>
@@ -243,7 +243,7 @@ export default function ImportPage() {
       <form onSubmit={handleImport} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
         {/* Name — always shown */}
-        <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, padding: 24, boxShadow: '0 4px 24px rgba(124,58,237,0.06)' }}>
+        <div style={{ background: 'var(--color-bg-card)', backdropFilter: 'blur(16px)', border: '1px solid var(--color-border-main)', borderRadius: 20, padding: 24, boxShadow: '0 4px 24px rgba(124,58,237,0.06)' }}>
           <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             Monitor Name
           </label>
@@ -259,7 +259,7 @@ export default function ImportPage() {
         </div>
 
         {/* Notification email */}
-        <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, padding: 24, boxShadow: '0 4px 24px rgba(124,58,237,0.06)' }}>
+        <div style={{ background: 'var(--color-bg-card)', backdropFilter: 'blur(16px)', border: '1px solid var(--color-border-main)', borderRadius: 20, padding: 24, boxShadow: '0 4px 24px rgba(124,58,237,0.06)' }}>
           <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             Alert Email <span style={{ color: 'var(--color-txt-muted)', textTransform: 'none', fontSize: 10 }}>(optional)</span>
           </label>
@@ -277,7 +277,7 @@ export default function ImportPage() {
 
         {/* URL field */}
         {needsUrl && (
-          <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, padding: 24, boxShadow: '0 4px 24px rgba(124,58,237,0.06)' }}>
+          <div style={{ background: 'var(--color-bg-card)', backdropFilter: 'blur(16px)', border: '1px solid var(--color-border-main)', borderRadius: 20, padding: 24, boxShadow: '0 4px 24px rgba(124,58,237,0.06)' }}>
             <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               URL to monitor <span style={{ color: 'var(--color-acid)' }}>*</span>
             </label>
@@ -299,7 +299,7 @@ export default function ImportPage() {
 
         {/* Repo picker */}
         {needsRepo && (
-          <div style={{ background: 'rgba(255,255,255,0.72)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 4px 24px rgba(124,58,237,0.06)' }}>
+          <div style={{ background: 'var(--color-bg-card)', backdropFilter: 'blur(16px)', border: '1px solid var(--color-border-main)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 4px 24px rgba(124,58,237,0.06)' }}>
             <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--color-border-main)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--color-txt-muted)">

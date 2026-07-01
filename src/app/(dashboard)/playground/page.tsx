@@ -396,7 +396,7 @@ export default function PlaygroundPage() {
             style={{
               display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
               padding: '10px 16px', borderRadius: 14,
-              background: activeTab === tab.id ? 'var(--color-brand-light)' : 'rgba(255,255,255,0.6)',
+              background: activeTab === tab.id ? 'var(--color-brand-light)' : 'var(--color-bg-card)',
               border: activeTab === tab.id ? '1px solid var(--color-brand-mid)' : '1px solid var(--color-border-main)',
               color: activeTab === tab.id ? 'var(--color-brand-primary)' : 'var(--color-txt-secondary)',
               cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s',
@@ -1023,7 +1023,7 @@ function EmptyResult({ icon, text }: { icon: 'wave' | 'code' | 'shield'; text: s
     shield: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>,
   };
   return (
-    <div style={{ background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(12px)', border: '1px dashed rgba(196,181,253,0.35)', borderRadius: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 48, textAlign: 'center', color: 'var(--color-txt-muted)', height: '100%', minHeight: 200 }}>
+    <div style={{ background: 'var(--color-bg-card)', backdropFilter: 'blur(12px)', border: '1px dashed rgba(196,181,253,0.35)', borderRadius: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 48, textAlign: 'center', color: 'var(--color-txt-muted)', height: '100%', minHeight: 200 }}>
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginBottom: 12, opacity: 0.4 }}>
         {icons[icon]}
       </svg>
