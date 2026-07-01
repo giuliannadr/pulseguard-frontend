@@ -6,21 +6,21 @@ import { usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
-import { api } from '@/lib/api';
+import { api, SecurityIncident } from '@/lib/api';
 import { useScan } from '@/lib/scan-context';
 
 export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: string | null; onCloseMobile?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useTranslation();
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    }
+    return 'light';
+  });
   const [alertCount, setAlertCount] = useState(0);
   const { scan, clearDone } = useScan();
-
-  useEffect(() => {
-    const isDark = document.documentElement.classList.contains('dark');
-    setTheme(isDark ? 'dark' : 'light');
-  }, []);
 
   useEffect(() => {
     const supabase = createClient();
@@ -29,7 +29,7 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
     function fetchCount() {
       if (!token) return;
       api.securityIncidents.listAll(token).then((data) => {
-        const count = data.filter((i: any) => !i.resolved && i.severity !== 'None').length;
+        const count = data.filter((i: SecurityIncident) => !i.resolved && i.severity !== 'None').length;
         setAlertCount(count);
       }).catch(() => {});
     }

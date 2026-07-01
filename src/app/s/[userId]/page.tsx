@@ -66,12 +66,12 @@ export default function PublicStatusPage({ params }: { params: Promise<{ userId:
   }, [userId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
     const id = setInterval(() => fetchData(), REFRESH_INTERVAL);
     return () => clearInterval(id);
   }, [fetchData]);
 
-  const allUp = monitors.length > 0 && monitors.every(m => m.status === 'up');
   const hasDown = monitors.some(m => m.status === 'down');
   const hasDegraded = monitors.some(m => m.status === 'degraded');
 

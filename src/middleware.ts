@@ -1,7 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-const PUBLIC_PATHS = ['/', '/auth/callback', '/auth/signout'];
 const AUTH_PATHS = ['/login', '/signup'];
 
 export async function middleware(request: NextRequest) {

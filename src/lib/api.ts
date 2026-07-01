@@ -19,10 +19,21 @@ export interface Monitor {
   notificationEmail?: string | null;
   maintenanceWindows?: MaintenanceWindow[] | null;
   securityGrade?: string | null;
-  securityHeaders?: Record<string, string> | null;
+  securityHeaders?: SecurityHeadersPayload | null;
   createdAt: string;
   updatedAt: string;
   checks?: Check[];
+}
+
+export interface SecurityHeadersPayload {
+  headers?: {
+    csp?: string | null;
+    hsts?: string | null;
+    xFrame?: string | null;
+    xContentType?: string | null;
+    referrer?: string | null;
+    permissions?: string | null;
+  } | null;
 }
 
 export interface MaintenanceWindow {
@@ -48,7 +59,7 @@ export interface Check {
   sslDaysLeft: number | null;
   errorMessage: string | null;
   securityGrade?: string | null;
-  securityHeaders?: any | null;
+  securityHeaders?: SecurityHeadersPayload | null;
   checkedAt: string;
 }
 
@@ -150,9 +161,9 @@ export const api = {
   },
   github: {
     repos: (token: string, ghToken: string) =>
-      apiFetch<any[]>('/github/repos', token, { headers: { 'x-github-token': ghToken } }),
+      apiFetch<unknown[]>('/github/repos', token, { headers: { 'x-github-token': ghToken } }),
     connect: (monitorId: string, owner: string, repo: string, token: string, ghToken: string) =>
-      apiFetch<any>(`/github/connect/${monitorId}`, token, {
+      apiFetch<unknown>(`/github/connect/${monitorId}`, token, {
         method: 'POST',
         body: JSON.stringify({ owner, repo }),
         headers: { 'x-github-token': ghToken },
@@ -163,7 +174,7 @@ export const api = {
     resolve: (id: string, token: string) => apiFetch<void>(`/security-incidents/${id}/resolve`, token, { method: 'PATCH' }),
   },
   playground: {
-    testEndpoint: (payload: { url: string; method: string; headers?: Record<string, string>; body?: any }, token: string) =>
+    testEndpoint: (payload: { url: string; method: string; headers?: Record<string, string>; body?: unknown }, token: string) =>
       apiFetch<unknown>('/playground/test-endpoint', token, { method: 'POST', body: JSON.stringify(payload) }),
     auditCode: (payload: { code: string; language: string }, token: string) =>
       apiFetch<unknown>('/playground/audit-code', token, { method: 'POST', body: JSON.stringify(payload) }),

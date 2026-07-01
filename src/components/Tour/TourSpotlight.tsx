@@ -94,6 +94,7 @@ export function TourSpotlight() {
 
   useEffect(() => {
     if (!active) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     updateRect();
     window.addEventListener('resize', updateRect);
     window.addEventListener('scroll', updateRect, true);
