@@ -416,7 +416,7 @@ interface i18nContextProps {
 const i18nContext = createContext<i18nContextProps | undefined>(undefined);
 
 export function TranslationProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>('en');
+  const [language, setLanguageState] = useState<Language>('es');
 
   useEffect(() => {
     const saved = localStorage.getItem('pg_language') as Language;
