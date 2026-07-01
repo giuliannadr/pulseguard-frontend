@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useTour } from './TourProvider';
 import { TOUR_STEPS } from '@/lib/tour-steps';
@@ -96,7 +97,7 @@ export function TourSpotlight() {
 
   const tooltipStyle = getTooltipStyle(isCentered ? null : rect, step.position);
 
-  return (
+  return createPortal(
     <>
       {/* Dark overlay: always shown; transparent when spotlight hole handles darkening */}
       <div
@@ -246,6 +247,7 @@ export function TourSpotlight() {
           )}
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }
