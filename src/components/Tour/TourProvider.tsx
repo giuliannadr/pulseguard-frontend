@@ -20,9 +20,15 @@ export function TourProvider({ children }: { children: ReactNode }) {
   const [stepIndex, setStepIndex] = useState(0);
 
   useEffect(() => {
+    const pending = sessionStorage.getItem('pg_pending_tour');
+    if (pending) {
+      sessionStorage.removeItem('pg_pending_tour');
+      localStorage.removeItem(TOUR_STORAGE_KEY);
+      const t = setTimeout(() => setActive(true), 800);
+      return () => clearTimeout(t);
+    }
     const done = localStorage.getItem(TOUR_STORAGE_KEY);
     if (!done) {
-      // Small delay so the dashboard has time to render its elements
       const t = setTimeout(() => setActive(true), 800);
       return () => clearTimeout(t);
     }

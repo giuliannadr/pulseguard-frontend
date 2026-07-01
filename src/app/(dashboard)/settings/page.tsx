@@ -5,13 +5,18 @@ import { createClient } from '@/lib/supabase/client';
 import { useTranslation, type Language } from '@/lib/i18n';
 import { api, githubToken as ghTokenHelper } from '@/lib/api';
 import { notify } from '@/lib/toast';
-import { useTour } from '@/components/Tour';
+import { useRouter } from 'next/navigation';
 
 type Tab = 'pref' | 'integ';
 
 export default function SettingsPage() {
   const { t, language, setLanguage } = useTranslation();
-  const { startTour } = useTour();
+  const router = useRouter();
+
+  function handleReplayTour() {
+    sessionStorage.setItem('pg_pending_tour', '1');
+    router.push('/dashboard');
+  }
   const [activeTab, setActiveTab] = useState<Tab>('pref');
   
   const [token, setToken] = useState<string | null>(null);
@@ -332,7 +337,7 @@ export default function SettingsPage() {
               </p>
               <button
                 type="button"
-                onClick={startTour}
+                onClick={handleReplayTour}
                 style={{
                   background: 'transparent',
                   border: '1px solid var(--color-border-main)',
