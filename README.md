@@ -27,7 +27,7 @@ PulseGuard es un sistema de monitoreo de uptime y seguridad para desarrolladores
 | **TypeScript** | Lenguaje | Tipado estricto, menor superficie de bugs en runtime |
 | **Supabase** | Auth + Realtime | BaaS que maneja autenticación JWT y suscripciones Postgres en tiempo real sin servidor propio |
 | **Recharts** | Gráficos | Componentes React nativos para el historial de latencia |
-| **Sonner** | Notificaciones | Toast notifications con soporte de éxito, error, warning, loading y promise |
+| **Sileo** | Notificaciones | Toast notifications con soporte de éxito, error, warning e info |
 
 **Decisión de arquitectura clave:** Se eligió separar completamente el frontend (Vercel) del backend (Railway) para poder escalar cada capa independientemente y mantener la lógica de negocio (checks, AI scanning, notificaciones) fuera del browser.
 
@@ -144,7 +144,7 @@ npm start
 
 ## Notificaciones UI
 
-Las notificaciones de la app usan [Sonner](https://sonner.emilkowal.ski/). Para mostrar toasts en cualquier componente:
+Las notificaciones de la app usan **Sileo** (wrapper sobre una librería de toasts). Para mostrar notificaciones en cualquier componente:
 
 ```ts
 import { notify } from '@/lib/toast';
@@ -152,11 +152,7 @@ import { notify } from '@/lib/toast';
 notify.success('Monitor activado');
 notify.error('Error al guardar', err.message);
 notify.warning('Sin email configurado');
-notify.promise(apiCall(), {
-  loading: 'Guardando...',
-  success: '¡Listo!',
-  error: 'Error',
-});
+notify.info('Escaneo en progreso');
 ```
 
 ---
