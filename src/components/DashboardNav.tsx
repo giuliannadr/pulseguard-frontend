@@ -127,6 +127,8 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
       background: 'var(--color-bg-sidebar)',
       display: 'flex', flexDirection: 'column', flexShrink: 0,
       position: 'relative', zIndex: 20,
+      overflowY: 'auto',
+      overflowX: 'hidden',
     }}>
 
       {/* Logo */}

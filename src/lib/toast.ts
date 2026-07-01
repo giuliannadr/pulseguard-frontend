@@ -2,16 +2,16 @@ import { sileo } from 'sileo';
 
 export const notify = {
   success: (title: string, description?: string) =>
-    sileo.success({ title, description }),
+    sileo.success({ title, description, duration: 2500 }),
 
   error: (title: string, description?: string) =>
-    sileo.error({ title, description }),
+    sileo.error({ title, description, duration: 3500 }),
 
   warning: (title: string, description?: string) =>
-    sileo.warning({ title, description }),
+    sileo.warning({ title, description, duration: 3000 }),
 
   info: (title: string, description?: string) =>
-    sileo.info({ title, description }),
+    sileo.info({ title, description, duration: 2500 }),
 
   loading: (title: string) =>
     sileo.show({ title, type: 'loading', duration: null }),
