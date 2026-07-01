@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { Bricolage_Grotesque, JetBrains_Mono, DM_Sans } from 'next/font/google';
-import { Toaster } from 'sileo';
 import './globals.css';
 import { TranslationProvider } from '@/lib/i18n';
+import { SileoToaster } from '@/components/SileoToaster';
 
 const bricolage = Bricolage_Grotesque({
   subsets: ['latin'],
@@ -55,7 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <TranslationProvider>
           {children}
         </TranslationProvider>
-        <Toaster position="bottom-right" theme="system" />
+        <SileoToaster />
       </body>
     </html>
   );
