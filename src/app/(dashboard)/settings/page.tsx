@@ -192,7 +192,7 @@ export default function SettingsPage() {
               <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-primary)', fontWeight: 'bold', marginBottom: 6 }}>
                 {t('settings_lang')}
               </label>
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: '#555', margin: '0 0 12px 0' }}>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-txt-secondary)', margin: '0 0 12px 0' }}>
                 {t('settings_lang_desc')}
               </p>
               <div style={{ display: 'flex', gap: 10 }}>
@@ -238,7 +238,7 @@ export default function SettingsPage() {
               <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-primary)', fontWeight: 'bold', marginBottom: 6 }}>
                 {t('settings_alert')}
               </label>
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: '#555', margin: '0 0 12px 0' }}>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-txt-secondary)', margin: '0 0 12px 0' }}>
                 {t('settings_alert_desc')}
               </p>
               <input
@@ -326,7 +326,7 @@ export default function SettingsPage() {
                 >
                   {applyingToAll ? 'Aplicando...' : 'Aplicar a todos los monitores'}
                 </button>
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: '#555', margin: '6px 0 0' }}>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--color-txt-secondary)', margin: '6px 0 0' }}>
                   Guarda esta URL de webhook en todos tus monitores actuales.
                 </p>
               </div>
@@ -337,7 +337,7 @@ export default function SettingsPage() {
               <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-primary)', fontWeight: 'bold', marginBottom: 6 }}>
                 Tour de bienvenida
               </label>
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: '#555', margin: '0 0 12px 0' }}>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-txt-secondary)', margin: '0 0 12px 0' }}>
                 Volvé a ver el recorrido guiado por las funciones de PulseGuard.
               </p>
               <button

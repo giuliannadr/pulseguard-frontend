@@ -174,10 +174,10 @@ export default function SecurityPage() {
       {/* ── Stat row ── */}
       <div className="grid-stats-4" style={{ marginBottom: 28 }}>
         {[
-          { label: t('sec_critical'), value: critical, color: critical > 0 ? '#DC2626' : 'var(--color-txt-primary)', bg: critical > 0 ? 'rgba(220,38,38,0.06)' : 'rgba(255,255,255,0.72)', border: critical > 0 ? 'rgba(220,38,38,0.2)' : 'rgba(255,255,255,0.85)' },
-          { label: t('sec_high'),     value: high,     color: high > 0 ? '#D97706' : 'var(--color-txt-primary)',     bg: high > 0 ? 'rgba(217,119,6,0.06)' : 'rgba(255,255,255,0.72)',     border: high > 0 ? 'rgba(217,119,6,0.2)' : 'rgba(255,255,255,0.85)' },
-          { label: t('sec_medium'),   value: medium,   color: medium > 0 ? '#7C3AED' : 'var(--color-txt-muted)',    bg: 'rgba(255,255,255,0.72)',                                           border: 'rgba(255,255,255,0.85)' },
-          { label: t('sec_resolved'), value: resolved, color: '#16A34A',                                             bg: resolved > 0 ? 'rgba(22,163,74,0.06)' : 'rgba(255,255,255,0.72)', border: resolved > 0 ? 'rgba(22,163,74,0.2)' : 'rgba(255,255,255,0.85)' },
+          { label: t('sec_critical'), value: critical, color: critical > 0 ? '#DC2626' : 'var(--color-txt-primary)', bg: critical > 0 ? 'rgba(220,38,38,0.06)' : 'var(--color-bg-card)', border: critical > 0 ? 'rgba(220,38,38,0.2)' : 'var(--color-border-main)' },
+          { label: t('sec_high'),     value: high,     color: high > 0 ? '#D97706' : 'var(--color-txt-primary)',     bg: high > 0 ? 'rgba(217,119,6,0.06)' : 'var(--color-bg-card)',     border: high > 0 ? 'rgba(217,119,6,0.2)' : 'var(--color-border-main)' },
+          { label: t('sec_medium'),   value: medium,   color: medium > 0 ? '#7C3AED' : 'var(--color-txt-muted)',    bg: 'var(--color-bg-card)',                                             border: 'var(--color-border-main)' },
+          { label: t('sec_resolved'), value: resolved, color: '#16A34A',                                             bg: resolved > 0 ? 'rgba(22,163,74,0.06)' : 'var(--color-bg-card)', border: resolved > 0 ? 'rgba(22,163,74,0.2)' : 'var(--color-border-main)' },
         ].map(s => (
           <div key={s.label} style={{ padding: '24px', background: s.bg, backdropFilter: 'blur(16px)', border: `1px solid ${s.border}`, borderRadius: 20, boxShadow: '0 4px 24px rgba(124,58,237,0.06)' }}>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 800, color: s.color, lineHeight: 1, marginBottom: 8, letterSpacing: '-0.02em' }}>

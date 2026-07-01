@@ -530,12 +530,12 @@ function EditModal({ monitor, token, onSave, onClose }: {
                 </button>
               )}
             </div>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: '#555', margin: '0 0 10px' }}>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--color-txt-secondary)', margin: '0 0 10px' }}>
               Checks are skipped during these windows — no false alerts at maintenance time.
             </p>
 
             {windows.length === 0 && !addingWindow && (
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#3A3A3A', margin: 0 }}>No windows configured.</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-secondary)', margin: 0 }}>No windows configured.</p>
             )}
 
             {windows.map((w, i) => (
@@ -1243,7 +1243,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, color: inc.resolved ? 'var(--color-txt-muted)' : 'var(--color-txt-primary)', margin: '0 0 12px', lineHeight: 1.5 }}>{inc.description}</p>
                 <div style={{ background: 'rgba(255,20,147,0.05)', padding: 12, borderRadius: 3, border: '1px solid rgba(255,20,147,0.1)', marginBottom: 12 }}>
                   <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-pink-primary)', marginBottom: 4, textTransform: 'uppercase' }}>{t('mon_incidents_recommendation')}</span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#D0D0D0' }}>{inc.recommendation}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-txt-secondary)' }}>{inc.recommendation}</span>
                 </div>
                 <div style={{ display: 'flex', gap: 16 }}>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-muted)' }}>{t('mon_incidents_author')} {inc.commitAuthor || 'Unknown'}</span>

@@ -182,7 +182,7 @@ export default function ImportPage() {
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700, color: mode === m.id ? 'var(--color-brand-primary)' : 'var(--color-txt-muted)', marginBottom: 6 }}>
               {m.label}
             </div>
-            <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: '#555', lineHeight: 1.5 }}>
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-txt-secondary)', lineHeight: 1.5 }}>
               {m.description}
             </div>
           </button>
@@ -253,7 +253,7 @@ export default function ImportPage() {
             value={name}
             onChange={e => setName(e.target.value)}
           />
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: '#555', margin: '8px 0 0' }}>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-txt-secondary)', margin: '8px 0 0' }}>
             Leave blank to auto-fill from repo name or URL.
           </p>
         </div>
@@ -270,7 +270,7 @@ export default function ImportPage() {
             value={notificationEmail}
             onChange={e => setNotificationEmail(e.target.value)}
           />
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: '#555', margin: '8px 0 0' }}>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-txt-secondary)', margin: '8px 0 0' }}>
             Get emailed when this monitor goes down. Requires RESEND_API_KEY on the server.
           </p>
         </div>
@@ -290,7 +290,7 @@ export default function ImportPage() {
               onChange={e => setUrl(e.target.value)}
             />
             {mode === 'url-only' && (
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: '#555', margin: '8px 0 0' }}>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--color-txt-secondary)', margin: '8px 0 0' }}>
                 Any public URL — you don't need to own the site.
               </p>
             )}
@@ -317,16 +317,16 @@ export default function ImportPage() {
             </div>
 
             {!githubToken ? (
-              <div style={{ padding: '32px 24px', textAlign: 'center', color: '#555', fontFamily: 'var(--font-body)', fontSize: 14 }}>
+              <div style={{ padding: '32px 24px', textAlign: 'center', color: 'var(--color-txt-secondary)', fontFamily: 'var(--font-body)', fontSize: 14 }}>
                 Connect your GitHub account to browse repositories.
               </div>
             ) : loadingRepos ? (
-              <div style={{ padding: '32px 24px', textAlign: 'center', color: '#555', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+              <div style={{ padding: '32px 24px', textAlign: 'center', color: 'var(--color-txt-secondary)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
                 Loading repositories...
               </div>
             ) : repos.length === 0 ? (
               <div style={{ padding: '32px 24px', textAlign: 'center' }}>
-                <p style={{ color: '#555', fontFamily: 'var(--font-body)', fontSize: 14, margin: '0 0 16px' }}>No repositories found.</p>
+                <p style={{ color: 'var(--color-txt-secondary)', fontFamily: 'var(--font-body)', fontSize: 14, margin: '0 0 16px' }}>No repositories found.</p>
                 <button type="button" onClick={handleConnectGithub} className="btn-strict-secondary" style={{ fontSize: 12 }}>
                   Reconnect GitHub
                 </button>
@@ -351,7 +351,7 @@ export default function ImportPage() {
                         <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-txt-primary)', fontWeight: 600 }}>
                           {repo.name}
                         </div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#555', marginTop: 3 }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-secondary)', marginTop: 3 }}>
                           {repo.private ? 'Private' : 'Public'} · {new Date(repo.updated_at).toLocaleDateString()}
                         </div>
                       </div>
