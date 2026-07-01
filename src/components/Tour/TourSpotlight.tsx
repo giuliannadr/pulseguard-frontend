@@ -9,6 +9,9 @@ import { TOUR_STEPS } from '@/lib/tour-steps';
 interface Rect { top: number; left: number; width: number; height: number }
 
 const PAD = 12;
+const CARD_W = 340;
+const CARD_H = 260; // conservative estimate
+const GAP = 16;
 
 function getTargetRect(target: string | null): Rect | null {
   if (!target) return null;
@@ -25,6 +28,53 @@ function getTargetRect(target: string | null): Rect | null {
     left: r.left - PAD,
     width: r.width + PAD * 2,
     height: r.height + PAD * 2,
+  };
+}
+
+function getCardStyle(rect: Rect, preferredPos?: string): React.CSSProperties {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const w = Math.min(CARD_W, vw - 32);
+
+  // Try preferred position, fall back if it doesn't fit
+  const canFitBelow = rect.top + rect.height + GAP + CARD_H + 16 <= vh;
+  const canFitAbove = rect.top - GAP - CARD_H - 16 >= 0;
+  const canFitRight = rect.left + rect.width + GAP + w + 16 <= vw;
+
+  let top: number;
+  let left: number;
+
+  if (preferredPos === 'right' && canFitRight) {
+    left = rect.left + rect.width + GAP;
+    top = Math.max(16, Math.min(rect.top + rect.height / 2 - CARD_H / 2, vh - CARD_H - 16));
+  } else if (preferredPos === 'top' && canFitAbove) {
+    top = rect.top - GAP - CARD_H;
+    left = Math.max(16, Math.min(rect.left + rect.width / 2 - w / 2, vw - w - 16));
+  } else if (canFitBelow) {
+    top = rect.top + rect.height + GAP;
+    left = Math.max(16, Math.min(rect.left + rect.width / 2 - w / 2, vw - w - 16));
+  } else if (canFitAbove) {
+    top = rect.top - GAP - CARD_H;
+    left = Math.max(16, Math.min(rect.left + rect.width / 2 - w / 2, vw - w - 16));
+  } else if (canFitRight) {
+    left = rect.left + rect.width + GAP;
+    top = Math.max(16, Math.min(rect.top + rect.height / 2 - CARD_H / 2, vh - CARD_H - 16));
+  } else {
+    // Last resort: below, clamped
+    top = Math.min(rect.top + rect.height + GAP, vh - CARD_H - 16);
+    top = Math.max(16, top);
+    left = Math.max(16, Math.min(rect.left + rect.width / 2 - w / 2, vw - w - 16));
+  }
+
+  return {
+    position: 'fixed',
+    top,
+    left,
+    width: w,
+    maxWidth: vw - 32,
+    maxHeight: vh - 32,
+    overflowY: 'auto',
+    zIndex: 10001,
   };
 }
 
@@ -53,7 +103,7 @@ export function TourSpotlight() {
     };
   }, [active, updateRect]);
 
-  // Open/close the sidebar drawer for nav steps (works on mobile AND desktop drawer)
+  // Open/close sidebar drawer for nav steps
   useEffect(() => {
     if (!active || !step) {
       window.dispatchEvent(new CustomEvent('pg:tour-sidebar', { detail: { open: false } }));
@@ -62,7 +112,6 @@ export function TourSpotlight() {
     const isNavStep = !!step.target?.startsWith('nav-');
     window.dispatchEvent(new CustomEvent('pg:tour-sidebar', { detail: { open: isNavStep } }));
     if (isNavStep) {
-      // Re-measure after drawer animation completes
       const t = setTimeout(() => updateRect(), 350);
       return () => clearTimeout(t);
     }
@@ -81,9 +130,16 @@ export function TourSpotlight() {
 
   if (!active || !step) return null;
 
-  // The card is ALWAYS centered using a flex wrapper — never positioned
-  // relative to the spotlight. This avoids cut-off on any screen size.
-  // The spotlight hole is rendered independently behind the card.
+  const cardStyle: React.CSSProperties = hasSpotlight && rect
+    ? getCardStyle(rect, step.position)
+    : {
+        position: 'relative',
+        width: 420,
+        maxWidth: 'calc(100vw - 32px)',
+        maxHeight: 'calc(100vh - 64px)',
+        overflowY: 'auto',
+      };
+
   const card = (
     <div
       style={{
@@ -93,14 +149,11 @@ export function TourSpotlight() {
         border: '1px solid rgba(255,255,255,0.9)',
         borderRadius: 20,
         padding: '24px 28px',
-        width: 420,
-        maxWidth: 'calc(100vw - 32px)',
         boxShadow: '0 20px 60px rgba(0,0,0,0.25), 0 4px 16px rgba(124,58,237,0.15)',
         animation: 'pg-fade-in 0.25s ease-out both',
-        position: 'relative',
+        ...cardStyle,
       }}
     >
-      {/* X */}
       <button
         onClick={skipTour}
         style={{
@@ -108,18 +161,14 @@ export function TourSpotlight() {
           background: 'transparent', border: 'none', cursor: 'pointer',
           color: '#9CA3AF', padding: 4, lineHeight: 1, borderRadius: 6,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'color 0.15s',
         }}
         title="Saltar tour"
-        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#6B7280'; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = '#9CA3AF'; }}
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
           <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
       </button>
 
-      {/* Counter */}
       <div style={{
         fontFamily: 'var(--font-mono)', fontSize: 10, color: '#7C3AED',
         fontWeight: 600, letterSpacing: '0.08em', marginBottom: 12,
@@ -129,7 +178,6 @@ export function TourSpotlight() {
         {stepIndex + 1} / {totalSteps}
       </div>
 
-      {/* Title */}
       <h3 style={{
         fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 800,
         color: '#0F0A1E', margin: '0 0 8px', lineHeight: 1.3,
@@ -137,7 +185,6 @@ export function TourSpotlight() {
         {step.title}
       </h3>
 
-      {/* Description */}
       <p style={{
         fontFamily: 'var(--font-body)', fontSize: 13, color: '#4B5563',
         margin: '0 0 20px', lineHeight: 1.7,
@@ -145,7 +192,6 @@ export function TourSpotlight() {
         {step.description}
       </p>
 
-      {/* Nav buttons */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         {stepIndex > 0 && (
           <button
@@ -207,8 +253,7 @@ export function TourSpotlight() {
 
   return createPortal(
     <>
-      {/* Layer 1 — dark overlay. When spotlight active, it's transparent so
-          the hole's box-shadow provides the dimming instead. */}
+      {/* Overlay — transparent when spotlight provides its own dimming */}
       <div
         style={{
           position: 'fixed', inset: 0, zIndex: 9999,
@@ -218,7 +263,7 @@ export function TourSpotlight() {
         onClick={(e) => e.stopPropagation()}
       />
 
-      {/* Layer 2 — spotlight hole. box-shadow creates the dim ring around it. */}
+      {/* Spotlight hole with animated position */}
       {hasSpotlight && rect && (
         <div
           style={{
@@ -234,16 +279,18 @@ export function TourSpotlight() {
         />
       )}
 
-      {/* Layer 3 — card, always flex-centered so it's never clipped */}
-      <div
-        style={{
+      {/* Card — positioned away from spotlight, or centered when no spotlight */}
+      {hasSpotlight ? (
+        card
+      ) : (
+        <div style={{
           position: 'fixed', inset: 0, zIndex: 10001,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           pointerEvents: 'none',
-        }}
-      >
-        <div style={{ pointerEvents: 'all' }}>{card}</div>
-      </div>
+        }}>
+          <div style={{ pointerEvents: 'all' }}>{card}</div>
+        </div>
+      )}
     </>,
     document.body
   );
