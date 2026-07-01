@@ -557,3 +557,79 @@ body::after {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ── Responsive grid utilities ──────────────────────────────────── */
+
+/* 4-column stat grids (dashboard, security) */
+.grid-stats-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+/* Auto-fill monitor cards */
+.grid-monitor-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+/* 3-column grids (mode selector, empty state steps) */
+.grid-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* 3-column mini stats inside monitor card */
+.grid-3mini {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .dashboard-main {
+    overflow-x: hidden;
+  }
+
+  .grid-stats-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .grid-monitor-cards {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .grid-3col {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .grid-3mini {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  .empty-steps-grid {
+    grid-template-columns: 1fr !important;
+    max-width: 100% !important;
+    gap: 12px !important;
+    margin-bottom: 24px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid-stats-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .grid-3mini {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}

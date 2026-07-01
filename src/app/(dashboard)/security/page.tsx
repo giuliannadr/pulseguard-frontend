@@ -171,7 +171,7 @@ export default function SecurityPage() {
       </div>
 
       {/* ── Stat row ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 28 }}>
+      <div className="grid-stats-4" style={{ marginBottom: 28 }}>
         {[
           { label: t('sec_critical'), value: critical, color: critical > 0 ? '#DC2626' : 'var(--color-txt-primary)', bg: critical > 0 ? 'rgba(220,38,38,0.06)' : 'rgba(255,255,255,0.72)', border: critical > 0 ? 'rgba(220,38,38,0.2)' : 'rgba(255,255,255,0.85)' },
           { label: t('sec_high'),     value: high,     color: high > 0 ? '#D97706' : 'var(--color-txt-primary)',     bg: high > 0 ? 'rgba(217,119,6,0.06)' : 'rgba(255,255,255,0.72)',     border: high > 0 ? 'rgba(217,119,6,0.2)' : 'rgba(255,255,255,0.85)' },
@@ -376,7 +376,7 @@ function SecuritySkeleton() {
         <div style={{ height: 8 }} />
         <Bone w={260} h={28} r={6} />
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 28 }}>
+      <div className="grid-stats-4" style={{ marginBottom: 28 }}>
         {[...Array(4)].map((_, i) => (
           <div key={i} className="glass-card" style={{ padding: 20, borderRadius: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
             <Bone w="50%" h={10} r={4} />

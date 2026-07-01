@@ -158,7 +158,7 @@ export default function ImportPage() {
       </p>
 
       {/* Mode selector */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 32 }}>
+      <div className="grid-3col" style={{ marginBottom: 32 }}>
         {MODES.map(m => (
           <button
             key={m.id}

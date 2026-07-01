@@ -176,7 +176,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Global Stats Row ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 32 }}>
+      <div className="grid-stats-4">
         {[
           {
             label: t('dash_system_health'),
@@ -233,12 +233,7 @@ export default function DashboardPage() {
         </span>
       </div>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-        gap: 16,
-        marginBottom: 32,
-      }}>
+      <div className="grid-monitor-cards">
         {monitors.map((m) => {
           const status = getLastStatus(m);
           const totalChecks = m.checks?.length ?? 0;
@@ -305,7 +300,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Metrics row */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+              <div className="grid-3mini">
                 <div style={{ background: 'var(--color-bg-card-hover)', borderRadius: 10, padding: '8px 10px', border: '1px solid var(--color-border-main)' }}>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--color-txt-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 3 }}>{t('mon_metric_uptime')}</div>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: 16, fontWeight: 800, color: uptimePct >= 99 ? '#16A34A' : uptimePct >= 95 ? '#D97706' : '#DC2626' }}>
@@ -484,7 +479,7 @@ function DashboardSkeleton() {
       </div>
 
       {/* Stats row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 32 }}>
+      <div className="grid-stats-4">
         {[...Array(4)].map((_, i) => (
           <div key={i} className="glass-card" style={{ padding: 20, borderRadius: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
             <Bone w="60%" h={10} r={4} />
@@ -501,7 +496,7 @@ function DashboardSkeleton() {
       </div>
 
       {/* Monitor cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16, marginBottom: 32 }}>
+      <div className="grid-monitor-cards">
         {[...Array(3)].map((_, i) => (
           <div key={i} className="glass-card" style={{ padding: 20, borderRadius: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -511,7 +506,7 @@ function DashboardSkeleton() {
               </div>
               <Bone w={52} h={22} r={6} />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
+            <div className="grid-3mini">
               {[...Array(3)].map((_, j) => (
                 <div key={j} style={{ background: 'var(--color-bg-card-hover)', borderRadius: 10, padding: '10px 8px', display: 'flex', flexDirection: 'column', gap: 6 }}>
                   <Bone w="50%" h={8} r={3} />
