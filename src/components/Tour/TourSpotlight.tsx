@@ -82,6 +82,21 @@ export function TourSpotlight() {
     };
   }, [active, updateRect]);
 
+  // On mobile, open/close the sidebar drawer when entering/leaving nav steps
+  useEffect(() => {
+    if (!active || !step) {
+      window.dispatchEvent(new CustomEvent('pg:tour-sidebar', { detail: { open: false } }));
+      return;
+    }
+    const isNavStep = !!step.target?.startsWith('nav-');
+    window.dispatchEvent(new CustomEvent('pg:tour-sidebar', { detail: { open: isNavStep } }));
+    if (isNavStep) {
+      // Re-measure after the drawer slide-in animation (300ms)
+      const t = setTimeout(() => updateRect(), 350);
+      return () => clearTimeout(t);
+    }
+  }, [active, step, updateRect]);
+
   useEffect(() => {
     if (!active) return;
     function handleKey(e: KeyboardEvent) {

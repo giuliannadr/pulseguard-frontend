@@ -127,8 +127,7 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
       background: 'var(--color-bg-sidebar)',
       display: 'flex', flexDirection: 'column', flexShrink: 0,
       position: 'relative', zIndex: 20,
-      overflowY: 'auto',
-      overflowX: 'hidden',
+      overflow: 'hidden',
     }}>
 
       {/* Logo */}
@@ -150,8 +149,8 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
         </Link>
       </div>
 
-      {/* Nav links */}
-      <div style={{ flex: 1, padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+      {/* Nav links — this section scrolls so the bottom buttons are always visible */}
+      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 2 }}>
         <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-txt-muted)', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 8px 8px' }}>
           {t('nav_navigation')}
         </p>

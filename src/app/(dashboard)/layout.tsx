@@ -16,6 +16,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
 
   useEffect(() => {
+    function handler(e: Event) {
+      setIsSidebarOpen((e as CustomEvent<{ open: boolean }>).detail.open);
+    }
+    window.addEventListener('pg:tour-sidebar', handler);
+    return () => window.removeEventListener('pg:tour-sidebar', handler);
+  }, []);
+
+  useEffect(() => {
     const supabase = createClient();
 
     async function checkSession() {
