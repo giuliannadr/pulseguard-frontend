@@ -569,7 +569,7 @@ function EmptyState() {
           </div>
         ))}
       </div>
-      <Link href="/import" style={{ textDecoration: 'none' }}>
+      <Link href="/import" data-tour="add-monitor" style={{ textDecoration: 'none' }}>
         <button className="btn-solid-glow" style={{ height: 42, fontSize: 13, padding: '0 28px', borderRadius: 999 }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" style={{ marginRight: 6 }}>
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>

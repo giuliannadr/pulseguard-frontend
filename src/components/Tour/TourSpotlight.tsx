@@ -29,7 +29,7 @@ function getTooltipStyle(rect: Rect | null, position?: string): React.CSSPropert
     return {
       position: 'fixed', top: '50%', left: '50%',
       transform: 'translate(-50%, -50%)',
-      zIndex: 9100, width: 420,
+      zIndex: 10001, width: 420,
       maxWidth: 'calc(100vw - 32px)',
     };
   }
@@ -44,17 +44,17 @@ function getTooltipStyle(rect: Rect | null, position?: string): React.CSSPropert
   if (position === 'right') {
     const left = Math.min(rect.left + rect.width + gap, vw - maxW - 16);
     const top = Math.max(16, Math.min(rect.top + rect.height / 2 - tooltipH / 2, vh - tooltipH - 16));
-    return { position: 'fixed', top, left, zIndex: 9100, width: maxW, maxWidth: maxW };
+    return { position: 'fixed', top, left, zIndex: 10001, width: maxW, maxWidth: maxW };
   }
   if (position === 'top') {
     const top = Math.max(16, rect.top - tooltipH - gap);
     const left = Math.max(16, Math.min(rect.left + rect.width / 2 - maxW / 2, vw - maxW - 16));
-    return { position: 'fixed', top, left, zIndex: 9100, width: maxW, maxWidth: maxW };
+    return { position: 'fixed', top, left, zIndex: 10001, width: maxW, maxWidth: maxW };
   }
   // default: bottom
   const top = Math.min(rect.top + rect.height + gap, vh - tooltipH - 16);
   const left = Math.max(16, Math.min(rect.left + rect.width / 2 - maxW / 2, vw - maxW - 16));
-  return { position: 'fixed', top, left, zIndex: 9100, width: maxW, maxWidth: maxW };
+  return { position: 'fixed', top, left, zIndex: 10001, width: maxW, maxWidth: maxW };
 }
 
 export function TourSpotlight() {
@@ -98,11 +98,11 @@ export function TourSpotlight() {
 
   return (
     <>
-      {/* Dark overlay — only for centered steps; spotlight steps use box-shadow only */}
+      {/* Dark overlay: always shown; transparent when spotlight hole handles darkening */}
       <div
         style={{
-          position: 'fixed', inset: 0, zIndex: 9000,
-          background: isCentered ? 'rgba(0,0,0,0.65)' : 'transparent',
+          position: 'fixed', inset: 0, zIndex: 9999,
+          background: (isCentered || !rect) ? 'rgba(0,0,0,0.65)' : 'transparent',
           pointerEvents: 'all',
         }}
         onClick={(e) => e.stopPropagation()}
@@ -119,14 +119,14 @@ export function TourSpotlight() {
             height: rect.height,
             borderRadius: 16,
             boxShadow: '0 0 0 9999px rgba(0,0,0,0.65)',
-            zIndex: 9001,
+            zIndex: 10000,
             pointerEvents: 'none',
             transition: 'top 0.35s cubic-bezier(0.4,0,0.2,1), left 0.35s cubic-bezier(0.4,0,0.2,1), width 0.35s cubic-bezier(0.4,0,0.2,1), height 0.35s cubic-bezier(0.4,0,0.2,1)',
           }}
         />
       )}
 
-      {/* Tooltip card */}
+      {/* Tooltip card — above grain overlay (body::after z-index: 9998) */}
       <div
         style={{
           ...tooltipStyle,
