@@ -56,7 +56,9 @@ export default function ImportPage() {
       if (!user) return;
       supabase.auth.getSession().then(({ data: { session } }) => {
         const tok = session?.access_token ?? null;
-        const freshGToken = session?.provider_token ?? null;
+        // Only store provider_token as GitHub token if the user authenticated via GitHub
+        const provider = user.app_metadata?.provider;
+        const freshGToken = provider === 'github' ? (session?.provider_token ?? null) : null;
         if (freshGToken) ghTokenHelper.set(freshGToken);
         const gToken = freshGToken ?? ghTokenHelper.get();
         setToken(tok);

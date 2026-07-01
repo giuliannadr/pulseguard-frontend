@@ -15,7 +15,7 @@ const translations = {
     nav_signedin: 'Signed in',
     nav_navigation: 'Navigation',
 
-    btn_import: 'Import Repository',
+    btn_import: 'Add Monitor',
     btn_edit: 'Edit',
     btn_check: 'Check Now',
     btn_scan: 'Scan Commits',
@@ -39,7 +39,7 @@ const translations = {
     dash_interval: 'Int.',
     dash_sec_grade: 'Sec. Grade',
     dash_empty_title: 'No projects monitored yet',
-    dash_empty_desc: 'To get started, import a Git repository and configure its public URL.',
+    dash_empty_desc: 'Add a URL to monitor its uptime, or connect a GitHub repo for AI security scanning — or both.',
 
     sec_global: 'Global',
     sec_title: 'Security Operations',
@@ -214,7 +214,7 @@ const translations = {
     nav_signedin: 'Conectado como',
     nav_navigation: 'Navegación',
 
-    btn_import: 'Importar Repositorio',
+    btn_import: 'Agregar Monitor',
     btn_edit: 'Editar',
     btn_check: 'Comprobar ahora',
     btn_scan: 'Escanear commits',
@@ -238,7 +238,7 @@ const translations = {
     dash_interval: 'Int.',
     dash_sec_grade: 'Nota Seg.',
     dash_empty_title: 'No hay proyectos monitoreados',
-    dash_empty_desc: 'Para comenzar, importa un repositorio de Git y configura su URL pública.',
+    dash_empty_desc: 'Agregá una URL para monitorear su uptime, conectá un repo de GitHub para análisis de seguridad con IA — o hacé ambas cosas.',
 
     sec_global: 'Global',
     sec_title: 'Operaciones de Seguridad',
