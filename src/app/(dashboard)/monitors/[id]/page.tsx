@@ -225,8 +225,8 @@ function AlertsPanel({ monitor, token, onUpdate }: { monitor: Monitor; token: st
   return (
     <div className="glass-card" style={{ borderRadius: 16, marginBottom: 16, overflow: 'hidden' }}>
       {/* Header */}
-      <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--color-border-main)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--color-border-main)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={noneConfigured ? '#9CA3AF' : '#16A34A'} strokeWidth="2" strokeLinecap="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
           </svg>
@@ -234,13 +234,13 @@ function AlertsPanel({ monitor, token, onUpdate }: { monitor: Monitor; token: st
             Alertas
           </span>
         </div>
-        <div className="alert-chips" style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           <span style={chipStyle(hasEmail)}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: hasEmail ? '#16A34A' : '#9CA3AF' }} />
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: hasEmail ? '#16A34A' : '#9CA3AF', flexShrink: 0 }} />
             Email {hasEmail ? 'activo' : 'inactivo'}
           </span>
           <span style={chipStyle(hasWebhook)}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: hasWebhook ? '#16A34A' : '#9CA3AF' }} />
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: hasWebhook ? '#16A34A' : '#9CA3AF', flexShrink: 0 }} />
             Webhook {hasWebhook ? 'activo' : 'inactivo'}
           </span>
         </div>
@@ -248,101 +248,111 @@ function AlertsPanel({ monitor, token, onUpdate }: { monitor: Monitor; token: st
 
       {/* Warning si no hay nada configurado */}
       {noneConfigured && (
-        <div style={{ padding: '10px 20px', background: 'rgba(217,119,6,0.06)', borderBottom: '1px solid var(--color-border-main)', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#D97706' }}>
+        <div style={{ padding: '10px 16px', background: 'rgba(217,119,6,0.06)', borderBottom: '1px solid var(--color-border-main)', display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 1 }}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#D97706', lineHeight: 1.4 }}>
             Sin alertas configuradas — no te enterarás si este monitor cae
           </span>
         </div>
       )}
 
       {/* Email row */}
-      <div style={rowStyle}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-txt-muted)" strokeWidth="1.5" strokeLinecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-        <div style={{ flex: 1 }}>
-          {editingEmail ? (
+      <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--color-border-main)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: editingEmail ? 10 : 0 }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--color-txt-muted)" strokeWidth="1.5" strokeLinecap="round" style={{ flexShrink: 0 }}><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Email</span>
+          {!editingEmail && (
+            <button onClick={() => setEditingEmail(true)}
+              style={{ marginLeft: 'auto', background: 'transparent', border: 'none', color: 'var(--color-acid)', fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer', padding: 0, flexShrink: 0 }}>
+              {hasEmail ? 'Cambiar' : '+ Agregar'}
+            </button>
+          )}
+        </div>
+        {editingEmail ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <input
+              className="input-strict"
+              type="email"
+              value={emailVal}
+              onChange={e => setEmailVal(e.target.value)}
+              placeholder="vos@ejemplo.com"
+              autoFocus
+              style={{ width: '100%', height: 36, fontSize: 13, boxSizing: 'border-box' }}
+            />
             <div style={{ display: 'flex', gap: 8 }}>
-              <input
-                className="input-strict"
-                type="email"
-                value={emailVal}
-                onChange={e => setEmailVal(e.target.value)}
-                placeholder="vos@ejemplo.com"
-                autoFocus
-                style={{ flex: 1, height: 32, fontSize: 12 }}
-              />
               <button onClick={() => saveField('email')} disabled={saving === 'email'}
-                style={{ background: 'rgba(0,240,255,0.08)', border: '1px solid rgba(0,240,255,0.3)', color: 'var(--color-acid)', padding: '0 12px', borderRadius: 4, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
+                style={{ flex: 1, background: 'rgba(0,240,255,0.08)', border: '1px solid rgba(0,240,255,0.3)', color: 'var(--color-acid)', height: 34, borderRadius: 6, fontSize: 12, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
                 {saving === 'email' ? '...' : 'Guardar'}
               </button>
               <button onClick={() => { setEditingEmail(false); setEmailVal(monitor.notificationEmail ?? ''); }}
-                style={{ background: 'transparent', border: '1px solid var(--color-border-main)', color: 'var(--color-txt-muted)', padding: '0 10px', borderRadius: 4, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
-                ✕
+                style={{ background: 'transparent', border: '1px solid var(--color-border-main)', color: 'var(--color-txt-muted)', height: 34, padding: '0 14px', borderRadius: 6, fontSize: 12, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
+                Cancelar
               </button>
             </div>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: hasEmail ? 'var(--color-txt-primary)' : 'var(--color-txt-muted)' }}>
-                {hasEmail ? monitor.notificationEmail : 'Sin email configurado'}
-              </span>
-              <button onClick={() => setEditingEmail(true)}
-                style={{ background: 'transparent', border: 'none', color: 'var(--color-acid)', fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer', padding: 0 }}>
-                {hasEmail ? 'Cambiar' : '+ Agregar'}
-              </button>
-            </div>
-          )}
-        </div>
-        {hasEmail && !editingEmail && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-            <button onClick={handleTest} disabled={testState === 'sending'}
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid var(--color-border-main)', color: testState === 'ok' ? '#16A34A' : testState === 'err' ? '#DC2626' : 'var(--color-txt-muted)', padding: '4px 12px', borderRadius: 4, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer', transition: 'all 0.2s' }}>
-              {testState === 'sending' ? '...' : testState === 'ok' ? '✓ Enviado' : testState === 'err' ? '✗ Error' : 'Probar'}
-            </button>
-            {testMsg && <span style={{ fontSize: 9, color: testState === 'ok' ? '#16A34A' : '#DC2626', fontFamily: 'var(--font-mono)', maxWidth: 180, textAlign: 'right' }}>{testMsg}</span>}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 6 }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: hasEmail ? 'var(--color-txt-primary)' : 'var(--color-txt-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {hasEmail ? monitor.notificationEmail : 'Sin email configurado'}
+            </span>
+            {hasEmail && (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3, flexShrink: 0 }}>
+                <button onClick={handleTest} disabled={testState === 'sending'}
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid var(--color-border-main)', color: testState === 'ok' ? '#16A34A' : testState === 'err' ? '#DC2626' : 'var(--color-txt-muted)', padding: '4px 12px', borderRadius: 4, fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>
+                  {testState === 'sending' ? '...' : testState === 'ok' ? '✓ Enviado' : testState === 'err' ? '✗ Error' : 'Probar'}
+                </button>
+                {testMsg && <span style={{ fontSize: 9, color: testState === 'ok' ? '#16A34A' : '#DC2626', fontFamily: 'var(--font-mono)', maxWidth: 120, textAlign: 'right', lineHeight: 1.3 }}>{testMsg}</span>}
+              </div>
+            )}
           </div>
         )}
       </div>
 
       {/* Webhook row */}
-      <div style={{ ...rowStyle, borderBottom: 'none' }}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-txt-muted)" strokeWidth="1.5" strokeLinecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        <div style={{ flex: 1 }}>
-          {editingWebhook ? (
+      <div style={{ padding: '14px 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: editingWebhook ? 10 : 0 }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--color-txt-muted)" strokeWidth="1.5" strokeLinecap="round" style={{ flexShrink: 0 }}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--color-txt-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Webhook</span>
+          {hasWebhook && !editingWebhook && (
+            <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: '#9CA3AF', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '1px 7px' }}>
+              {monitor.notificationWebhookUrl?.includes('discord') ? 'Discord' : monitor.notificationWebhookUrl?.includes('slack') ? 'Slack' : 'Webhook'}
+            </span>
+          )}
+          {!editingWebhook && (
+            <button onClick={() => setEditingWebhook(true)}
+              style={{ marginLeft: 'auto', background: 'transparent', border: 'none', color: 'var(--color-acid)', fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer', padding: 0, flexShrink: 0 }}>
+              {hasWebhook ? 'Cambiar' : '+ Agregar'}
+            </button>
+          )}
+        </div>
+        {editingWebhook ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <input
+              className="input-strict"
+              type="url"
+              value={webhookVal}
+              onChange={e => setWebhookVal(e.target.value)}
+              placeholder="https://discord.com/api/webhooks/..."
+              autoFocus
+              style={{ width: '100%', height: 36, fontSize: 13, boxSizing: 'border-box' }}
+            />
             <div style={{ display: 'flex', gap: 8 }}>
-              <input
-                className="input-strict"
-                type="url"
-                value={webhookVal}
-                onChange={e => setWebhookVal(e.target.value)}
-                placeholder="https://discord.com/api/webhooks/..."
-                autoFocus
-                style={{ flex: 1, height: 32, fontSize: 12 }}
-              />
               <button onClick={() => saveField('webhook')} disabled={saving === 'webhook'}
-                style={{ background: 'rgba(0,240,255,0.08)', border: '1px solid rgba(0,240,255,0.3)', color: 'var(--color-acid)', padding: '0 12px', borderRadius: 4, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
+                style={{ flex: 1, background: 'rgba(0,240,255,0.08)', border: '1px solid rgba(0,240,255,0.3)', color: 'var(--color-acid)', height: 34, borderRadius: 6, fontSize: 12, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
                 {saving === 'webhook' ? '...' : 'Guardar'}
               </button>
               <button onClick={() => { setEditingWebhook(false); setWebhookVal(monitor.notificationWebhookUrl ?? ''); }}
-                style={{ background: 'transparent', border: '1px solid var(--color-border-main)', color: 'var(--color-txt-muted)', padding: '0 10px', borderRadius: 4, fontSize: 11, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
-                ✕
+                style={{ background: 'transparent', border: '1px solid var(--color-border-main)', color: 'var(--color-txt-muted)', height: 34, padding: '0 14px', borderRadius: 6, fontSize: 12, fontFamily: 'var(--font-mono)', cursor: 'pointer' }}>
+                Cancelar
               </button>
             </div>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: hasWebhook ? 'var(--color-txt-primary)' : 'var(--color-txt-muted)', maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {hasWebhook ? monitor.notificationWebhookUrl : 'Sin webhook configurado'}
-              </span>
-              <button onClick={() => setEditingWebhook(true)}
-                style={{ background: 'transparent', border: 'none', color: 'var(--color-acid)', fontSize: 10, fontFamily: 'var(--font-mono)', cursor: 'pointer', padding: 0, flexShrink: 0 }}>
-                {hasWebhook ? 'Cambiar' : '+ Agregar'}
-              </button>
-            </div>
-          )}
-        </div>
-        {hasWebhook && !editingWebhook && (
-          <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: '#9CA3AF' }}>
-            {monitor.notificationWebhookUrl?.includes('discord') ? 'Discord' : monitor.notificationWebhookUrl?.includes('slack') ? 'Slack' : 'Webhook'}
-          </span>
+          </div>
+        ) : (
+          <div style={{ marginTop: 6 }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: hasWebhook ? 'var(--color-txt-primary)' : 'var(--color-txt-muted)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {hasWebhook ? monitor.notificationWebhookUrl : 'Sin webhook configurado'}
+            </span>
+          </div>
         )}
       </div>
     </div>
