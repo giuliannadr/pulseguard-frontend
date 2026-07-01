@@ -95,7 +95,11 @@ export function TourSpotlight() {
 
   if (!active || !step) return null;
 
-  const spotlightStyle = !isCentered ? getTooltipStyle(rect, step.position) : null;
+  // On mobile, nav items are hidden in the drawer — rect comes back null.
+  // Treat those steps as centered so the card uses the safe flex wrapper
+  // instead of transform:translate(-50%,-50%) which clips tall cards.
+  const isEffectivelyCentered = isCentered || rect === null;
+  const spotlightStyle = !isEffectivelyCentered ? getTooltipStyle(rect, step.position) : null;
 
   const tooltipCard = (
     <div
@@ -109,7 +113,7 @@ export function TourSpotlight() {
         boxShadow: '0 20px 60px rgba(0,0,0,0.25), 0 4px 16px rgba(124,58,237,0.15)',
         animation: 'pg-fade-in 0.25s ease-out both',
         position: 'relative',
-        width: isCentered ? 420 : undefined,
+        width: isEffectivelyCentered ? 420 : undefined,
         maxWidth: 'calc(100vw - 32px)',
         ...(spotlightStyle ?? {}),
       }}
@@ -228,14 +232,14 @@ export function TourSpotlight() {
       <div
         style={{
           position: 'fixed', inset: 0, zIndex: 9999,
-          background: (isCentered || !rect) ? 'rgba(0,0,0,0.65)' : 'transparent',
+          background: isEffectivelyCentered ? 'rgba(0,0,0,0.65)' : 'transparent',
           pointerEvents: 'all',
         }}
         onClick={(e) => e.stopPropagation()}
       />
 
       {/* Spotlight hole */}
-      {!isCentered && rect && (
+      {!isEffectivelyCentered && rect && (
         <div
           style={{
             position: 'fixed',
@@ -249,8 +253,8 @@ export function TourSpotlight() {
         />
       )}
 
-      {/* Centered steps: flex wrapper guarantees true viewport centering */}
-      {isCentered ? (
+      {/* Centered/fallback steps: flex wrapper guarantees true viewport centering */}
+      {isEffectivelyCentered ? (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 10001,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
