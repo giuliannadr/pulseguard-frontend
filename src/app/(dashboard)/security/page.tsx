@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { api, type SecurityIncident } from '@/lib/api';
 import Link from 'next/link';
@@ -36,7 +36,8 @@ export default function SecurityPage() {
   const [resolvingAll, setResolvingAll] = useState(false);
   const [showNone, setShowNone] = useState(false);
 
-  const supabase = createClient();
+  const supabaseRef = useRef(createClient());
+  const supabase = supabaseRef.current;
 
   const loadIncidents = useCallback(async (tok: string) => {
     try {

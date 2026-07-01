@@ -91,6 +91,8 @@ export default function ImportPage() {
   useEffect(() => {
     setSelectedRepo(null);
     setError('');
+    setUrl('');
+    setName('');
   }, [mode]);
 
   async function handleConnectGithub() {

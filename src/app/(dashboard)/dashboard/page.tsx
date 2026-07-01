@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { api, type Monitor, type MonitorStatus } from '@/lib/api';
@@ -40,7 +40,8 @@ export default function DashboardPage() {
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [, setNow] = useState(Date.now());
 
-  const supabase = createClient();
+  const supabaseRef = useRef(createClient());
+  const supabase = supabaseRef.current;
 
   const loadMonitors = useCallback(async (tok: string) => {
     try {

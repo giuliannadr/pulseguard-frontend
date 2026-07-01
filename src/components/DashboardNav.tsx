@@ -24,13 +24,25 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session?.access_token) return;
-      api.securityIncidents.listAll(session.access_token).then((data) => {
+    let token: string | null = null;
+
+    function fetchCount() {
+      if (!token) return;
+      api.securityIncidents.listAll(token).then((data) => {
         const count = data.filter((i: any) => !i.resolved && i.severity !== 'None').length;
         setAlertCount(count);
       }).catch(() => {});
+    }
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.access_token) return;
+      token = session.access_token;
+      fetchCount();
     });
+
+    // Refresh every 60 seconds so badge stays current during the session
+    const interval = setInterval(fetchCount, 60_000);
+    return () => clearInterval(interval);
   }, []);
 
   const toggleTheme = () => {

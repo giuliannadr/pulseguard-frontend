@@ -44,7 +44,8 @@ export default function SettingsPage() {
       setUserId(user.id);
       supabase.auth.getSession().then(({ data: { session } }) => {
         setToken(session?.access_token ?? null);
-        if (ghTokenHelper.get()) setGithubConnected(true);
+        const provider = user.app_metadata?.provider;
+        if (provider === 'github' || ghTokenHelper.get()) setGithubConnected(true);
         setLoading(false);
       });
     });
@@ -109,15 +110,17 @@ export default function SettingsPage() {
         };
       }
 
-      const res = await fetch(webhookUrl, {
+      // Use no-cors for cross-origin webhooks; response is opaque so we always
+      // show a "sent" message and ask the user to verify their channel.
+      await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        mode: 'no-cors' // avoid CORS block for Discord/Slack direct calls
+        mode: 'no-cors',
       });
 
       notify.dismiss(toastId);
-      notify.success('Test enviado — verificá tu canal');
+      notify.success('Test enviado — verificá tu canal', 'No podemos confirmar la entrega debido a restricciones CORS del servicio externo.');
     } catch (e: any) {
       notify.dismiss(toastId);
       notify.error('Error al enviar webhook', e.message);
@@ -129,7 +132,7 @@ export default function SettingsPage() {
     await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: `${window.location.origin}/settings`,
+        redirectTo: `${window.location.origin}/auth/callback?redirectTo=/settings`,
         scopes: 'repo write:repo_hook read:user'
       }
     });

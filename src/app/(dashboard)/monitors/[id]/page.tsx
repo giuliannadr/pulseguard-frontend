@@ -738,8 +738,12 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
 
   async function handleDelete() {
     if (!token) return;
-    await api.monitors.delete(id, token);
-    router.push('/dashboard');
+    try {
+      await api.monitors.delete(id, token);
+      router.push('/dashboard');
+    } catch (e: any) {
+      notify.error('Error al eliminar monitor', e?.message);
+    }
   }
 
   async function handleToggle() {
