@@ -95,52 +95,25 @@ export function TourSpotlight() {
 
   if (!active || !step) return null;
 
-  const tooltipStyle = getTooltipStyle(isCentered ? null : rect, step.position);
+  const spotlightStyle = !isCentered ? getTooltipStyle(rect, step.position) : null;
 
-  return createPortal(
-    <>
-      {/* Dark overlay: always shown; transparent when spotlight hole handles darkening */}
-      <div
-        style={{
-          position: 'fixed', inset: 0, zIndex: 9999,
-          background: (isCentered || !rect) ? 'rgba(0,0,0,0.65)' : 'transparent',
-          pointerEvents: 'all',
-        }}
-        onClick={(e) => e.stopPropagation()}
-      />
-
-      {/* Spotlight hole — box-shadow creates the dark surround without covering the hole */}
-      {!isCentered && rect && (
-        <div
-          style={{
-            position: 'fixed',
-            top: rect.top,
-            left: rect.left,
-            width: rect.width,
-            height: rect.height,
-            borderRadius: 16,
-            boxShadow: '0 0 0 9999px rgba(0,0,0,0.65)',
-            zIndex: 10000,
-            pointerEvents: 'none',
-            transition: 'top 0.35s cubic-bezier(0.4,0,0.2,1), left 0.35s cubic-bezier(0.4,0,0.2,1), width 0.35s cubic-bezier(0.4,0,0.2,1), height 0.35s cubic-bezier(0.4,0,0.2,1)',
-          }}
-        />
-      )}
-
-      {/* Tooltip card — above grain overlay (body::after z-index: 9998) */}
-      <div
-        style={{
-          ...tooltipStyle,
-          background: 'rgba(255,255,255,0.97)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,0.9)',
-          borderRadius: 20,
-          padding: '24px 28px',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.25), 0 4px 16px rgba(124,58,237,0.15)',
-          animation: 'pg-fade-in 0.25s ease-out both',
-        }}
-      >
+  const tooltipCard = (
+    <div
+      style={{
+        background: 'rgba(255,255,255,0.97)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255,255,255,0.9)',
+        borderRadius: 20,
+        padding: '24px 28px',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.25), 0 4px 16px rgba(124,58,237,0.15)',
+        animation: 'pg-fade-in 0.25s ease-out both',
+        position: 'relative',
+        width: isCentered ? 420 : undefined,
+        maxWidth: 'calc(100vw - 32px)',
+        ...(spotlightStyle ?? {}),
+      }}
+    >
         {/* X button */}
         <button
           onClick={skipTour}
@@ -246,7 +219,46 @@ export function TourSpotlight() {
             </button>
           )}
         </div>
-      </div>
+    </div>
+  );
+
+  return createPortal(
+    <>
+      {/* Dark overlay */}
+      <div
+        style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          background: (isCentered || !rect) ? 'rgba(0,0,0,0.65)' : 'transparent',
+          pointerEvents: 'all',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      />
+
+      {/* Spotlight hole */}
+      {!isCentered && rect && (
+        <div
+          style={{
+            position: 'fixed',
+            top: rect.top, left: rect.left,
+            width: rect.width, height: rect.height,
+            borderRadius: 16,
+            boxShadow: '0 0 0 9999px rgba(0,0,0,0.65)',
+            zIndex: 10000, pointerEvents: 'none',
+            transition: 'top 0.35s cubic-bezier(0.4,0,0.2,1), left 0.35s cubic-bezier(0.4,0,0.2,1), width 0.35s cubic-bezier(0.4,0,0.2,1), height 0.35s cubic-bezier(0.4,0,0.2,1)',
+          }}
+        />
+      )}
+
+      {/* Centered steps: flex wrapper guarantees true viewport centering */}
+      {isCentered ? (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 10001,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          pointerEvents: 'none',
+        }}>
+          <div style={{ pointerEvents: 'all' }}>{tooltipCard}</div>
+        </div>
+      ) : tooltipCard}
     </>,
     document.body
   );
