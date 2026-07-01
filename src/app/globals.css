@@ -275,6 +275,11 @@ body::after {
   to { transform: rotate(360deg); }
 }
 
+@keyframes pg-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
 .animate-fade-in {
   animation: pg-fade-in 0.35s ease-out both;
 }
@@ -500,7 +505,7 @@ body::after {
   .mobile-top-bar {
     display: flex;
     height: 56px;
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--color-bg-sidebar);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid var(--color-border-main);

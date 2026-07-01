@@ -14,6 +14,8 @@ function getTargetRect(target: string | null): Rect | null {
   const el = document.querySelector(`[data-tour="${target}"]`);
   if (!el) return null;
   const r = el.getBoundingClientRect();
+  // Element is off-screen (e.g. nav drawer hidden on mobile) — treat as missing
+  if (r.right < 0 || r.left > window.innerWidth || r.bottom < 0 || r.top > window.innerHeight) return null;
   return {
     top: r.top - PAD,
     left: r.left - PAD,
@@ -37,20 +39,22 @@ function getTooltipStyle(rect: Rect | null, position?: string): React.CSSPropert
   const tooltipH = 220;
   const gap = 16;
 
+  const maxW = Math.min(tooltipW, vw - 32);
+
   if (position === 'right') {
-    const left = Math.min(rect.left + rect.width + gap, vw - tooltipW - 16);
+    const left = Math.min(rect.left + rect.width + gap, vw - maxW - 16);
     const top = Math.max(16, Math.min(rect.top + rect.height / 2 - tooltipH / 2, vh - tooltipH - 16));
-    return { position: 'fixed', top, left, zIndex: 9100, width: tooltipW };
+    return { position: 'fixed', top, left, zIndex: 9100, width: maxW, maxWidth: maxW };
   }
   if (position === 'top') {
     const top = Math.max(16, rect.top - tooltipH - gap);
-    const left = Math.max(16, Math.min(rect.left + rect.width / 2 - tooltipW / 2, vw - tooltipW - 16));
-    return { position: 'fixed', top, left, zIndex: 9100, width: tooltipW };
+    const left = Math.max(16, Math.min(rect.left + rect.width / 2 - maxW / 2, vw - maxW - 16));
+    return { position: 'fixed', top, left, zIndex: 9100, width: maxW, maxWidth: maxW };
   }
   // default: bottom
   const top = Math.min(rect.top + rect.height + gap, vh - tooltipH - 16);
-  const left = Math.max(16, Math.min(rect.left + rect.width / 2 - tooltipW / 2, vw - tooltipW - 16));
-  return { position: 'fixed', top, left, zIndex: 9100, width: tooltipW };
+  const left = Math.max(16, Math.min(rect.left + rect.width / 2 - maxW / 2, vw - maxW - 16));
+  return { position: 'fixed', top, left, zIndex: 9100, width: maxW, maxWidth: maxW };
 }
 
 export function TourSpotlight() {
