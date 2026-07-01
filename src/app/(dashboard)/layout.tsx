@@ -20,26 +20,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     async function checkSession() {
       const { data: { user }, error } = await supabase.auth.getUser();
-
-      if (error || !user) {
-        router.replace('/login');
-        return;
-      }
-
+      if (error || !user) { router.replace('/login'); return; }
       setEmail(user.email ?? null);
       setReady(true);
-      if (!sessionStorage.getItem('pg_welcomed')) {
-        sessionStorage.setItem('pg_welcomed', '1');
-        setTimeout(() => notify.success(`¡Bienvenido de vuelta, ${user.email?.split('@')[0]}!`), 600);
-      }
     }
 
     checkSession();
 
-    // Re-check whenever auth state changes (logout, token expiry, account deletion)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
         router.replace('/login');
+      }
+      // Show welcome toast only on actual sign-in events (not page refresh)
+      if (event === 'SIGNED_IN' && session?.user) {
+        const name = session.user.email?.split('@')[0] ?? 'de vuelta';
+        setTimeout(() => notify.success(`¡Bienvenido, ${name}!`), 600);
       }
     });
 
