@@ -98,17 +98,17 @@ export function TourSpotlight() {
 
   return (
     <>
-      {/* Dark overlay */}
+      {/* Dark overlay — only for centered steps; spotlight steps use box-shadow only */}
       <div
         style={{
           position: 'fixed', inset: 0, zIndex: 9000,
-          background: 'rgba(0,0,0,0.65)',
+          background: isCentered ? 'rgba(0,0,0,0.65)' : 'transparent',
           pointerEvents: 'all',
         }}
         onClick={(e) => e.stopPropagation()}
       />
 
-      {/* Spotlight hole — box-shadow punches through the overlay */}
+      {/* Spotlight hole — box-shadow creates the dark surround without covering the hole */}
       {!isCentered && rect && (
         <div
           style={{

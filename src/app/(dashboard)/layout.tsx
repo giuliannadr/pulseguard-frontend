@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import DashboardNav from '@/components/DashboardNav';
 import { ScanProvider } from '@/lib/scan-context';
 import { TourProvider, TourSpotlight } from '@/components/Tour';
+import { notify } from '@/lib/toast';
 import Link from 'next/link';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -27,6 +28,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       setEmail(user.email ?? null);
       setReady(true);
+      if (!sessionStorage.getItem('pg_welcomed')) {
+        sessionStorage.setItem('pg_welcomed', '1');
+        setTimeout(() => notify.success(`¡Bienvenido de vuelta, ${user.email?.split('@')[0]}!`), 600);
+      }
     }
 
     checkSession();
