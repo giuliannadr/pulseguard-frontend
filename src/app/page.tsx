@@ -31,7 +31,7 @@ function DashboardMockup() {
     <div style={{ position: 'relative', width: '100%', maxWidth: 720, margin: '0 auto' }}>
 
       {/* Floating badge */}
-      <div style={{
+      <div className="pg-floating-badge-left" style={{
         position: 'absolute', left: -20, top: 48, zIndex: 20,
         background: 'white', borderRadius: 16, padding: '10px 14px',
         boxShadow: '0 12px 40px rgba(124,58,237,0.15), 0 2px 8px rgba(0,0,0,0.06)',
@@ -51,7 +51,7 @@ function DashboardMockup() {
         </div>
       </div>
 
-      <div style={{
+      <div className="pg-floating-badge-right" style={{
         position: 'absolute', right: -16, bottom: 72, zIndex: 20,
         background: 'white', borderRadius: 14, padding: '10px 14px',
         boxShadow: '0 12px 40px rgba(124,58,237,0.15), 0 2px 8px rgba(0,0,0,0.06)',
@@ -88,7 +88,7 @@ function DashboardMockup() {
         {/* App layout */}
         <div style={{ display: 'flex', height: 360 }}>
           {/* Sidebar */}
-          <div style={{ width: 172, borderRight: '1px solid #F1F5F9', padding: '16px 10px', display: 'flex', flexDirection: 'column', background: 'white' }}>
+          <div className="pg-mockup-sidebar" style={{ width: 172, borderRight: '1px solid #F1F5F9', padding: '16px 10px', display: 'flex', flexDirection: 'column', background: 'white' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0 8px', marginBottom: 18 }}>
               <div style={{ width: 22, height: 22, borderRadius: 6, background: 'linear-gradient(135deg,#7C3AED,#2563EB)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
@@ -196,10 +196,41 @@ export default function LandingPage() {
         .pg-feature-card:hover { border-color:#DDD6FE !important; box-shadow:0 12px 40px rgba(124,58,237,0.08) !important; transform:translateY(-4px); }
         @media(max-width:900px){.pg-steps-grid{grid-template-columns:1fr !important}.pg-features-grid{grid-template-columns:1fr 1fr !important}}
         @media(max-width:600px){.pg-features-grid{grid-template-columns:1fr !important}}
+        
+        /* Responsive Overrides */
+        @media (max-width: 768px) {
+          .pg-navbar {
+            padding: 0 16px !important;
+          }
+          .pg-hero-container {
+            padding: 40px 16px 32px !important;
+          }
+          .pg-section {
+            padding: 48px 16px !important;
+          }
+          .pg-floating-badge-left, .pg-floating-badge-right {
+            display: none !important;
+          }
+          .pg-mockup-sidebar {
+            display: none !important;
+          }
+          .pg-footer {
+            padding: 24px 16px !important;
+            flex-direction: column;
+            gap: 12px;
+            text-align: center;
+          }
+        }
+        @media (max-width: 480px) {
+          .pg-nav-login {
+            display: none !important;
+          }
+        }
+
       `}</style>
 
       {/* ── Navbar ──────────────────────────────────────────────────────────── */}
-      <nav style={{
+      <nav className="pg-navbar" style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, height: 64,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '0 48px', transition: 'all 0.3s',
@@ -225,7 +256,7 @@ export default function LandingPage() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Link href="/login" style={{ padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 600, color: '#6B7280', textDecoration: 'none' }}>
+          <Link href="/login" className="pg-nav-login" style={{ padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 600, color: '#6B7280', textDecoration: 'none' }}>
             Iniciar sesión
           </Link>
           <Link href="/signup" style={{ padding: '10px 20px', borderRadius: 10, fontSize: 13, fontWeight: 700, background: 'linear-gradient(135deg,#7C3AED,#2563EB)', color: 'white', textDecoration: 'none', boxShadow: '0 4px 14px rgba(124,58,237,0.35)' }}>
@@ -235,7 +266,7 @@ export default function LandingPage() {
       </nav>
 
       {/* ── HERO ─────────────────────────────────────────────────────────────── */}
-      <section style={{ position: 'relative', overflow: 'hidden', minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingTop: 64 }}>
+      <section className="pg-hero-section" style={{ position: 'relative', overflow: 'hidden', minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingTop: 64 }}>
 
         {/* Light pastel blobs — igual que Atout */}
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
@@ -249,7 +280,7 @@ export default function LandingPage() {
           <div style={{ position: 'absolute', right: '-5%', bottom: '5%', width: '40%', height: '45%', background: 'radial-gradient(ellipse,#FBCFE8 0%,transparent 70%)', opacity: 0.35, animation: 'pg-blob 20s ease-in-out 9s infinite' }} />
         </div>
 
-        <div style={{ position: 'relative', zIndex: 10, width: '100%', maxWidth: 900, margin: '0 auto', padding: '80px 40px 48px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+        <div className="pg-hero-container" style={{ position: 'relative', zIndex: 10, width: '100%', maxWidth: 900, margin: '0 auto', padding: '80px 40px 48px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
 
           {/* Pill */}
           <div style={{
@@ -316,7 +347,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── HOW IT WORKS ──────────────────────────────────────────────────────── */}
-      <section id="how" style={{ padding: '96px 40px', background: 'white', position: 'relative', overflow: 'hidden' }}>
+      <section id="how" className="pg-section" style={{ padding: '96px 40px', background: 'white', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', left: '-5%', top: 0, width: '35%', height: '100%', background: 'radial-gradient(ellipse,#DDD6FE,transparent 70%)', opacity: 0.35, pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', right: '-5%', top: '20%', width: '30%', height: '70%', background: 'radial-gradient(ellipse,#BAE6FD,transparent 70%)', opacity: 0.35, pointerEvents: 'none' }} />
 
@@ -343,7 +374,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FEATURES ──────────────────────────────────────────────────────────── */}
-      <section id="features" style={{ padding: '96px 40px', background: '#FAFBFF', position: 'relative', overflow: 'hidden' }}>
+      <section id="features" className="pg-section" style={{ padding: '96px 40px', background: '#FAFBFF', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', right: '-5%', top: '-10%', width: '40%', height: '60%', background: 'radial-gradient(ellipse,#EEE9FF,transparent 70%)', opacity: 0.7, pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', left: '-5%', bottom: '10%', width: '35%', height: '55%', background: 'radial-gradient(ellipse,#E0F2FE,transparent 70%)', opacity: 0.7, pointerEvents: 'none' }} />
 
@@ -378,7 +409,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FINAL CTA ─────────────────────────────────────────────────────────── */}
-      <section style={{ padding: '100px 40px', position: 'relative', overflow: 'hidden', background: 'white' }}>
+      <section className="pg-section" style={{ padding: '100px 40px', position: 'relative', overflow: 'hidden', background: 'white' }}>
         <div style={{ position: 'absolute', left: '10%', top: '-20%', width: '55%', height: '80%', background: 'radial-gradient(ellipse,#C4B5FD,transparent 70%)', opacity: 0.4, pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', right: '-5%', bottom: '-10%', width: '45%', height: '70%', background: 'radial-gradient(ellipse,#BAE6FD,transparent 70%)', opacity: 0.35, pointerEvents: 'none' }} />
 
@@ -417,7 +448,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ────────────────────────────────────────────────────────────── */}
-      <footer style={{ borderTop: '1px solid #F1F5F9', padding: '24px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'white' }}>
+      <footer className="pg-footer" style={{ borderTop: '1px solid #F1F5F9', padding: '24px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'white' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{ width: 22, height: 22, borderRadius: 6, background: 'linear-gradient(135deg,#7C3AED,#2563EB)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
