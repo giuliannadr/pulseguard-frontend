@@ -57,24 +57,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </TranslationProvider>
         <Toaster
           position="bottom-right"
-          toastOptions={{
-            style: {
-              background: 'var(--color-bg-card, #1a1a2e)',
-              color: 'var(--color-txt-primary, #f0f0f0)',
-              border: '1px solid var(--color-border-main, rgba(255,255,255,0.1))',
-              fontFamily: 'var(--font-mono, monospace)',
-              fontSize: '13px',
-              borderRadius: '12px',
-              backdropFilter: 'blur(16px)',
-            },
-            classNames: {
-              toast: 'pg-toast',
-              success: 'pg-toast-success',
-              error: 'pg-toast-error',
-              warning: 'pg-toast-warning',
-              info: 'pg-toast-info',
-            },
-          }}
           richColors
           closeButton
         />

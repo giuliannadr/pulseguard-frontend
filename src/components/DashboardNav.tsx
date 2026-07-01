@@ -62,6 +62,7 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
       href: '/security',
       label: t('nav_security'),
       badge: alertCount,
+      tourId: 'nav-security',
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -72,6 +73,7 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
       href: '/playground',
       label: t('nav_playground'),
       badge: 0,
+      tourId: 'nav-playground',
       scanStatus: scan.status,
       scanCount: scan.count,
       icon: (
@@ -94,6 +96,7 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
       href: '/settings',
       label: t('nav_settings'),
       badge: 0,
+      tourId: 'nav-settings',
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="3"/>
@@ -146,6 +149,7 @@ export default function DashboardNav({ userEmail, onCloseMobile }: { userEmail: 
               href={link.href}
               onClick={() => onCloseMobile?.()}
               className={`sidebar-link ${active ? 'active-link' : ''}`}
+              {...('tourId' in link && link.tourId ? { 'data-tour': link.tourId } : {})}
               style={{
                 fontWeight: active ? 600 : 400,
                 color: active ? '#7C3AED' : 'var(--color-txt-secondary)',

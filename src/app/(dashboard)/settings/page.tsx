@@ -5,11 +5,13 @@ import { createClient } from '@/lib/supabase/client';
 import { useTranslation, type Language } from '@/lib/i18n';
 import { api, githubToken as ghTokenHelper } from '@/lib/api';
 import { notify } from '@/lib/toast';
+import { useTour } from '@/components/Tour';
 
 type Tab = 'pref' | 'integ';
 
 export default function SettingsPage() {
   const { t, language, setLanguage } = useTranslation();
+  const { startTour } = useTour();
   const [activeTab, setActiveTab] = useState<Tab>('pref');
   
   const [token, setToken] = useState<string | null>(null);
@@ -318,6 +320,38 @@ export default function SettingsPage() {
                   Guarda esta URL de webhook en todos tus monitores actuales.
                 </p>
               </div>
+            </div>
+
+            {/* Tour replay */}
+            <div style={{ paddingTop: 8, borderTop: '1px solid var(--color-border-main)' }}>
+              <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-txt-primary)', fontWeight: 'bold', marginBottom: 6 }}>
+                Tour de bienvenida
+              </label>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: '#555', margin: '0 0 12px 0' }}>
+                Volvé a ver el recorrido guiado por las funciones de PulseGuard.
+              </p>
+              <button
+                type="button"
+                onClick={startTour}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid var(--color-border-main)',
+                  color: 'var(--color-brand-primary)',
+                  padding: '8px 16px',
+                  borderRadius: 8,
+                  fontSize: 12,
+                  fontFamily: 'var(--font-mono)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  transition: 'background 0.15s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = 'var(--color-brand-light)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
+                🗺️ Repasar tour
+              </button>
             </div>
 
             <button

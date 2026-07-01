@@ -161,7 +161,7 @@ export default function DashboardPage() {
           </h1>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <Link href="/import" style={{ textDecoration: 'none' }}>
+          <Link href="/import" data-tour="add-monitor" style={{ textDecoration: 'none' }}>
             <button className="btn-solid-glow" style={{ height: 36, fontSize: 11, padding: '0 16px', borderRadius: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               {t('dash_add_monitor')}
@@ -176,7 +176,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Global Stats Row ── */}
-      <div className="grid-stats-4">
+      <div className="grid-stats-4" data-tour="stats">
         {[
           {
             label: t('dash_system_health'),
@@ -233,8 +233,8 @@ export default function DashboardPage() {
         </span>
       </div>
 
-      <div className="grid-monitor-cards">
-        {monitors.map((m) => {
+      <div className="grid-monitor-cards" data-tour="monitors">
+      {monitors.map((m) => {
           const status = getLastStatus(m);
           const totalChecks = m.checks?.length ?? 0;
           const upChecks = m.checks?.filter(c => c.status === 'up').length ?? 0;

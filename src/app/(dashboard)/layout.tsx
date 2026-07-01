@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardNav from '@/components/DashboardNav';
 import { ScanProvider } from '@/lib/scan-context';
+import { TourProvider, TourSpotlight } from '@/components/Tour';
 import Link from 'next/link';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -58,6 +59,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
+    <TourProvider>
     <ScanProvider>
     <div className="dashboard-container">
       {/* Mobile Top Bar */}
@@ -117,7 +119,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {children}
         </div>
       </main>
+      <TourSpotlight />
     </div>
     </ScanProvider>
+    </TourProvider>
   );
 }
