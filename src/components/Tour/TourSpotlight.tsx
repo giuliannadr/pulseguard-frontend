@@ -9,15 +9,17 @@ import { TOUR_STEPS } from '@/lib/tour-steps';
 interface Rect { top: number; left: number; width: number; height: number }
 
 const PAD = 12;
-const MOBILE_BP = 768;
 
 function getTargetRect(target: string | null): Rect | null {
   if (!target) return null;
   const el = document.querySelector(`[data-tour="${target}"]`);
   if (!el) return null;
   const r = el.getBoundingClientRect();
-  if (r.right < 0 || r.left > window.innerWidth || r.bottom < 0 || r.top > window.innerHeight) return null;
-  if (r.width === 0 || r.height === 0) return null;
+  if (
+    r.width === 0 || r.height === 0 ||
+    r.right < 0 || r.left > window.innerWidth ||
+    r.bottom < 0 || r.top > window.innerHeight
+  ) return null;
   return {
     top: r.top - PAD,
     left: r.left - PAD,
@@ -26,47 +28,14 @@ function getTargetRect(target: string | null): Rect | null {
   };
 }
 
-function getTooltipStyle(rect: Rect, position?: string): React.CSSProperties {
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const tooltipW = 340;
-  // Use a generous height estimate so bottom-clamping works correctly
-  const tooltipH = 280;
-  const gap = 16;
-  const maxW = Math.min(tooltipW, vw - 32);
-
-  if (position === 'right') {
-    const left = Math.min(rect.left + rect.width + gap, vw - maxW - 16);
-    const top = Math.max(16, Math.min(rect.top + rect.height / 2 - tooltipH / 2, vh - tooltipH - 16));
-    return { position: 'fixed', top, left, zIndex: 10001, width: maxW, maxWidth: maxW };
-  }
-  if (position === 'top') {
-    const top = Math.max(16, rect.top - tooltipH - gap);
-    const left = Math.max(16, Math.min(rect.left + rect.width / 2 - maxW / 2, vw - maxW - 16));
-    return { position: 'fixed', top, left, zIndex: 10001, width: maxW, maxWidth: maxW };
-  }
-  // default: bottom — clamp so card never goes below viewport
-  const top = Math.min(rect.top + rect.height + gap, vh - tooltipH - 16);
-  const left = Math.max(16, Math.min(rect.left + rect.width / 2 - maxW / 2, vw - maxW - 16));
-  return { position: 'fixed', top: Math.max(16, top), left, zIndex: 10001, width: maxW, maxWidth: maxW };
-}
-
 export function TourSpotlight() {
   const { active, stepIndex, totalSteps, skipTour, nextStep, prevStep } = useTour();
   const [rect, setRect] = useState<Rect | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
 
   const step = TOUR_STEPS[stepIndex];
   const isCentered = !step?.target;
   const isLast = stepIndex === totalSteps - 1;
-
-  // Track mobile breakpoint
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < MOBILE_BP);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
+  const hasSpotlight = !isCentered && rect !== null;
 
   const updateRect = useCallback(() => {
     if (!step) return;
@@ -84,13 +53,8 @@ export function TourSpotlight() {
     };
   }, [active, updateRect]);
 
-  // On desktop only: open/close the sidebar drawer for nav steps
+  // Open/close the sidebar drawer for nav steps (works on mobile AND desktop drawer)
   useEffect(() => {
-    if (isMobile) {
-      // Always close sidebar on mobile — tour uses centered cards only
-      window.dispatchEvent(new CustomEvent('pg:tour-sidebar', { detail: { open: false } }));
-      return;
-    }
     if (!active || !step) {
       window.dispatchEvent(new CustomEvent('pg:tour-sidebar', { detail: { open: false } }));
       return;
@@ -98,10 +62,11 @@ export function TourSpotlight() {
     const isNavStep = !!step.target?.startsWith('nav-');
     window.dispatchEvent(new CustomEvent('pg:tour-sidebar', { detail: { open: isNavStep } }));
     if (isNavStep) {
+      // Re-measure after drawer animation completes
       const t = setTimeout(() => updateRect(), 350);
       return () => clearTimeout(t);
     }
-  }, [active, step, isMobile, updateRect]);
+  }, [active, step, updateRect]);
 
   useEffect(() => {
     if (!active) return;
@@ -116,12 +81,10 @@ export function TourSpotlight() {
 
   if (!active || !step) return null;
 
-  // Mobile: all steps centered — no spotlight, no positioning complexity.
-  // Desktop: centered for steps with no target, or when target not found.
-  const isEffectivelyCentered = isCentered || rect === null || isMobile;
-  const spotlightStyle = !isEffectivelyCentered && rect ? getTooltipStyle(rect, step.position) : null;
-
-  const tooltipCard = (
+  // The card is ALWAYS centered using a flex wrapper — never positioned
+  // relative to the spotlight. This avoids cut-off on any screen size.
+  // The spotlight hole is rendered independently behind the card.
+  const card = (
     <div
       style={{
         background: 'rgba(255,255,255,0.97)',
@@ -130,15 +93,14 @@ export function TourSpotlight() {
         border: '1px solid rgba(255,255,255,0.9)',
         borderRadius: 20,
         padding: '24px 28px',
+        width: 420,
+        maxWidth: 'calc(100vw - 32px)',
         boxShadow: '0 20px 60px rgba(0,0,0,0.25), 0 4px 16px rgba(124,58,237,0.15)',
         animation: 'pg-fade-in 0.25s ease-out both',
         position: 'relative',
-        width: isEffectivelyCentered ? 420 : undefined,
-        maxWidth: 'calc(100vw - 32px)',
-        ...(spotlightStyle ?? {}),
       }}
     >
-      {/* X button */}
+      {/* X */}
       <button
         onClick={skipTour}
         style={{
@@ -157,7 +119,7 @@ export function TourSpotlight() {
         </svg>
       </button>
 
-      {/* Step counter chip */}
+      {/* Counter */}
       <div style={{
         fontFamily: 'var(--font-mono)', fontSize: 10, color: '#7C3AED',
         fontWeight: 600, letterSpacing: '0.08em', marginBottom: 12,
@@ -183,7 +145,7 @@ export function TourSpotlight() {
         {step.description}
       </p>
 
-      {/* Navigation buttons */}
+      {/* Nav buttons */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         {stepIndex > 0 && (
           <button
@@ -194,7 +156,6 @@ export function TourSpotlight() {
               color: '#6B7280', fontSize: 13, fontWeight: 600,
               cursor: 'pointer', fontFamily: 'var(--font-body)',
               display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0,
-              transition: 'border-color 0.15s',
             }}
           >
             ← Anterior
@@ -203,15 +164,13 @@ export function TourSpotlight() {
 
         {isLast ? (
           <Link href="/import" onClick={skipTour} style={{ textDecoration: 'none', flex: 1 }}>
-            <button
-              style={{
-                width: '100%', height: 36, padding: '0 20px', borderRadius: 8,
-                background: 'linear-gradient(135deg,#7C3AED,#2563EB)',
-                border: 'none', color: 'white', fontSize: 13, fontWeight: 700,
-                cursor: 'pointer', fontFamily: 'var(--font-body)',
-                boxShadow: '0 4px 12px rgba(124,58,237,0.3)',
-              }}
-            >
+            <button style={{
+              width: '100%', height: 36, padding: '0 20px', borderRadius: 8,
+              background: 'linear-gradient(135deg,#7C3AED,#2563EB)',
+              border: 'none', color: 'white', fontSize: 13, fontWeight: 700,
+              cursor: 'pointer', fontFamily: 'var(--font-body)',
+              boxShadow: '0 4px 12px rgba(124,58,237,0.3)',
+            }}>
               Crear mi primer monitor →
             </button>
           </Link>
@@ -248,18 +207,19 @@ export function TourSpotlight() {
 
   return createPortal(
     <>
-      {/* Full-screen dark overlay (always shown — provides dimming for all steps) */}
+      {/* Layer 1 — dark overlay. When spotlight active, it's transparent so
+          the hole's box-shadow provides the dimming instead. */}
       <div
         style={{
           position: 'fixed', inset: 0, zIndex: 9999,
-          background: isEffectivelyCentered ? 'rgba(0,0,0,0.65)' : 'transparent',
+          background: hasSpotlight ? 'transparent' : 'rgba(0,0,0,0.65)',
           pointerEvents: 'all',
         }}
         onClick={(e) => e.stopPropagation()}
       />
 
-      {/* Spotlight hole (desktop only, when element found) */}
-      {!isEffectivelyCentered && rect && (
+      {/* Layer 2 — spotlight hole. box-shadow creates the dim ring around it. */}
+      {hasSpotlight && rect && (
         <div
           style={{
             position: 'fixed',
@@ -267,22 +227,23 @@ export function TourSpotlight() {
             width: rect.width, height: rect.height,
             borderRadius: 16,
             boxShadow: '0 0 0 9999px rgba(0,0,0,0.65)',
-            zIndex: 10000, pointerEvents: 'none',
-            transition: 'top 0.35s cubic-bezier(0.4,0,0.2,1), left 0.35s cubic-bezier(0.4,0,0.2,1), width 0.35s cubic-bezier(0.4,0,0.2,1), height 0.35s cubic-bezier(0.4,0,0.2,1)',
+            zIndex: 10000,
+            pointerEvents: 'none',
+            transition: 'top 0.4s cubic-bezier(0.4,0,0.2,1), left 0.4s cubic-bezier(0.4,0,0.2,1), width 0.4s cubic-bezier(0.4,0,0.2,1), height 0.4s cubic-bezier(0.4,0,0.2,1)',
           }}
         />
       )}
 
-      {/* Centered wrapper — used for all mobile steps and any desktop step without a found target */}
-      {isEffectivelyCentered ? (
-        <div style={{
+      {/* Layer 3 — card, always flex-centered so it's never clipped */}
+      <div
+        style={{
           position: 'fixed', inset: 0, zIndex: 10001,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           pointerEvents: 'none',
-        }}>
-          <div style={{ pointerEvents: 'all' }}>{tooltipCard}</div>
-        </div>
-      ) : tooltipCard}
+        }}
+      >
+        <div style={{ pointerEvents: 'all' }}>{card}</div>
+      </div>
     </>,
     document.body
   );
